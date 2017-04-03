@@ -20,7 +20,8 @@ class SQL extends PDO {
      * @param type $password Password of the SQL server.
      * @throws PDOException Throws PDOException when the PDO connection can't be established.
      */
-    function __construct($dsn, $username, $password) {
+    function __construct($host, $username, $password, $db) {
+        $dsn = $this->generateMySQLDSN($host, $db);
         parent::__construct($dsn, $username, $password, array(
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, 
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
@@ -42,6 +43,10 @@ class SQL extends PDO {
         } else {
             return array("rows_affected" => $stmt->rowCount(), "last_insert_id" => $this->pdo->lastInsertId());
         }
+    }
+    
+    private function generateMySQLDSN($host, $db) {
+        return "mysql:host=$host;dbname=$db";
     }
 
 }
