@@ -41,7 +41,7 @@ class SQL extends PDO {
         if ($queryType === "SELECT") {
             return $stmt->fetchAll();
         } else {
-            return array("rows_affected" => $stmt->rowCount(), "last_insert_id" => $this->pdo->lastInsertId());
+            return array("rows_affected" => $stmt->rowCount(), "last_insert_id" => parent::lastInsertId());
         }
     }
     

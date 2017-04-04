@@ -23,8 +23,16 @@ class Installation {
     static function initializeConfig($db_host, $db_username, $db_password, $db) {
         try {
             $sql = new SQL($db_host, $db_username, $db_password, $db);
+            
+            //if no exception, write to file.
         } catch (PDOException $e) {
             throw $e;
+        }
+    }
+    
+    static function initializeTables(SQL $sql) {
+        foreach (Constants::$CREATE_TABLES as $table_query) {
+            $sql->query($table_query);
         }
     }
 }
