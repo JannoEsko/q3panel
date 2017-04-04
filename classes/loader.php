@@ -1,5 +1,6 @@
 <?php
 error_reporting(E_ALL);
+ini_set('display_errors', 'on');
 /**
  * Holds all the required classes, so instead of requiring files separately where they are needed,
  * we can use this file to load everything through a single file.
