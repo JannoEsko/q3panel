@@ -39,5 +39,11 @@ class Constants {
     
     static $INSERT_QUERIES = array(
         "ADD_NEW_USER" => "INSERT INTO q3panel_users (username, password, origin, email, group_id, allow_emails) VALUES (?, ?, ?, ?, ?, ?)"
+        , "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0"
+    );
+    
+    static $ERRORS = array(
+        "AUTH_NO_DATA_ERROR" => "This account does not exist.",
+        "AUTH_WRONG_PASSWORD_OR_DISABLED" => "Wrong password or the account is disabled."
     );
 }

@@ -67,8 +67,20 @@ class User {
         $this->preferEmail = $preferEmail;
     }
 
-        function authenticate() {
-        
+    function authenticate(SQL $sql) {
+        $query = Constants::$INSERT_QUERIES['GET_USER_BY_NAME'];
+        $params = array($this->getUsername());
+        $data = $sql->query($query, $params);
+        if (sizeof($data) === 1) {
+            $data = $data[0];
+            $password = $data['password'];
+            if (password_verify($this->getPassword(), $password)) {
+                return $data;
+            } else {
+                return array("error" => Constants::$ERRORS['AUTH_WRONG_PASSWORD_OR_DISABLED']);
+            }
+        }
+        return array("error" => Constants::$ERRORS['AUTH_NO_DATA_ERROR']);
     }
     
     static function changePassword($user_id) {
