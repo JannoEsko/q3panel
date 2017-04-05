@@ -9,8 +9,9 @@ ini_set('display_errors', 'on');
 $d = __DIR__;
 
 
+
 require_once "$d/sql/SQL.php"; 
-//require_once "$d/../config.php";
+require_once "$d/../config.php";
 require_once "$d/api/API.php";
 require_once "$d/servers/host/Host.php";
 require_once "$d/servers/Server.php";

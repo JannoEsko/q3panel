@@ -30,7 +30,7 @@ class Constants {
         "CREATE TABLE q3panel_support_ticket (support_ticket_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, title TEXT, ticket_status TINYINT COMMENT '0 - open, 1 - closed, 2 - on hold, 3 - resolved', creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
         "CREATE TABLE q3panel_support_ticket_map (support_ticket_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, user_id INTEGER NOT NULL)",
         "CREATE TABLE q3panel_support_ticket_messages (support_ticket_message_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, user_id INTEGER NOT NULL, user_ip VARCHAR(255), message_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, message TEXT)",
-        "CREATE TABLE q3panel_external_authentication (ext_auth_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host VARCHAR(255), db_username VARCHAR(255), db_password VARCHAR(255), db_name VARCHAR(255), users_table_name VARCHAR(255), username_field VARCHAR(255), password_field VARCHAR(255), email_field VARCHAR(255))",
+        "CREATE TABLE q3panel_external_authentication (ext_auth_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host VARCHAR(255), db_username VARCHAR(255), db_password VARCHAR(255), db_name VARCHAR(255), users_table_name VARCHAR(255), user_id_field VARCHAR(255), username_field VARCHAR(255), password_field VARCHAR(255), email_field VARCHAR(255))",
         "CREATE TABLE q3panel_external_email_service (ext_email_service_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host VARCHAR(255), email VARCHAR(255), name VARCHAR(255), username VARCHAR(255), password VARCHAR(255))",
         "CREATE TABLE q3panel_style_preference (style_preference_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_id INTEGER NOT NULL)",
         "CREATE TABLE q3panel_styles (style_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_name VARCHAR(255))"
@@ -39,7 +39,16 @@ class Constants {
     
     static $INSERT_QUERIES = array(
         "ADD_NEW_USER" => "INSERT INTO q3panel_users (username, password, origin, email, group_id, allow_emails) VALUES (?, ?, ?, ?, ?, ?)"
-        , "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0"
+        
+    );
+    
+    static $SELECT_QUERIES = array(
+        "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0",
+        "GET_EXT_DATA" => "SELECT * FROM q3panel_external_authentication"
+    );
+    
+    static $DELETE_QUERIES = array(
+        "DELETE_USER_BY_ID" => "DELETE FROM q3panel_users WHERE user_id = ?"
     );
     
     static $ERRORS = array(

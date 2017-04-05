@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 <?php
 error_reporting(E_ALL);
-if (!file_exists("$d/config.php")) {
-    header("Location: install/");
+ini_set('display_errors', 'on');
+//Install script cannot require loader.php because there's no config file yet.
+require_once __DIR__ . "/../functions.php";
+if (isset($_GET['writeSQL'])) {
+    require_once __DIR__ . "/../classes/writer/Writer.php";
+    $wrt = new Writer(__DIR__ . "/../config.php");
+    $wrt->write("<?php\n\n\$sql = new SQL();");
 }
-require_once __DIR__ . "/classes/loader.php";
 
 ?>
 <!--
