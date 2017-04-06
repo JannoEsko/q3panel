@@ -11,5 +11,39 @@ if (isset($_GET['setuptables'])) {
     print_r("Tables setup done");
 }
 
+/**
+ * Taken from http://stackoverflow.com/questions/1846202/php-how-to-generate-a-random-unique-alphanumeric-string/13733588#13733588.
+ * @param type $length
+ * @return string
+ */
+function generateRandomKey($length = 50) {
+    $key = "";
+    $possibleValues = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for ($i = 0; $i < $length; $i++) {
+        $key .= $possibleValues[keyRandomizer(0, strlen($possibleValues))];
+    }
+    return $key;
+}
+
+/**
+ * Taken from http://stackoverflow.com/questions/1846202/php-how-to-generate-a-random-unique-alphanumeric-string/13733588#13733588
+ * @param type $min
+ * @param type $max
+ * @return type
+ */
+function keyRandomizer($min, $max) {
+    $range = $max - $min;
+    if ($range < 0) return $min;
+    $log = log($range, 2);
+    $bytes = (int) ($log / 8) + 1;
+    $bits = (int) $log + 1;
+    $filter = (int) (1 << $bits) - 1;
+    do {
+        $rnd = hexdec(bin2hex(openssl_random_pseudo_bytes($bytes)));
+        $rnd = $rnd & $filter;
+    } while ($rnd >= $range);
+    return $min + $rnd;
+}
+
 
 

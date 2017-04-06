@@ -109,10 +109,6 @@ class User {
         return array("error" => Constants::$ERRORS['AUTH_NO_DATA_ERROR']);
     }
     
-    static function changePassword($user_id, $newPassword) {
-        
-    }
-    
     static function forgotPassword($email) {
         
     }
@@ -141,7 +137,8 @@ class User {
         }
         if ($password !== null) {
             $query .= "password = ?,";
-            array_push($params, $password);
+            $hash = password_hash($password, PASSWORD_BCRYPT);
+            array_push($params, $hash);
         }
         if ($origin !== null) {
             $query .= "origin = ?,";

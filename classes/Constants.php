@@ -44,7 +44,8 @@ class Constants {
     
     static $SELECT_QUERIES = array(
         "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0",
-        "GET_EXT_DATA" => "SELECT * FROM q3panel_external_authentication"
+        "GET_EXT_DATA" => "SELECT * FROM q3panel_external_authentication",
+        "GET_USER_BY_EMAIL" => "SELECT * FROM q3panel_users WHERE email = ?"
     );
     
     static $DELETE_QUERIES = array(
