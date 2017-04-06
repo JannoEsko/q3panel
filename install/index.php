@@ -7,7 +7,7 @@ require_once __DIR__ . "/../functions.php";
 if (isset($_GET['writeSQL'])) {
     require_once __DIR__ . "/../classes/writer/Writer.php";
     $wrt = new Writer(__DIR__ . "/../config.php");
-    $wrt->write("<?php\n\n\$sql = new SQL();");
+    $wrt->write("<?php\n\n\$sql = new SQL();\n\n$page_url = \"\";");
 }
 
 ?>
