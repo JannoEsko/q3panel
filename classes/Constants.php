@@ -56,4 +56,41 @@ class Constants {
         "AUTH_NO_DATA_ERROR" => "This account does not exist.",
         "AUTH_WRONG_PASSWORD_OR_DISABLED" => "Wrong password or the account is disabled."
     );
+    
+    private static $CSS = <<<EOT
+
+        <link rel="stylesheet" href="{}/css/font-awesome.min.css">
+        <link rel="stylesheet" href="{}/css/simple-line-icons.css">
+        <link rel="stylesheet" href="{}/css/animate.min.css">
+        <link rel="stylesheet" href="{}/css/whirl.css">
+        <link rel="stylesheet" href="{}/css/bootstrap.css">
+        <link rel="stylesheet" href="{}/css/app.css"> 
+
+EOT;
+    
+    private static $JS = <<<EOT
+
+        <script src="{}/js/jquery-2.2.0.min.js"></script>
+        <script src="{}/js/modernizr.custom.js"></script>
+        <script src="{}/js/matchMedia.js"></script>
+        <script src="{}/js/bootstrap.js"></script>
+        <script src="{}/js/jquery.easing.js"></script>
+        <script src="{}/js/animo.js"></script>
+        <script src="{}/js/jquery.slimscroll.min.js"></script>
+        <script src="{}/js/screenfull.js"></script>
+        <script src="{}/js/jquery.localize.js"></script>
+        <script src="{}/js/jquery.storageapi.js"></script>
+        <script src="{}/js/app.js"></script>
+        <script src="{}/js/q3panel.js"></script>
+
+EOT;
+    
+    
+    public static function getCSS($url) {
+        return str_replace("{}", $url, self::$CSS);
+    }
+    
+    public static function getJS($url) {
+        return str_replace("{}", $url, self::$JS);
+    }
 }
