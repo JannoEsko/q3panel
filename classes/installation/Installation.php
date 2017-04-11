@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . "/../sql/SQL.php";
+require_once __DIR__ . "/../writer/Writer.php";
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -20,17 +21,22 @@ class Installation {
      * @param String $db_password The database's password
      * @param String $db The database
      */
-    static function initializeConfig($db_host, $db_username, $db_password, $db) {
+    static function initializeConfig($db_host, $db_username, $db_password, $db, $url) {
         try {
             $sql = new SQL($db_host, $db_username, $db_password, $db);
             $test = $sql->query("SELECT 1 + 1 AS sum");
-            if ($test[0]['sum'] === 2) {
+            if ($test[0]['sum'] == 2) { 
                 $wtr = new Writer(__DIR__ . "/../../config.php");
-                $wtr->write("<?php\n\n\$sql = new SQL(\"$db_host\", \"$db_username\", \"$db_password\", \"$db\");\n");
+                $url = rtrim($url, "/");
+                $return = $wtr->write("<?php\n\n\$sql = new SQL(\"$db_host\", \"$db_username\", \"$db_password\", \"$db\");\n\n\n\$HOST_URL = \"$url\";");
+                if ($return["error"] !== NULL) {
+                    return json_encode($return);
+                }
+                return json_encode(array("href" => "../step3/"));
             }
             
         } catch (PDOException $e) {
-            throw $e;
+            return json_encode(array("error" => $e->getMessage()));
         }
     }
     

@@ -28,7 +28,7 @@ if (isset($_GET['writeSQL'])) {
             <br>
             <section>
                 <div class="row">
-                    <div class="panel panel-danger" id="formMsgPanel" hidden>
+                    <div class="panel janno-panel" id="formMsgPanel" hidden>
                         <div class="panel-heading" id="formTitle">
                             
                         </div>

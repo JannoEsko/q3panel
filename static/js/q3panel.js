@@ -8,27 +8,31 @@ $(function() {
     var form = $("#form");
     var formMsg = $("#formMsg");
     var formMsgPanel = $("#formMsgPanel");
-    formMsgPanel.removeClass("panel-danger");
-    formMsgPanel.hide(500);
+    var formTitle = $("#formTitle");
+
     $(form).submit(function(e) {
         e.preventDefault();
+        formMsgPanel.removeClass("panel-danger");
+        formMsgPanel.hide(500);
         var data = form.serialize();
-        var type = $(form).attr('action');
-        var url = $(form).attr('method');
+        var url = $(form).attr('action');
+        var type = $(form).attr('method');
         $.ajax({
             type: type,
             url: url,
             data: data
         }).done(function(response) {
-            if (response.error !== "") {
-                
+            response = JSON.parse(response);
+            if (typeof response.error !== "undefined") {
+                formTitle.html("Error2");
                 formMsgPanel.addClass("panel-danger");
                 formMsg.html(response.error);
                 formMsgPanel.show(500);
             } else {
-                if (response.href !== "") {
+                if (typeof response.href !== "undefined") {
                     location.href = response.href;
                 } else {
+                    formTitle.html("Success");
                     formMsgPanel.html(response.msg);
                     formMsgPanel.show(500);
                 }

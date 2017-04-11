@@ -11,6 +11,17 @@ if (isset($_GET['setuptables'])) {
     print_r("Tables setup done");
 }
 
+if (isset($_POST['host']) && isset($_POST['username']) && isset($_POST['password']) && isset($_POST['db']) && isset($_POST['url'])) {
+    require_once __DIR__ . "/classes/installation/Installation.php";
+    $db_host = $_POST['host'];
+    $db_username = $_POST['username'];
+    $db_password = $_POST['password'];
+    $db = $_POST['db'];
+    $url = $_POST['url'];
+    
+    echo Installation::initializeConfig($db_host, $db_username, $db_password, $db, $url);
+}
+
 /**
  * Taken from http://stackoverflow.com/questions/1846202/php-how-to-generate-a-random-unique-alphanumeric-string/13733588#13733588.
  * @param type $length

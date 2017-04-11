@@ -20,9 +20,13 @@ class Writer {
     }
     
     function write($str) {
-        $fp = fopen($this->fileLocation, "w") or die ("Unable to create file " . $this->fileLocation
-                . ", please check that your web engine user has sufficient privileges for that folder");
+        $fp = fopen($this->fileLocation, "w");
+        if (!$fp) {
+            return array("error" => "Couldn't open file " . $this->fileLocation . " for writing. Please recheck permissions!");
+        }
         fwrite($fp, $str);
         fclose($fp);
+        return array();
+        
     }
 }
