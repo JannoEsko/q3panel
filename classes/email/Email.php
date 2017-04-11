@@ -86,9 +86,25 @@ class Email {
     public function sendEmail($useSendgrid = false, $sendgrid_apikey = "") {
         if ($useSendgrid) {
             require_once __DIR__ . "/../sendgrid-php/sendgrid-php.php";
+            $sfrom = new SendGrid\Email($this->getFromName(), $this->getFrom());
+            $sto = new SendGrid\Email($this->getToName(), $this->getTo());
+            $content = new SendGrid\Content("text/html", $this->getBody());
+            $mail = new SendGrid\Mail($sfrom, $this->title, $sto, $content);
+            $sg = new \Sendgrid($sendgrid_apikey);
+            $response = $sg->client->mail()->send()->post($mail);
             return array();
         } else {
             require_once __DIR__ . "/../phpmailer/PHPMailerAutoload.php";
+            $mail = new PHPMailer();
+            $mail->setFrom($this->getFrom(), $this->getFromName());
+            $mail->addAddress($this->getTo(), $this->getToName());
+            $mail->Subject = $this->getTitle();
+            $mail->Body = $this->getBody();
+            if (!$mail->send()) {
+                return array("error" => $mail->ErrorInfo);
+            } else {
+                return array();
+            }
             return array();
         }
     }
