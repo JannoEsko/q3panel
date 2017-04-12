@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 error_reporting(E_ALL);
-if (!file_exists("$d/config.php")) {
+if (!file_exists(__DIR__ . "/config.php")) {
     header("Location: install/");
 }
 require_once __DIR__ . "/classes/loader.php";

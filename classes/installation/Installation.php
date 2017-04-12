@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . "/../sql/SQL.php";
 require_once __DIR__ . "/../writer/Writer.php";
+require_once __DIR__ . "/../Constants.php";
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -30,13 +31,13 @@ class Installation {
                 $url = rtrim($url, "/");
                 $return = $wtr->write("<?php\n\n\$sql = new SQL(\"$db_host\", \"$db_username\", \"$db_password\", \"$db\");\n\n\n\$HOST_URL = \"$url\";");
                 if ($return["error"] !== NULL) {
-                    return json_encode($return);
+                    return $return;
                 }
-                return json_encode(array("href" => "../step3/"));
+                return array("href" => "../step3/");
             }
             
         } catch (PDOException $e) {
-            return json_encode(array("error" => $e->getMessage()));
+            return array("error" => $e->getMessage());
         }
     }
     
@@ -45,8 +46,35 @@ class Installation {
      * @param SQL $sql The SQL connection.
      */
     static function initializeTables(SQL $sql) {
-        foreach (Constants::$CREATE_TABLES as $table_query) {
-            $sql->query($table_query);
+        try {
+            foreach (Constants::$CREATE_TABLES as $table_query) {
+                $sql->query($table_query);
+            }
+        } catch (PDOException $ex) {
+            return array("error" => $ex->getMessage());
+        }
+        
+    }
+    
+    static function initializeExternalConnection(SQL $sql, $db_host, $db_name, $db_password, $db, $table, $id, $usrname, $psw, $email) {
+        try {
+            $ext_sql = new SQL($db_host, $db_name, $db_password, $db);
+            $ext_firstUserQuery = Constants::$SELECT_QUERIES['EXT_GET_FIRST_USER'];
+            $ext_firstUserQuery = str_replace("{ext_usrname}", $usrname, $ext_firstUserQuery);
+            $ext_firstUserQuery = str_replace("{ext_psw}", $psw, $ext_firstUserQuery);
+            $ext_firstUserQuery = str_replace("{ext_email}", $email, $ext_firstUserQuery);
+            $ext_firstUserQuery = str_replace("{ext_usrtable}", $table, $ext_firstUserQuery);
+            $ext_firstUserQuery = str_replace("{ext_usrtable_id}", $id, $ext_firstUserQuery);
+            $data = $ext_sql->query($ext_firstUserQuery);
+            if (sizeof($data) === 1) {
+                //means we didn't encounter errors.
+                $query = Constants::$INSERT_QUERIES['ADD_EXT_DB'];
+                $params = array($db_host, $db_name, $db_password, $db, $table, $id, $usrname, $psw, $email);
+                $sql->query($query, $params);
+                return array("href" => "../step4/");
+            }
+        } catch (PDOException $ex) {
+            return array("error" => $ex->getMessage());
         }
     }
 }

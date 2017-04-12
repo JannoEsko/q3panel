@@ -124,7 +124,12 @@ class User {
             $this->getGroup_id(),
             $this->getPreferEmail()
         );
-        return $sql->query($query, $params);
+        try {
+            $sql->query($query, $params);
+            return array("href" => "../step6/");
+        } catch (PDOException $ex) {
+            return array("error" => $ex->getMessage());
+        }
     }
     
     static function editAccount(SQL $sql, $user_id, $username = null, $password = null, $origin = null, $email = null, $group_id = null, $preferEmail = null) {
@@ -167,6 +172,47 @@ class User {
         $query = Constants::$DELETE_QUERIES['DELETE_USER_BY_ID'];
         $params = array($user_id);
         return $sql->query($query, $params);
+    }
+    
+    static function getExternalAccounts(SQL $sql, $username) {
+        $query = Constants::$SELECT_QUERIES['FIND_EXT_USER_SELECT2'];
+        $data = self::getExtData($sql);
+        if (sizeof($data) !== 0) {
+            $db_host = $data['host'];
+            $db_username = $data['db_username'];
+            $db_password = $data['db_password'];
+            $db = $data['db_name'];
+            $users_table = $data['users_table_name'];
+            $user_id = $data['user_id_field'];
+            $username_field = $data['username_field'];
+            //SELECT {ext_usrtable_id}, {ext_usrname} FROM {ext_usrtable} WHERE {ext_usrname} LIKE CONCAT('%', ?, '%')
+            $query = str_replace("{ext_usrtable_id}", $user_id, $query);
+            $query = str_replace("{ext_usrname}", $username_field, $query);
+            $query = str_replace("{ext_usrtable}", $users_table, $query);
+            
+            $params = array("%" . $username . "%");
+            $ext_sql = new SQL($db_host, $db_username, $db_password, $db);
+            $extUsers = $ext_sql->query($query, $params);
+            foreach($extUsers as $extUser) {
+                $dat[] = array("id" => $extUser['id'], "text" => $extUser['text']);
+            }
+            return $dat;
+        }
+        return array();
+    }
+    
+    static function getExtData(SQL $sql) {
+        $query = Constants::$SELECT_QUERIES['GET_EXT_DATA'];
+        $data = $sql->query($query);
+        if (sizeof($data) === 1) {
+            $data = $data[0];
+            return $data;
+        }
+        return array();
+    }
+    
+    static function canAddUser($sql, $user_id) {
+        return true;
     }
 }
 

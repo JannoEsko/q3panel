@@ -4,17 +4,18 @@
  * and open the template in the editor.
  */
 
-$(function() {
-    var form = $("#form");
+function handleForm(id) {
+    var form = $("#" + id);
     var formMsg = $("#formMsg");
     var formMsgPanel = $("#formMsgPanel");
     var formTitle = $("#formTitle");
-
     $(form).submit(function(e) {
         e.preventDefault();
         formMsgPanel.removeClass("panel-danger");
+        formMsgPanel.addClass("janno-panel");
         formMsgPanel.hide(500);
         var data = form.serialize();
+        console.log(data);
         var url = $(form).attr('action');
         var type = $(form).attr('method');
         $.ajax({
@@ -22,9 +23,11 @@ $(function() {
             url: url,
             data: data
         }).done(function(response) {
+            console.log(response);
             response = JSON.parse(response);
             if (typeof response.error !== "undefined") {
-                formTitle.html("Error2");
+                formTitle.html("Error");
+                formMsgPanel.removeClass("janno-panel");
                 formMsgPanel.addClass("panel-danger");
                 formMsg.html(response.error);
                 formMsgPanel.show(500);
@@ -39,4 +42,4 @@ $(function() {
             }
         });
     });
-});
+}

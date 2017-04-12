@@ -110,5 +110,14 @@ class Email {
     }
 
 
+    public static function saveEmailPreferences(SQL $sql, $is_sendgrid, $from_name, $from_email, $api) {
+        $query = Constants::$INSERT_QUERIES['ADD_EMAIL_SERVICE'];
+        $params = array($is_sendgrid, $from_name, $from_email, $api);
+        try {
+            return $sql->query($query, $params);
+        } catch (PDOException $ex) {
+            return array("error" => $ex->getMessage());
+        }
+    }
     
 }
