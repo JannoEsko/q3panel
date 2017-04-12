@@ -9,11 +9,28 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+if (isset($_GET['logout'])) {
+    session_destroy();
+}
+
+if (isset($_POST['login'], $_POST['username'], $_POST['password'])) {
+    session_destroy();
+    $user = new User($_POST['username'], $_POST['password']);
+    $data = $user->authenticate($sql);
+    if (isset($data['error'])) {
+        echo json_encode($data);
+    } else {
+        echo json_encode(array("href" => "."));
+    }
+}
+
+
 if (isset($_GET['getExternalUser'], $_GET['extUserName'])) {
     echo json_encode(User::getExternalAccounts($sql, $_GET['extUserName']));
 }
 
 if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (isset($_SESSION['installer']) || User::canAddUser($sql, $_SESSION['user_id']))) {
+    
     $user = new User($_POST['extUser'], null, "1", null, $_POST['extUserGroup'], 1);
     echo json_encode($user->register($sql));
 }

@@ -44,12 +44,14 @@ class Constants {
     );
     
     static $SELECT_QUERIES = array(
-        "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0",
+        "GET_LOCAL_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0 AND origin = 0",
         "GET_EXT_DATA" => "SELECT * FROM q3panel_external_authentication",
         "GET_USER_BY_EMAIL" => "SELECT * FROM q3panel_users WHERE email = ?",
         "EXT_GET_FIRST_USER" => "SELECT {ext_usrname}, {ext_psw}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = 1"
         , "EXT_AUTH_EXISTS" => "SELECT Count(ext_auth_id) AS count FROM q3panel_external_authentication"
         , "FIND_EXT_USER_SELECT2" => "SELECT {ext_usrtable_id} AS id, {ext_usrname} AS text FROM {ext_usrtable} WHERE {ext_usrname} LIKE ?"
+        , "GET_EXTERNAL_ACCOUNT" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_psw} FROM {ext_usrtable} WHERE {ext_usrname} = ?"
+        , "GET_EXT_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0 AND origin = 1"
     );
     
     static $DELETE_QUERIES = array(
@@ -59,6 +61,7 @@ class Constants {
     static $ERRORS = array(
         "AUTH_NO_DATA_ERROR" => "This account does not exist.",
         "AUTH_WRONG_PASSWORD_OR_DISABLED" => "Wrong password or the account is disabled."
+        , "AUTH_NO_DATA_WRONG_PSW_OR_DISABLED" => "This account doesn't exist, you typed the wrong password or the account is disabled"
     );
     
     private static $CSS = <<<EOT

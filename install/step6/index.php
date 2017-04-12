@@ -2,11 +2,12 @@
 <?php
 error_reporting(E_ALL);
 session_start();
+
 if (!isset($_SESSION['installer'])) { 
     header("Location: ../../");
 }
 require_once __DIR__ . "/../../classes/loader.php";
-
+session_destroy();
 ?>
 <html>
     <head>

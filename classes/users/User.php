@@ -68,16 +68,14 @@ class User {
     }
 
     function authenticate(SQL $sql) {
-        $query = Constants::$SELECT_QUERIES['GET_USER_BY_NAME'];
+        $query = Constants::$SELECT_QUERIES['GET_LOCAL_USER_BY_NAME'];
         $params = array($this->getUsername());
         $data = $sql->query($query, $params);
         if (sizeof($data) === 1) {
             $data = $data[0];
-            if ($data['origin'] === 1) {
-                $ext_query = Constants::$SELECT_QUERIES['GET_EXT_DATA'];
-                $ext_data = $sql->query($ext_query);
-                if (sizeof($ext_data) === 1) {
-                    $ext_data = $ext_data[0];
+            /*if (intval($data['origin']) === 1) {
+                $ext_data = self::getExtData($sql);
+                if (sizeof($ext_data) !== 0) {
                     $ext_sql = new SQL($ext_data['host'], $ext_data['db_username'], $ext_data['db_password'], $ext_data['db_name']);
                     $user_id = $data['username'];
                     $ext_user_query = "SELECT " . $ext_data['username_field'] . ", " . $ext_data['password_field'] . ", " . $ext_data['email_field'] . " FROM " . $ext_data['users_table_name'] . " WHERE " . $ext_data['users_id_field'] . " = ?";
@@ -95,14 +93,60 @@ class User {
                         return array("error" => Constants::$ERRORS['AUTH_NO_DATA_ERROR']);
                     }
                 } else {
-                    throw new UnexpectedValueException("External users in system, but no external connection in database (or multiple defined).");
+                    return array("error" => "External users in system, but no external connection in database (or multiple defined).");
                 }
+            } else {*/
+            $password = $data['password'];
+            if (password_verify($this->getPassword(), $password)) {
+                $data['realUsername'] = $data['username'];
+                self::setSessionVariables($data);
+                return $data;
             } else {
-                $password = $data['password'];
-                if (password_verify($this->getPassword(), $password)) {
-                    return $data;
-                } else {
-                    return array("error" => Constants::$ERRORS['AUTH_WRONG_PASSWORD_OR_DISABLED']);
+                return array("error" => Constants::$ERRORS['AUTH_WRONG_PASSWORD_OR_DISABLED']);
+            }
+            
+        } else {
+            $data = self::getExtData($sql);
+            if (sizeof($data) !== 0) {
+                $query = Constants::$SELECT_QUERIES['GET_EXTERNAL_ACCOUNT'];
+                $db_host = $data['host'];
+                $db_username = $data['db_username'];
+                $db_password = $data['db_password'];
+                $db = $data['db_name'];
+                $users_table = $data['users_table_name'];
+                $user_id = $data['user_id_field'];
+                $username_field = $data['username_field'];
+                $password_field = $data['password_field'];
+                //"SELECT {ext_usrtable_id} FROM {ext_usrtable} WHERE {ext_usrname} = ?"
+                $query = str_replace("{ext_usrtable_id}", $user_id, $query);
+                $query = str_replace("{ext_usrname}", $username_field, $query);
+                $query = str_replace("{ext_usrtable}", $users_table, $query);
+                $query = str_replace("{ext_psw}", $password_field, $query);
+
+                $params = array($this->getUsername());
+                $ext_sql = new SQL($db_host, $db_username, $db_password, $db);
+                $extUsers = $ext_sql->query($query, $params);
+                if (sizeof($extUsers) === 1) {
+                    $extUsers = $extUsers[0];
+                    $ext_member_id = $extUsers[$user_id];
+                    $ext_member_psw = $extUsers[$password_field];
+                    $ext_username = $extUsers[$username_field];
+                    if (password_verify($this->getPassword(), $ext_member_psw)) {
+                        //atleast password is correct, check now that do we have that user in our database.
+                        $query = Constants::$SELECT_QUERIES['GET_EXT_USER_BY_NAME'];
+                        $params = array($ext_member_id);
+                        $data = $sql->query($query, $params);
+                        if (sizeof($data) === 1) {
+                            $data = $data[0];
+                            $data['realUsername'] = $ext_username;
+                            self::setSessionVariables($data);
+                            return $data;
+                        } else {
+                            return array("error" => Constants::$ERRORS['AUTH_NO_DATA_WRONG_PSW_OR_DISABLED']);
+                        }
+                    } else {
+                        return array("error" => Constants::$ERRORS['AUTH_WRONG_PASSWORD_OR_DISABLED']);
+                    }
                 }
             }
         }
@@ -213,6 +257,13 @@ class User {
     
     static function canAddUser($sql, $user_id) {
         return true;
+    }
+    
+    static function setSessionVariables($data) {
+        session_start();
+        $_SESSION['user_id'] = $data['user_id'];
+        $_SESSION['group_id'] = $data['group_id'];
+        $_SESSION['username'] = $data['realUsername'];
     }
 }
 
