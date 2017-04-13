@@ -71,6 +71,15 @@
                             </li>
 
                             <li class="nav-heading">
+                                <span>Management</span>
+                            </li>
+                            <li>
+                                <a href="<?php echo "$HOST_URL/users/"; ?>" title="Users">
+                                    <em class="icon-user"></em>
+                                    <span>Users</span>
+                                </a>
+                            </li>
+                            <li class="nav-heading">
                                 <span>Links</span>
                             </li>
                             <li>

@@ -86,7 +86,7 @@ EOT;
     
     private static $JS = <<<EOT
 
-        <script src="{}/js/jquery-2.2.0.min.js"></script>
+        <script src="{}/js/jquery.js"></script>
         <script src="{}/js/modernizr.custom.js"></script>
         <script src="{}/js/matchMedia.js"></script>
         <script src="{}/js/bootstrap.js"></script>

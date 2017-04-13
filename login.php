@@ -18,7 +18,6 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
         ?>
     </head>
     <body>
-        <div class="panel janno-panel" id="tst" hidden></div>
         <div class="wrapper">
         <div class="block-center mt-xl wd-xl">
                     <div class="panel janno-panel" id="formMsgPanel" hidden>
