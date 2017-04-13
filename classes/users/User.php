@@ -130,8 +130,26 @@ class User {
         return array("error" => Constants::$ERRORS['AUTH_NO_DATA_ERROR']);
     }
     
-    static function forgotPassword($email) {
-        
+    static function forgotPassword(SQL $sql, $email, $request_key) {
+        //first try from local DB.
+        $query = Constants::$SELECT_QUERIES['GET_USER_BY_EMAIL'];
+        $params = array($email);
+        $data = $sql->query($query, $params);
+        if (sizeof($data) === 1) {
+            $data = $data[0];
+            $user_id = $data['user_id'];
+            $forgottenpswquery = Constants::$INSERT_QUERIES['SET_FORGOTTEN_PASSWORD'];
+            $forgottenparams = array($user_id, $request_key);
+            $sql->query($forgottenpswquery, $forgottenparams);
+            $emailPrefs = Email::getEmailPreferences($sql);
+            $emailBody = Constants::$EMAIL_TEMPLATE['FORGOTTEN_MSG'];
+            $emailBody = str_replace("{FORGOTTEN_URL_KEY}", $HOST_URL . "?recover=$request_key");
+            $emailBody = str_replace("{SENDER_NAME}", $emailPrefs['from_name']);
+            $em = new Email($emailPrefs['from_email'], $email, Constants::$EMAIL_TEMPLATE['FORGOTTEN_TITLE'], $emailBody, $emailPrefs['from_name'], null);
+            return $em->sendEmail(int2bool($emailPrefs['is_sendgrid']), $emailPrefs['api_key']);
+        } else {
+           return array("error" => Constants::$ERRORS['FPSW_NO_DATA_ERROR']);
+        }
     }
     
     function register(SQL $sql) {

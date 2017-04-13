@@ -43,6 +43,7 @@ class Constants {
         "ADD_EMAIL_SERVICE" => "INSERT INTO q3panel_email_service (is_sendgrid, from_name, from_email, api_key) VALUES (?, ?, ?, ?)"
         , "ADD_STYLES" => "INSERT INTO q3panel_styles (style_name, style_bg) VALUES ('theme-a.css', '#23b7e5'), ('theme-b.css', '#37bc9b'), ('theme-c.css', '#7266ba'), ('theme-d.css', '#f05050'), ('theme-e.css', '#1797be'), ('theme-f.css', '#2b957a'), ('theme-g.css', '#564aa3'), ('theme-h.css', '#ec2121')"
         , "SET_STYLE_PREFERENCE" => "INSERT INTO q3panel_style_preference (style_id, user_id) VALUES (?, ?)"
+        , "SET_FORGOTTEN_PASSWORD" => "INSERT INTO q3panel_forgottenpsw (user_id, request_key) VALUES (?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -56,6 +57,7 @@ class Constants {
         , "GET_EXT_USER_BY_NAME" => "SELECT * FROM q3panel_users INNER JOIN q3panel_style_preference ON q3panel_users.user_id = q3panel_style_preference.user_id INNER JOIN q3panel_styles ON q3panel_style_preference.style_id = q3panel_styles.style_id WHERE username = ? AND group_id > 0 AND origin = 1"
         , "GET_STYLE_BY_NAME" => "SELECT * FROM q3panel_styles WHERE style_name = ?"
         , "GET_EMAIL_PREFERENCES" => "SELECT * FROM q3panel_email_service"
+        , "GET_EXT_USERID_BY_EMAIL" => "SELECT {ext_usrtable_id} FROM {ext_usrtable} WHERE {ext_usrtable_email} = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -70,6 +72,12 @@ class Constants {
         "AUTH_NO_DATA_ERROR" => "This account does not exist.",
         "AUTH_WRONG_PASSWORD_OR_DISABLED" => "Wrong password or the account is disabled."
         , "AUTH_NO_DATA_WRONG_PSW_OR_DISABLED" => "This account doesn't exist, you typed the wrong password or the account is disabled"
+        , "FPSW_NO_DATA_ERROR" => "Either this account doesn't exist on this panel or the account's origin is from an external system. If it is from an external system, you have to fix your password issue over there."
+    );
+    
+    static $EMAIL_TEMPLATE = array(
+        "FORGOTTEN_TITLE" => "Forgotten password | Q3Panel"
+        , "FORGOTTEN_MSG" => "Hello,<br><br>Someone (hopefully you) has just requested a new password on your account. To do so, please, click on here: <a href=\"{FORGOTTEN_URL_KEY}\">{FORGOTTEN_URL_KEY}</a><br>If it wasn't you, feel free to ignore this e-mail.<br><br>Best regards,<br>{SENDER_NAME}"
     );
     
     private static $CSS = <<<EOT
