@@ -44,3 +44,10 @@ function handleForm(id) {
     });
 }
 
+function setPreferencedTheme(theme) {
+    $.post(window.location.href, {
+        theme: "1",
+        themename: theme
+    });
+}
+

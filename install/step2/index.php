@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <?php
 session_start();
 error_reporting(E_ALL);
@@ -9,6 +9,7 @@ require_once __DIR__ . "/../../classes/Constants.php";
 
 
 ?>
+<!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">

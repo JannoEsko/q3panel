@@ -32,7 +32,7 @@ class Constants {
         "CREATE TABLE q3panel_support_ticket_messages (support_ticket_message_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, user_id INTEGER NOT NULL, user_ip VARCHAR(255), message_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, message TEXT)",
         "CREATE TABLE q3panel_external_authentication (ext_auth_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host VARCHAR(255), db_username VARCHAR(255), db_password VARCHAR(255), db_name VARCHAR(255), users_table_name VARCHAR(255), user_id_field VARCHAR(255), username_field VARCHAR(255), password_field VARCHAR(255), email_field VARCHAR(255))",
         "CREATE TABLE q3panel_email_service (email_service_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, is_sendgrid TINYINT, from_name VARCHAR(255), from_email VARCHAR(255), api_key TEXT COMMENT 'empty if PHPMailer, key if SendGrid')",
-        "CREATE TABLE q3panel_style_preference (style_preference_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_id INTEGER NOT NULL)",
+        "CREATE TABLE q3panel_style_preference (style_preference_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_id INTEGER NOT NULL, user_id INTEGER NOT NULL)",
         "CREATE TABLE q3panel_styles (style_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_name VARCHAR(255))"
         
     );
@@ -41,17 +41,24 @@ class Constants {
         "ADD_NEW_USER" => "INSERT INTO q3panel_users (username, password, origin, email, group_id, allow_emails) VALUES (?, ?, ?, ?, ?, ?)",
         "ADD_EXT_DB" => "INSERT INTO q3panel_external_authentication (host, db_username, db_password, db_name, users_table_name, user_id_field, username_field, password_field, email_field) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         "ADD_EMAIL_SERVICE" => "INSERT INTO q3panel_email_service (is_sendgrid, from_name, from_email, api_key) VALUES (?, ?, ?, ?)"
+        , "ADD_STYLES" => "INSERT INTO q3panel_styles (style_name) VALUES ('theme-a.css'), ('theme-b.css'), ('theme-c.css'), ('theme-d.css'), ('theme-e.css'), ('theme-f.css'), ('theme-g.css'), ('theme-h.css')"
+        , "SET_STYLE_PREFERENCE" => "INSERT INTO q3panel_style_preference (style_id, user_id) VALUES (?, ?)"
     );
     
     static $SELECT_QUERIES = array(
-        "GET_LOCAL_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0 AND origin = 0",
+        "GET_LOCAL_USER_BY_NAME" => "SELECT * FROM q3panel_users INNER JOIN q3panel_style_preference ON q3panel_users.user_id = q3panel_style_preference.user_id INNER JOIN q3panel_styles ON q3panel_style_preference.style_id = q3panel_styles.style_id WHERE username = ? AND group_id > 0 AND origin = 0",
         "GET_EXT_DATA" => "SELECT * FROM q3panel_external_authentication",
         "GET_USER_BY_EMAIL" => "SELECT * FROM q3panel_users WHERE email = ?",
         "EXT_GET_FIRST_USER" => "SELECT {ext_usrname}, {ext_psw}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = 1"
         , "EXT_AUTH_EXISTS" => "SELECT Count(ext_auth_id) AS count FROM q3panel_external_authentication"
         , "FIND_EXT_USER_SELECT2" => "SELECT {ext_usrtable_id} AS id, {ext_usrname} AS text FROM {ext_usrtable} WHERE {ext_usrname} LIKE ?"
         , "GET_EXTERNAL_ACCOUNT" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_psw} FROM {ext_usrtable} WHERE {ext_usrname} = ?"
-        , "GET_EXT_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ? AND group_id > 0 AND origin = 1"
+        , "GET_EXT_USER_BY_NAME" => "SELECT * FROM q3panel_users INNER JOIN q3panel_style_preference ON q3panel_users.user_id = q3panel_style_preference.user_id INNER JOIN q3panel_styles ON q3panel_style_preference.style_id = q3panel_styles.style_id WHERE username = ? AND group_id > 0 AND origin = 1"
+        , "GET_STYLE_BY_NAME" => "SELECT * FROM q3panel_styles WHERE style_name = ?"
+    );
+    
+    static $UPDATE_QUERIES = array(
+        "SET_STYLE_FOR_USER" => "UPDATE q3panel_style_preference SET style_id = ? WHERE user_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -94,6 +101,18 @@ EOT;
 
 EOT;
     
+    private static $PREFERENCED_STYLES = array(
+        "theme-a.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-a.css\"> ",
+        "theme-b.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-b.css\"> ",
+        "theme-c.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-c.css\"> ",
+        "theme-d.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-d.css\"> ",
+        "theme-e.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-e.css\"> ",
+        "theme-f.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-f.css\"> ",
+        "theme-g.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-g.css\"> ",
+        "theme-h.css" => "<link id=\"autoloaded-stylesheet\" rel=\"stylesheet\" href=\"{}/css/theme-h.css\"> "
+        
+    );
+    
     
     public static function getCSS($url) {
         return str_replace("{}", $url, self::$CSS);
@@ -103,5 +122,8 @@ EOT;
         return str_replace("{}", $url, self::$JS);
     }
     
+    public static function getPreferencedCSS($url, $css) {
+        return str_replace("{}", $url, self::$PREFERENCED_STYLES[$css]);
+    }
     
 }

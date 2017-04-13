@@ -146,8 +146,12 @@ class User {
             $this->getPreferEmail()
         );
         try {
-            $sql->query($query, $params);
-            return array("href" => "../step6/");
+            $data = $sql->query($query, $params);
+            $user_id = $data["last_insert_id"];
+            $styleQuery = Constants::$INSERT_QUERIES['SET_STYLE_PREFERENCE'];
+            $styleParams = array("1", $user_id);
+            $sql->query($styleQuery, $styleParams);
+            return array();
         } catch (PDOException $ex) {
             return array("error" => $ex->getMessage());
         }
@@ -241,6 +245,23 @@ class User {
         $_SESSION['user_id'] = $data['user_id'];
         $_SESSION['group_id'] = $data['group_id'];
         $_SESSION['username'] = $data['realUsername'];
+        $_SESSION['style'] = $data['style_name'];
+    }
+    
+    static function changeUserStylePreference(SQL $sql, $user_id, $style) {
+        session_start();
+        $getStyleId = Constants::$SELECT_QUERIES['GET_STYLE_BY_NAME'];
+        $styleParams = array($style);
+        $data = $sql->query($getStyleId, $styleParams);
+        if (sizeof($data) === 1) {
+            $data = $data[0];
+            $style_id = $data['style_id'];
+            $setStyle = Constants::$UPDATE_QUERIES['SET_STYLE_FOR_USER'];
+            $setStyleParams = array($style_id, $user_id);
+            $sql->query($setStyle, $setStyleParams);
+            $_SESSION['style'] = $style;
+        }
+        
     }
 }
 

@@ -50,6 +50,7 @@ class Installation {
             foreach (Constants::$CREATE_TABLES as $table_query) {
                 $sql->query($table_query);
             }
+            $sql->query(Constants::$INSERT_QUERIES['ADD_STYLES']);
         } catch (PDOException $ex) {
             return array("error" => $ex->getMessage());
         }

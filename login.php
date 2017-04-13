@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <?php
 session_start();
 
@@ -6,7 +6,7 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
     
 
 ?>
- 
+ <!DOCTYPE html>
 <html>
     <head>
         <meta charset="UTF-8">

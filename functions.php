@@ -13,14 +13,20 @@ if (isset($_GET['logout'])) {
     session_destroy();
 }
 
+if (isset($_POST['theme'], $_POST['themename'])) {
+    User::changeUserStylePreference($sql, $_SESSION['user_id'], $_POST['themename']);
+}
+
 if (isset($_POST['login'], $_POST['username'], $_POST['password'])) {
     session_destroy();
     $user = new User($_POST['username'], $_POST['password']);
     $data = $user->authenticate($sql);
     if (isset($data['error'])) {
         echo json_encode($data);
+    } else if (isset($_SESSION['installer'])) {
+        echo json_encode(array("href" => "../step6/"));
     } else {
-        echo json_encode(array("href" => "."));
+        echo json_encode(array("success" => ""));
     }
 }
 
@@ -32,12 +38,24 @@ if (isset($_GET['getExternalUser'], $_GET['extUserName'])) {
 if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (isset($_SESSION['installer']) || User::canAddUser($sql, $_SESSION['user_id']))) {
     
     $user = new User($_POST['extUser'], null, "1", null, $_POST['extUserGroup'], 1);
-    echo json_encode($user->register($sql));
+    $dat = $user->register($sql);
+    if (isset($dat['error'])) {
+        echo json_encode($dat);
+    } else if (isset($_SESSION['installer'])) {
+        echo json_encode(array("href" => "../step6/"));
+    } else {
+        echo json_encode(array("success" => ""));
+    }
 }
 
 if (isset($_POST['register'], $_POST['userGroup'], $_POST['username'], $_POST['password'], $_POST['email']) && (isset($_SESSION['installer']) || User::canAddUser($sql, $_SESSION['user_id']))) {
     $user = new User($_POST['username'], $_POST['password'], 0, $_POST['email'], $_POST['userGroup'], 1);
-    echo json_encode($user->register($sql));
+    $dat = $user->register($sql);
+    if (isset($dat['error'])) {
+        echo json_encode($dat);
+    } else {
+        echo json_encode(array("href" => "../step6/"));
+    }
 }
 
 if (isset($_GET['setuptables'])) {
