@@ -36,7 +36,7 @@ function handleForm(id) {
                     location.href = response.href;
                 } else {
                     formTitle.html("Success");
-                    formMsgPanel.html(response.msg);
+                    formMsg.html(response.msg);
                     formMsgPanel.show(500);
                 }
             }

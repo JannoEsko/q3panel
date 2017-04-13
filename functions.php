@@ -13,6 +13,17 @@ if (isset($_GET['logout'])) {
     session_destroy();
 }
 
+if (isset($_POST['requestRecovery'], $_POST['email'])) {
+    echo json_encode(User::forgotPassword($sql, $_POST['email'], generateRandomKey(), $HOST_URL));
+}
+
+if (isset($_GET['recover'])) {
+    $dat = User::recovery($sql, $_GET['recover']);
+    if (isset($dat['error'])) {
+        $_SESSION['FPSW_ERROR'] = $dat['error'];
+    }
+}
+
 if (isset($_POST['theme'], $_POST['themename'])) {
     echo json_encode(User::changeUserStylePreference($sql, $_SESSION['user_id'], $_POST['themename']));
     die();

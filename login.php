@@ -20,6 +20,17 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
     <body>
         <div class="wrapper">
         <div class="block-center mt-xl wd-xl">
+            <div class="panel panel-danger" <?php if (!isset($_SESSION['FPSW_ERROR'])) { ?> hidden<?php } ?>>
+                        <div class="panel-heading" id="formTitle">
+                            Error
+                        </div>
+                        <div class="panel-body" id="formMsg">
+                            <?php if (isset($_SESSION['FPSW_ERROR'])) {
+                                echo $_SESSION['FPSW_ERROR'];
+                            } ?>
+                        </div>
+                        
+                    </div>
                     <div class="panel janno-panel" id="formMsgPanel" hidden>
                         <div class="panel-heading" id="formTitle">
                             
@@ -50,9 +61,27 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
                                 <button type="submit" class="btn btn-block btn-primary mt-lg">Login</button>
                                 <div class="clearfix">
                                     <div class="text-center pv">
-                                        <a href="#" class="text-muted">Forgot your password?</a>
+                                        <a href="#" onclick="$('#recoveryForm').show(500);" class="text-muted">Forgot your password?</a>
                                     </div>
                                 </div>
+                            </form>
+                            <form id="recoveryForm2" <?php if (!isset($_GET['recover']) || isset($_SESSION['FPSW_ERROR'])) {?> hidden <?php } ?> role="form" class="mb-lg" method="post" action="<?php echo $HOST_URL; ?>/functions.php">
+                                <input type="hidden" name="recover" value="<?php if (isset($_GET['recover'])) {echo $_GET['recover'];} ?>">
+                                <div class="form-group has-feedback">
+                                    <input type="password" placeholder="Password" required class="form-control" name="password">
+                                    <span class="fa fa-lock form-control-feedback text-muted"></span>
+                                </div>
+
+                                <button type="submit" class="btn btn-block btn-primary mt-lg">Recover</button>
+                            </form>
+                            <form id="recoveryForm" hidden role="form" class="mb-lg" method="post" action="<?php echo $HOST_URL; ?>/functions.php">
+                                <input type="hidden" name="requestRecovery" value="1">
+                                <div class="form-group has-feedback">
+                                    <input type="email" placeholder="E-mail" required class="form-control" name="email">
+                                    <span class="fa fa-lock form-control-feedback text-muted"></span>
+                                </div>
+
+                                <button type="submit" class="btn btn-block btn-primary mt-lg">Recover</button>
                             </form>
 
                         </div>
@@ -69,7 +98,7 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
         echo Constants::getJS("$HOST_URL/static");
         
         ?>
-        <script>handleForm("form");</script>
+        <script>handleForm("form");handleForm("recoveryForm2");handleForm("recoveryForm");</script>
     </body>
 </html>
 <?php 

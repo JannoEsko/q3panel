@@ -130,8 +130,8 @@ class User {
         return array("error" => Constants::$ERRORS['AUTH_NO_DATA_ERROR']);
     }
     
-    static function forgotPassword(SQL $sql, $email, $request_key) {
-        //first try from local DB.
+    static function forgotPassword(SQL $sql, $email, $request_key, $HOST_URL) {
+        require_once __DIR__ . "/../email/Email.php";
         $query = Constants::$SELECT_QUERIES['GET_USER_BY_EMAIL'];
         $params = array($email);
         $data = $sql->query($query, $params);
@@ -143,12 +143,24 @@ class User {
             $sql->query($forgottenpswquery, $forgottenparams);
             $emailPrefs = Email::getEmailPreferences($sql);
             $emailBody = Constants::$EMAIL_TEMPLATE['FORGOTTEN_MSG'];
-            $emailBody = str_replace("{FORGOTTEN_URL_KEY}", $HOST_URL . "?recover=$request_key");
-            $emailBody = str_replace("{SENDER_NAME}", $emailPrefs['from_name']);
+            $emailBody = str_replace("{FORGOTTEN_URL_KEY}", $HOST_URL . "/?recover=$request_key", $emailBody);
+            $emailBody = str_replace("{SENDER_NAME}", $emailPrefs['from_name'], $emailBody);
             $em = new Email($emailPrefs['from_email'], $email, Constants::$EMAIL_TEMPLATE['FORGOTTEN_TITLE'], $emailBody, $emailPrefs['from_name'], null);
-            return $em->sendEmail(int2bool($emailPrefs['is_sendgrid']), $emailPrefs['api_key']);
+            $em->sendEmail(int2bool($emailPrefs['is_sendgrid']), $emailPrefs['api_key']);
+            return array("msg" => Constants::$MESSAGES['FPSW_SUCCESS']);
         } else {
            return array("error" => Constants::$ERRORS['FPSW_NO_DATA_ERROR']);
+        }
+    }
+    
+    static function recovery(SQL $sql, $request_key) {
+        $query = Constants::$SELECT_QUERIES['GET_RECOVERY_DATA'];
+        $params = array($request_key);
+        $data = $sql->query($query, $params);
+        if (sizeof($data) === 1) {
+            return array("showform" => "1");
+        } else {
+            return array("error" => Constants::$ERRORS['NO_RECOVERY_INFO']);
         }
     }
     

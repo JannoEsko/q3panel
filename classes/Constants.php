@@ -58,6 +58,7 @@ class Constants {
         , "GET_STYLE_BY_NAME" => "SELECT * FROM q3panel_styles WHERE style_name = ?"
         , "GET_EMAIL_PREFERENCES" => "SELECT * FROM q3panel_email_service"
         , "GET_EXT_USERID_BY_EMAIL" => "SELECT {ext_usrtable_id} FROM {ext_usrtable} WHERE {ext_usrtable_email} = ?"
+        , "GET_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
     );
     
     static $UPDATE_QUERIES = array(
@@ -73,11 +74,16 @@ class Constants {
         "AUTH_WRONG_PASSWORD_OR_DISABLED" => "Wrong password or the account is disabled."
         , "AUTH_NO_DATA_WRONG_PSW_OR_DISABLED" => "This account doesn't exist, you typed the wrong password or the account is disabled"
         , "FPSW_NO_DATA_ERROR" => "Either this account doesn't exist on this panel or the account's origin is from an external system. If it is from an external system, you have to fix your password issue over there."
+        , "NO_RECOVERY_INFO" => "Recovery key is expired or is wrong. Please request password recovery again."
     );
     
     static $EMAIL_TEMPLATE = array(
         "FORGOTTEN_TITLE" => "Forgotten password | Q3Panel"
         , "FORGOTTEN_MSG" => "Hello,<br><br>Someone (hopefully you) has just requested a new password on your account. To do so, please, click on here: <a href=\"{FORGOTTEN_URL_KEY}\">{FORGOTTEN_URL_KEY}</a><br>If it wasn't you, feel free to ignore this e-mail.<br><br>Best regards,<br>{SENDER_NAME}"
+    );
+    
+    static $MESSAGES = array(
+        "FPSW_SUCCESS" => "Further instructions sent to e-mail."
     );
     
     private static $CSS = <<<EOT
