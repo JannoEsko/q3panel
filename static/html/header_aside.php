@@ -24,8 +24,8 @@
                         </ul>
                         <ul class="nav navbar-nav navbar-right">
                             <li>
-                                <a href="#">
-                                    <em class="icon-login"></em> Log in
+                                <a href="?logout">
+                                    <em class="icon-login"></em> Log out
                                 </a>
                             </li>
                             <li>

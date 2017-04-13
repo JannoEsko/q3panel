@@ -33,7 +33,7 @@ class Constants {
         "CREATE TABLE q3panel_external_authentication (ext_auth_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host VARCHAR(255), db_username VARCHAR(255), db_password VARCHAR(255), db_name VARCHAR(255), users_table_name VARCHAR(255), user_id_field VARCHAR(255), username_field VARCHAR(255), password_field VARCHAR(255), email_field VARCHAR(255))",
         "CREATE TABLE q3panel_email_service (email_service_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, is_sendgrid TINYINT, from_name VARCHAR(255), from_email VARCHAR(255), api_key TEXT COMMENT 'empty if PHPMailer, key if SendGrid')",
         "CREATE TABLE q3panel_style_preference (style_preference_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_id INTEGER NOT NULL, user_id INTEGER NOT NULL)",
-        "CREATE TABLE q3panel_styles (style_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_name VARCHAR(255))"
+        "CREATE TABLE q3panel_styles (style_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_name VARCHAR(255), style_bg VARCHAR(255) COMMENT 'The background color from CSS of the object janno-panel')"
         
     );
     
@@ -41,7 +41,7 @@ class Constants {
         "ADD_NEW_USER" => "INSERT INTO q3panel_users (username, password, origin, email, group_id, allow_emails) VALUES (?, ?, ?, ?, ?, ?)",
         "ADD_EXT_DB" => "INSERT INTO q3panel_external_authentication (host, db_username, db_password, db_name, users_table_name, user_id_field, username_field, password_field, email_field) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
         "ADD_EMAIL_SERVICE" => "INSERT INTO q3panel_email_service (is_sendgrid, from_name, from_email, api_key) VALUES (?, ?, ?, ?)"
-        , "ADD_STYLES" => "INSERT INTO q3panel_styles (style_name) VALUES ('theme-a.css'), ('theme-b.css'), ('theme-c.css'), ('theme-d.css'), ('theme-e.css'), ('theme-f.css'), ('theme-g.css'), ('theme-h.css')"
+        , "ADD_STYLES" => "INSERT INTO q3panel_styles (style_name, style_bg) VALUES ('theme-a.css', '#23b7e5'), ('theme-b.css', '#37bc9b'), ('theme-c.css', '#7266ba'), ('theme-d.css', '#f05050'), ('theme-e.css', '#1797be'), ('theme-f.css', '#2b957a'), ('theme-g.css', '#564aa3'), ('theme-h.css', '#ec2121')"
         , "SET_STYLE_PREFERENCE" => "INSERT INTO q3panel_style_preference (style_id, user_id) VALUES (?, ?)"
     );
     

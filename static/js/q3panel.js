@@ -48,6 +48,12 @@ function setPreferencedTheme(theme) {
     $.post(window.location.href, {
         theme: "1",
         themename: theme
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data !== "undefined" && typeof data.style_bg !== "undefined") {
+            $("#themecolor").attr("content", data.style_bg);
+        }
     });
 }
+
 

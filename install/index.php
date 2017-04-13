@@ -15,6 +15,7 @@ if (isset($_GET['writeSQL'])) {
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta id="themecolor" name="theme-color" content="#23b7e5">
         <title>Installation | Q3Panel</title>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <?php echo Constants::getCSS("../static"); ?>

@@ -246,6 +246,7 @@ class User {
         $_SESSION['group_id'] = $data['group_id'];
         $_SESSION['username'] = $data['realUsername'];
         $_SESSION['style'] = $data['style_name'];
+        $_SESSION['style_bg'] = $data['style_bg'];
     }
     
     static function changeUserStylePreference(SQL $sql, $user_id, $style) {
@@ -260,7 +261,10 @@ class User {
             $setStyleParams = array($style_id, $user_id);
             $sql->query($setStyle, $setStyleParams);
             $_SESSION['style'] = $style;
+            $_SESSION['style_bg'] = $data['style_bg'];
+            return $data;
         }
+        return array("error" => "Couldn't load new style");
         
     }
 }

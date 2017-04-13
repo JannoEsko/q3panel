@@ -12,6 +12,7 @@ require_once __DIR__ . "/../../classes/loader.php";
     <head>
         <meta charset="UTF-8">
         <title>Installation | Q3Panel</title>
+        <meta id="themecolor" name="theme-color" content="#23b7e5">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <?php echo Constants::getCSS($HOST_URL . "/static"); ?>
         <link rel="stylesheet" href="../../static/css/theme-a.css" />

@@ -14,7 +14,8 @@ if (isset($_GET['logout'])) {
 }
 
 if (isset($_POST['theme'], $_POST['themename'])) {
-    User::changeUserStylePreference($sql, $_SESSION['user_id'], $_POST['themename']);
+    echo json_encode(User::changeUserStylePreference($sql, $_SESSION['user_id'], $_POST['themename']));
+    die();
 }
 
 if (isset($_POST['login'], $_POST['username'], $_POST['password'])) {
@@ -26,7 +27,7 @@ if (isset($_POST['login'], $_POST['username'], $_POST['password'])) {
     } else if (isset($_SESSION['installer'])) {
         echo json_encode(array("href" => "../step6/"));
     } else {
-        echo json_encode(array("success" => ""));
+        echo json_encode(array("href" => "."));
     }
 }
 

@@ -10,12 +10,15 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
 <html>
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+        <meta id="themecolor" name="theme-color" content="#23b7e5">
         <title>Login | Q3Panel</title>
         <?php
         echo Constants::getCSS("$HOST_URL/static");
         ?>
     </head>
     <body>
+        <div class="panel janno-panel" id="tst" hidden></div>
         <div class="wrapper">
         <div class="block-center mt-xl wd-xl">
                     <div class="panel janno-panel" id="formMsgPanel" hidden>
@@ -27,7 +30,7 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
                         </div>
                         
                     </div>
-                    <div class="panel panel-primary">
+                    <div class="panel janno-panel">
                         <div class="panel-heading text-center">
                             <a href="#" style="color:white;">Q3Panel</a>
                         </div>
