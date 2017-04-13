@@ -40,6 +40,7 @@ require_once __DIR__ . "/../../classes/loader.php";
                         <div class="panel-body">
                             This panel allows you to choose between 2 e-mail classes, one is PHPMailer library, which relies heavily on the php's original <code>mail()</code>
                              function, the other is SendGrid, which is a free-to-use service (as long as you don't go over the quotas), which just deals with the e-mailing side on itself. Benefits of using SendGrid is that PHPMailer's e-mails might end up in junk (SPF, rDNS issues etc), while SendGrid's e-mails are more often trusted. 
+                             If you opt for PHPMailer, please check that you got sendmail installed (on Debian and its derivates, <code>sudo apt-get install sendmail</code>).
                            <br>
                                 <div class="pull-left">
                                     <button type="button" class="btn btn-default btn-block btn-lg" onclick="$('#form').show(500);$('#form2').hide(500);">Use SendGrid</button>
