@@ -92,14 +92,15 @@ class Email {
             $mail = new SendGrid\Mail($sfrom, $this->title, $sto, $content);
             $sg = new \Sendgrid($sendgrid_apikey);
             $response = $sg->client->mail()->send()->post($mail);
-            return array();
+            return array($response);
         } else {
             require_once __DIR__ . "/../phpmailer/PHPMailerAutoload.php";
             $mail = new PHPMailer();
-            $mail->setFrom($this->getFrom(), $this->getFromName());
+            $mail->setFrom($this->getFrom(), $this->getFromName(), 0);
             $mail->addAddress($this->getTo(), $this->getToName());
             $mail->Subject = $this->getTitle();
             $mail->Body = $this->getBody();
+            $mail->IsHTML(true); 
             if (!$mail->send()) {
                 return array("error" => $mail->ErrorInfo);
             } else {
@@ -118,6 +119,12 @@ class Email {
         } catch (PDOException $ex) {
             return array("error" => $ex->getMessage());
         }
+    }
+    
+    public static function getEmailPreferences(SQL $sql) {
+        $query = Constants::$SELECT_QUERIES['GET_EMAIL_PREFERENCES'];
+        $data = $sql->query($query);
+        return $data[0];
     }
     
 }
