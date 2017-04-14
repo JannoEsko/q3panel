@@ -24,6 +24,16 @@ if (isset($_GET['recover'])) {
     }
 }
 
+if (isset($_POST['recover'], $_POST['password'])) { 
+    $data = User::changeForgottenPassword($sql, $_POST['password'], $_POST['recover']);
+    if (isset($data['error'])) {
+        echo json_encode($data);
+    } else {
+        echo json_encode(array("href" => "."));
+    }
+    
+}
+
 if (isset($_POST['theme'], $_POST['themename'])) {
     echo json_encode(User::changeUserStylePreference($sql, $_SESSION['user_id'], $_POST['themename']));
     die();

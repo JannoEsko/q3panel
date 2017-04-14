@@ -70,8 +70,9 @@ class User {
     function authenticate(SQL $sql) {
         $query = Constants::$SELECT_QUERIES['GET_LOCAL_USER_BY_NAME'];
         $params = array($this->getUsername());
-        $data = $sql->query($query, $params);
+        $data = $sql->query($query, $params); 
         if (sizeof($data) === 1) {
+           
             $data = $data[0];
             $password = $data['password'];
             if (password_verify($this->getPassword(), $password)) {
@@ -162,6 +163,27 @@ class User {
         } else {
             return array("error" => Constants::$ERRORS['NO_RECOVERY_INFO']);
         }
+    }
+    
+    static function changeForgottenPassword(SQL $sql, $newPass, $requestKey) {
+        $query = Constants::$SELECT_QUERIES['GET_USER_BY_RECOVERY_DATA'];
+        $params = array($requestKey);
+        $data = $sql->query($query, $params);
+        if (sizeof($data) === 1) {
+            $data = $data[0];
+            $user_id = $data['user_id'];
+            $removeQuery = Constants::$DELETE_QUERIES['DELETE_FORGOTTEN_DATA'];
+            $removeParams = array($user_id);
+            $sql->query($removeQuery, $removeParams);
+            $email = $data['email'];
+            $emailPrefs = Email::getEmailPreferences($sql);
+            $emailBody = Constants::$EMAIL_TEMPLATE['FPSW_CHANGED'];
+            $emailBody = str_replace("{SENDER_NAME}", $emailPrefs['from_name'], $emailBody);
+            $em = new Email($emailPrefs['from_email'], $email, Constants::$EMAIL_TEMPLATE['FORGOTTEN_TITLE'], $emailBody, $emailPrefs['from_name'], null);
+            $em->sendEmail(int2bool($emailPrefs['is_sendgrid']), $emailPrefs['api_key']);
+            return self::editAccount($sql, $user_id, null, $newPass);
+        }
+        return array("error" => Constants::$ERRORS['CHANGE_FORGOTTEN_ERROR']);
     }
     
     function register(SQL $sql) {

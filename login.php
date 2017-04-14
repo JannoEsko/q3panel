@@ -21,12 +21,13 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
         <div class="wrapper">
         <div class="block-center mt-xl wd-xl">
             <div class="panel panel-danger" <?php if (!isset($_SESSION['FPSW_ERROR'])) { ?> hidden<?php } ?>>
-                        <div class="panel-heading" id="formTitle">
+                        <div class="panel-heading">
                             Error
                         </div>
-                        <div class="panel-body" id="formMsg">
+                        <div class="panel-body">
                             <?php if (isset($_SESSION['FPSW_ERROR'])) {
                                 echo $_SESSION['FPSW_ERROR'];
+                                
                             } ?>
                         </div>
                         
@@ -40,14 +41,14 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
                         </div>
                         
                     </div>
-                    <div class="panel janno-panel">
+                    <div class="panel janno-panel" >
                         <div class="panel-heading text-center">
                             <a href="#" style="color:white;">Q3Panel</a>
                         </div>
                         <div class="panel-body">
                             
-                            <p class="text-center pv">Please log in to the panel</p>
-                            <form id="form" role="form" class="mb-lg" method="post" action="<?php echo $HOST_URL; ?>/functions.php">
+                            <p class="text-center pv"><?php if (isset($_GET['recover']) && !isset($_SESSION['FPSW_ERROR'])) {?>Please enter your new password and click Recover.<?php } else { ?>Please log in to the panel <?php } ?></p>
+                            <form id="form" <?php if (isset($_GET['recover']) && !isset($_SESSION['FPSW_ERROR'])) {?>hidden <?php } ?> role="form" class="mb-lg" method="post" action="<?php echo $HOST_URL; ?>/functions.php">
                                 <input type="hidden" name="login" value="1">
                                 <div class="form-group has-feedback">
                                     <input type="name" placeholder="Enter your account" required class="form-control" name="username">
@@ -102,6 +103,10 @@ if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) 
     </body>
 </html>
 <?php 
+
+//Need to unset this one because otherwise, even if you enter the right recovery key, you'll end up with an error message instead.
+unset($_SESSION['FPSW_ERROR']);
+
 
 
 die(); //no need to show index if we're not logged in.

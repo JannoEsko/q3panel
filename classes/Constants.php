@@ -59,6 +59,7 @@ class Constants {
         , "GET_EMAIL_PREFERENCES" => "SELECT * FROM q3panel_email_service"
         , "GET_EXT_USERID_BY_EMAIL" => "SELECT {ext_usrtable_id} FROM {ext_usrtable} WHERE {ext_usrtable_email} = ?"
         , "GET_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
+        , "GET_USER_BY_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_forgottenpsw.user_id WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
     );
     
     static $UPDATE_QUERIES = array(
@@ -67,6 +68,7 @@ class Constants {
     
     static $DELETE_QUERIES = array(
         "DELETE_USER_BY_ID" => "DELETE FROM q3panel_users WHERE user_id = ?"
+        , "DELETE_FORGOTTEN_DATA" => "DELETE FROM q3panel_forgottenpsw WHERE user_id = ?"
     );
     
     static $ERRORS = array(
@@ -75,11 +77,13 @@ class Constants {
         , "AUTH_NO_DATA_WRONG_PSW_OR_DISABLED" => "This account doesn't exist, you typed the wrong password or the account is disabled"
         , "FPSW_NO_DATA_ERROR" => "Either this account doesn't exist on this panel or the account's origin is from an external system. If it is from an external system, you have to fix your password issue over there."
         , "NO_RECOVERY_INFO" => "Recovery key is expired or is wrong. Please request password recovery again."
+        , "CHANGE_FORGOTTEN_ERROR" => "Error occurred during the recovery process. Please request a new recovery key."
     );
     
     static $EMAIL_TEMPLATE = array(
         "FORGOTTEN_TITLE" => "Forgotten password | Q3Panel"
         , "FORGOTTEN_MSG" => "Hello,<br><br>Someone (hopefully you) has just requested a new password on your account. To do so, please, click on here: <a href=\"{FORGOTTEN_URL_KEY}\">{FORGOTTEN_URL_KEY}</a><br>If it wasn't you, feel free to ignore this e-mail.<br><br>Best regards,<br>{SENDER_NAME}"
+        , "FPSW_CHANGED" => "Hello,<br><br>You recently requested a new password from the page and it has been changed now. You have to use that password from now on.<br><br>Best regards,<br>{SENDER_NAME}"
     );
     
     static $MESSAGES = array(
