@@ -60,6 +60,8 @@ class Constants {
         , "GET_EXT_USERID_BY_EMAIL" => "SELECT {ext_usrtable_id} FROM {ext_usrtable} WHERE {ext_usrtable_email} = ?"
         , "GET_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
         , "GET_USER_BY_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_forgottenpsw.user_id WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
+        , "GET_ALL_USERS" => "SELECT * FROM q3panel_users"
+        , "GET_EXT_USER_BY_ID" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -88,6 +90,8 @@ class Constants {
     
     static $MESSAGES = array(
         "FPSW_SUCCESS" => "Further instructions sent to e-mail."
+        , "ORIGIN" => array(0 => "Local", 1 => "External")
+        , "GROUP" => array(0 => "Disabled", 1 => "Normal user", 2 => "Server owner", 3 => "Panel admin")
     );
     
     private static $CSS = <<<EOT
