@@ -62,6 +62,7 @@ class Constants {
         , "GET_USER_BY_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_forgottenpsw.user_id WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
         , "GET_ALL_USERS" => "SELECT * FROM q3panel_users"
         , "GET_EXT_USER_BY_ID" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = ?"
+        , "GET_USER_BY_ID" => "SELECT * FROM q3panel_users WHERE user_id = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -80,6 +81,8 @@ class Constants {
         , "FPSW_NO_DATA_ERROR" => "Either this account doesn't exist on this panel or the account's origin is from an external system. If it is from an external system, you have to fix your password issue over there."
         , "NO_RECOVERY_INFO" => "Recovery key is expired or is wrong. Please request password recovery again."
         , "CHANGE_FORGOTTEN_ERROR" => "Error occurred during the recovery process. Please request a new recovery key."
+        , "GENERIC_PRIVILEGE_ERROR" => "You're not privileged enough to perform this action."
+        , "GENERIC_ERROR" => "Something went wrong with your action, please try again or refresh the page and try again."
     );
     
     static $EMAIL_TEMPLATE = array(
@@ -137,6 +140,7 @@ EOT;
     );
     
     
+    
     public static function getCSS($url) {
         return str_replace("{}", $url, self::$CSS);
     }
@@ -147,6 +151,13 @@ EOT;
     
     public static function getPreferencedCSS($url, $css) {
         return str_replace("{}", $url, self::$PREFERENCED_STYLES[$css]);
+    }
+    
+    public static function getSelectGroups() {
+        foreach(self::$MESSAGES['GROUP'] as $group_id => $group_name) {
+            $data[] = "<option value=\"$group_id\">$group_name</option>";
+        }
+        return $data;
     }
     
 }

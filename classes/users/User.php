@@ -270,8 +270,42 @@ class User {
     
     //User::canEditUser($sql, $_SESSION['user_id'])
     
-    static function canEditUser($sql, $user_id) {
-        return true;
+    /**
+     * @todo Server-based account modifications.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user id of the requestor.
+     * @param int $editable_user_id The user id, which you want to edit.
+     * @return int Returns 0, if the account can't be edited with this user, 1 if it can be edited, 2 if it's an external account (so only group edits are allowed), -1 if an error occured and 3 if group can't be edited.
+     */
+    static function canEditUser(SQL $sql, $user_id, $editable_user_id) {
+        $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID'];
+        $params = array($user_id);
+        $data = $sql->query($query, $params);
+        $params2 = array($editable_user_id);
+        $editableUser = $sql->query($query, $params2);
+        if (sizeof($data) === 1 && sizeof($editableUser) === 1) {
+            $data = $data[0];
+            $editableUser = $editableUser[0];
+            $user_group_id = intval($data['group_id']);
+            $editable_group_id = intval($editableUser['group_id']);
+            if ($user_group_id === 3) {
+                if (intval($editableUser['origin']) === 1) {
+                    if ($user_id === $editable_user_id) {
+                        return 0;
+                    } else {
+                        return 2;
+                    }
+                } else {
+                    if ($user_id === $editable_user_id) {
+                        return 3;
+                    } else {
+                        return 1;
+                    }
+                }
+            }
+            
+        }
+        return -1;
     }
     
     static function getAllUsers(SQL $sql) {

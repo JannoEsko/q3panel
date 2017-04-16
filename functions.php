@@ -71,7 +71,7 @@ function int2bool($input) {
 }
 
 if (isset($_GET['getExternalUser'], $_GET['extUserName'])) {
-    echo json_encode(User::getExternalAccounts($sql, $_GET['extUserName']));
+    echo json_encode(User::getExternalAccount($sql, $_GET['extUserName']));
 }
 
 if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (isset($_SESSION['installer']) || User::canAddUser($sql, $_SESSION['user_id']))) {
@@ -200,6 +200,33 @@ function isExternalAuthEnabled($sql) {
     return false;
 }
 
+if (isset($_POST['getUserData'], $_POST['user_id'])) {
+    echo json_encode();
+}
 
+if (isset($_POST['user_id'], $_POST['delete']) && intval($_POST['delete']) === 1) {
+    if (User::canEditUser($sql, $_SESSION['user_id'], $_POST['user_id']) > 0 && intval($_SESSION['user_id']) !== intval($_POST['user_id'])) {
+        //We won't grab the group id from session data because someone might've changed it in the meantime
+        //and thus, we will check it from SQL, so if the user can actually edit an user (delete incl), 
+        //we'll let him do it if and only if it's allowed.
+        $data = User::deleteAccount($sql, $_POST['user_id']);
+        if (intval($data['rows_affected']) === 1) {
+            die(json_encode(array("href" => ".")));
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+        }
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
+    
+}
 
+if (isset($_POST['user_id'], $_POST['origin'], $_POST['editUser']) && intval($_POST['editUser']) === 1) {
+    //first check that if he is editing his own account,
+    //is he trying to edit his own group to a lower group (hence, locking himself out from the system).
+    if (User::canEditUser($sql, $_SESSION['user_id'], $_POST['user_id']) > 0) {
+        
+    }
+    die(json_encode(array("error" => "HI")));
+}
 

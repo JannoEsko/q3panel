@@ -56,4 +56,41 @@ function setPreferencedTheme(theme) {
     });
 }
 
+function initEditUserModal(id, user_id, username, email, origin, group) {
+    $("#group").val(group).change();
+    $("#userModalTitle").html("Edit user " + username);
+    if (parseInt(origin) === 1) {
+        $("#disabledmsg").html("Upper options are disabled because the user derives from an external system.");
+        $("#username").prop('disabled', true);
+        $("#password").prop('disabled', true);
+        $("#email").prop('disabled', true);
+    } else {
+        $("#disabledmsg").html("");
+        $("#username").prop('disabled', false);
+        $("#password").prop('disabled', false);
+        $("#email").prop('disabled', false);
+    }
+    $("#user_id").val(user_id);
+    $("#username").val(username);
+    $("#email").val(email);
+    $("#origin").val(origin);
+    $("#editUser").val(1);
+    $("#delete").val(0);
+    $("#userform").show();
+    $("#deleteSubmit").show();
+    $("#editSubmit").show();
+    $("#newUserForm").hide();
+    $("#accountButtons").hide();
+    $("#" + id).modal();
+}
+
+function initRegisterModal(id) {
+    $("#deleteSubmit").hide();
+    $("#editSubmit").hide();
+    $("#userform").hide();
+    $("#newUserForm").show();
+    $("#accountButtons").show();
+    $("#" + id).modal();
+}
+
 
