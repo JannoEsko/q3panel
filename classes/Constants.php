@@ -44,6 +44,7 @@ class Constants {
         , "ADD_STYLES" => "INSERT INTO q3panel_styles (style_name, style_bg) VALUES ('theme-a.css', '#23b7e5'), ('theme-b.css', '#37bc9b'), ('theme-c.css', '#7266ba'), ('theme-d.css', '#f05050'), ('theme-e.css', '#1797be'), ('theme-f.css', '#2b957a'), ('theme-g.css', '#564aa3'), ('theme-h.css', '#ec2121')"
         , "SET_STYLE_PREFERENCE" => "INSERT INTO q3panel_style_preference (style_id, user_id) VALUES (?, ?)"
         , "SET_FORGOTTEN_PASSWORD" => "INSERT INTO q3panel_forgottenpsw (user_id, request_key) VALUES (?, ?)"
+        , "ADD_NEW_GAME" => "INSERT INTO q3panel_games (game_name, game_location, startscript) VALUES (?, ?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -64,6 +65,8 @@ class Constants {
         , "GET_EXT_USER_BY_ID" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = ?"
         , "GET_USER_BY_ID" => "SELECT * FROM q3panel_users WHERE user_id = ?"
         , "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ?"
+        , "GET_ALL_GAMES" => "SELECT * FROM q3panel_games"
+        , "GET_GAME_BY_ID" => "SELECT * FROM q3panel_games WHERE game_id = ?"
     );
     
     static $UPDATE_QUERIES = array(

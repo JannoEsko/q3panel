@@ -9,6 +9,8 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+
+
 if (isset($_GET['logout'])) {
     session_destroy();
 }
@@ -204,6 +206,15 @@ function isExternalAuthEnabled($sql) {
 
 if (isset($_POST['getUserData'], $_POST['user_id'])) {
     echo json_encode();
+}
+
+if (isset($_POST['addGame'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript'])) {
+    $data = Game::saveGame($sql, $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
+    if (intval($data['rows_affected']) === 1) {
+        die(json_encode(array("href" => ".")));
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+    }
 }
 
 if (isset($_POST['user_id'], $_POST['delete']) && intval($_POST['delete']) === 1) {

@@ -287,7 +287,6 @@ class User {
             $data = $data[0];
             $editableUser = $editableUser[0];
             $user_group_id = intval($data['group_id']);
-            $editable_group_id = intval($editableUser['group_id']);
             if ($user_group_id === 3) {
                 if (intval($editableUser['origin']) === 1) {
                     if ($user_id === $editable_user_id) {

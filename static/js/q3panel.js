@@ -71,9 +71,9 @@ function initEditUserModal(id, user_id, username, email, origin, group, canChang
         $("#email").prop('disabled', false);
     }
     if (canChangeGroup) {
-        $("#group").removeProp("disabled");
+        $("#group").removeAttr("disabled");
     } else {
-        $("#group").prop("disabled", "true");
+        $("#group").prop("disabled", true);
     }
     $("#user_id").val(user_id);
     $("#username").val(username);

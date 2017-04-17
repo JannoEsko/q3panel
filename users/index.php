@@ -44,7 +44,6 @@ require_once __DIR__ . "/../login.php";
                                             <tbody>
                                                 <?php
                                                 $users = User::getAllUsers($sql);
-                                                print_r($users);
                                                 foreach($users as $user) {
                                                     ?>
                                                 <tr>
@@ -53,7 +52,8 @@ require_once __DIR__ . "/../login.php";
                                                     <td><?php echo Constants::$MESSAGES['ORIGIN'][$user['origin']]; ?></td>
                                                     <td><?php echo Constants::$MESSAGES['GROUP'][$user['group_id']]; ?></td>
                                                     <td><?php if (User::canEditUser($sql, $_SESSION['user_id'], $user['user_id']) > 0) {
-                                                        ?><button type="button" class="btn btn-default btn-block" onclick="initEditUserModal('userModal', <?php echo "'" . $user['user_id'] . "', '" . $user['realName'] . "', '" . $user['email'] . "', '".$user['origin'] . "', '" . $user['group_id']. "', ";if(intval($_SESSION['user_id']) === intval($user['user_id'])) {echo "false";} else {echo "true";} ?>);">Edit user</button> <?php
+                                                        ?><button type="button" class="btn btn-default btn-block" onclick="initEditUserModal('userModal', <?php echo "'" . $user['user_id'] . "', '" . $user['realName'] . "', '" . $user['email'] . "', '".$user['origin'] . "', '" . $user['group_id']. "', ";if(intval($_SESSION['user_id']) === intval($user['user_id'])) {echo "false";} else {echo "true";} ?>);">Edit user</button>
+                                                            <?php
                                                     } ?></td>
                                                 </tr>
                                                 <?php }

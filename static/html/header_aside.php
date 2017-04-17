@@ -78,6 +78,10 @@
                                     <em class="icon-user"></em>
                                     <span>Users</span>
                                 </a>
+                                <a href="<?php echo "$HOST_URL/game/"; ?>" title="Users">
+                                    <em class="icon-settings"></em>
+                                    <span>Game setup</span>
+                                </a>
                             </li>
                             <li class="nav-heading">
                                 <span>Links</span>
