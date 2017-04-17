@@ -268,6 +268,12 @@ class User {
         return $sql->query($query, $params);
     }
     
+    static function checkUser(SQL $sql, $user_id, $group_id) {
+        $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID_AND_GROUP'];
+        $params = array($user_id, $group_id);
+        return sizeof($sql->query($query, $params)) === 1;
+    }
+    
     //User::canEditUser($sql, $_SESSION['user_id'])
     
     /**

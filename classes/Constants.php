@@ -67,6 +67,7 @@ class Constants {
         , "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ?"
         , "GET_ALL_GAMES" => "SELECT * FROM q3panel_games"
         , "GET_GAME_BY_ID" => "SELECT * FROM q3panel_games WHERE game_id = ?"
+        , "GET_USER_BY_ID_AND_GROUP" => "SELECT * FROM q3panel_users WHERE user_id = ? AND group_id = ?"
     );
     
     static $UPDATE_QUERIES = array(

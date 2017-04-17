@@ -1,7 +1,11 @@
 
 <?php
 session_start();
-
+if (!User::checkUser($sql, $_SESSION['user_id'], $_SESSION['group_id'])) {
+    unset($_SESSION['user_id']);
+    unset($_SESSION['group_id']);
+    session_destroy();
+}
 if (!isset($_SESSION['group_id'], $_SESSION['user_id'], $_SESSION['username'])) {
     
 
@@ -110,4 +114,4 @@ unset($_SESSION['FPSW_ERROR']);
 
 
 die(); //no need to show index if we're not logged in.
-}
+} 
