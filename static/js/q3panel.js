@@ -56,7 +56,7 @@ function setPreferencedTheme(theme) {
     });
 }
 
-function initEditUserModal(id, user_id, username, email, origin, group) {
+function initEditUserModal(id, user_id, username, email, origin, group, canChangeGroup) {
     $("#group").val(group).change();
     $("#userModalTitle").html("Edit user " + username);
     if (parseInt(origin) === 1) {
@@ -70,13 +70,18 @@ function initEditUserModal(id, user_id, username, email, origin, group) {
         $("#password").prop('disabled', false);
         $("#email").prop('disabled', false);
     }
+    if (canChangeGroup) {
+        $("#group").removeProp("disabled");
+    } else {
+        $("#group").prop("disabled", "true");
+    }
     $("#user_id").val(user_id);
     $("#username").val(username);
     $("#email").val(email);
     $("#origin").val(origin);
     $("#editUser").val(1);
     $("#delete").val(0);
-    $("#userform").show();
+    $("#userForm").show();
     $("#deleteSubmit").show();
     $("#editSubmit").show();
     $("#newUserForm").hide();
@@ -87,7 +92,7 @@ function initEditUserModal(id, user_id, username, email, origin, group) {
 function initRegisterModal(id) {
     $("#deleteSubmit").hide();
     $("#editSubmit").hide();
-    $("#userform").hide();
+    $("#userForm").hide();
     $("#newUserForm").show();
     $("#accountButtons").show();
     $("#" + id).modal();

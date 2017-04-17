@@ -63,6 +63,7 @@ class Constants {
         , "GET_ALL_USERS" => "SELECT * FROM q3panel_users"
         , "GET_EXT_USER_BY_ID" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = ?"
         , "GET_USER_BY_ID" => "SELECT * FROM q3panel_users WHERE user_id = ?"
+        , "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ?"
     );
     
     static $UPDATE_QUERIES = array(

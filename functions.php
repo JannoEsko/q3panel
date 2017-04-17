@@ -83,7 +83,7 @@ if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (i
     } else if (isset($_SESSION['installer'])) {
         echo json_encode(array("href" => "../step6/"));
     } else {
-        echo json_encode(array("success" => ""));
+        echo json_encode(array("href" => "."));
     }
 }
 
@@ -92,8 +92,10 @@ if (isset($_POST['register'], $_POST['userGroup'], $_POST['username'], $_POST['p
     $dat = $user->register($sql);
     if (isset($dat['error'])) {
         echo json_encode($dat);
-    } else {
+    } else if (isset($_SESSION['installer'])) {
         echo json_encode(array("href" => "../step6/"));
+    } else {
+        echo json_encode(array("href" => "."));
     }
 }
 
@@ -225,8 +227,14 @@ if (isset($_POST['user_id'], $_POST['origin'], $_POST['editUser']) && intval($_P
     //first check that if he is editing his own account,
     //is he trying to edit his own group to a lower group (hence, locking himself out from the system).
     if (User::canEditUser($sql, $_SESSION['user_id'], $_POST['user_id']) > 0) {
-        
+        User::editAccount($sql, $_POST['user_id'], $_POST['username'], $_POST['password'], null, $_POST['email'], $_POST['group']);
+        die(json_encode(array("href" => ".")));
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
     }
-    die(json_encode(array("error" => "HI")));
+    
 }
 
+if (isset($_POST['origin'], $_POST['register'], $_POST['extUser'], $_POST['group'])) {
+    
+}

@@ -53,7 +53,7 @@ require_once __DIR__ . "/../login.php";
                                                     <td><?php echo Constants::$MESSAGES['ORIGIN'][$user['origin']]; ?></td>
                                                     <td><?php echo Constants::$MESSAGES['GROUP'][$user['group_id']]; ?></td>
                                                     <td><?php if (User::canEditUser($sql, $_SESSION['user_id'], $user['user_id']) > 0) {
-                                                        ?><button type="button" class="btn btn-default btn-block" onclick="initEditUserModal('userModal', <?php echo "'" . $user['user_id'] . "', '" . $user['realName'] . "', '" . $user['email'] . "', '".$user['origin'] . "', '" . $user['group_id']. "'"; ?>);">Edit user</button> <?php
+                                                        ?><button type="button" class="btn btn-default btn-block" onclick="initEditUserModal('userModal', <?php echo "'" . $user['user_id'] . "', '" . $user['realName'] . "', '" . $user['email'] . "', '".$user['origin'] . "', '" . $user['group_id']. "', ";if(intval($_SESSION['user_id']) === intval($user['user_id'])) {echo "false";} else {echo "true";} ?>);">Edit user</button> <?php
                                                     } ?></td>
                                                 </tr>
                                                 <?php }
@@ -154,8 +154,7 @@ require_once __DIR__ . "/../login.php";
                             </div>
                         </div>
                         <form id="newExternalUser" role="form" method="post" action="../functions.php" hidden>
-                            <input type="hidden" name="origin" value="1">
-                            <input type="hidden" name="register" value="1">
+                            <input type="hidden" name="extAccount" value="1">
                             <div class="form-group">
                                 <label>Name of the account</label>
                                 <select id="ext_users" class="form-control" name="extUser" width="100%" required>
@@ -165,7 +164,7 @@ require_once __DIR__ . "/../login.php";
                             </div>
                             <div class="form-group">
                                 <label>Group</label>
-                                <select name="group" id="group" name="group" class="form-control m-b">
+                                <select name="extUserGroup" id="extgroup" name="group" class="form-control m-b">
                                     <?php echo implode("", Constants::getSelectGroups()); ?>
                                 </select>
                             </div>
@@ -173,24 +172,24 @@ require_once __DIR__ . "/../login.php";
                                 <button type="submit" class="btn btn-default btn-block">Submit</button>
                             </div>
                         </form>
-                        <form id="newLocalUser" role="form" method="post" action="../functions.php" hidden>  
-                            <input type="hidden" name="origin" value="0">
+                        <form id="newLocalUser" role="form" method="post" action="../functions.php" hidden> 
+                            <input type="hidden" name="register" value="1">
                             <div class="form-group">
                                 <label>Username</label>
-                                <input value=" " type="text" id="username" name="username" class="form-control" placeholder="The username of the account" required>
+                                <input value="" type="text" id="newusername" name="username" class="form-control" placeholder="The username of the account" required>
                             </div>
                             <div class="form-group">
                                 <label>Password</label>
-                                <input id="password" name="password" type="password" class="form-control" placeholder="The password of the account" required>
+                                <input id="newpassword" name="password" type="password" class="form-control" placeholder="The password of the account" required>
                             </div>
                             <div class="form-group">
                                 <label>E-mail</label>
-                                <input type="email" id="email" name="email" class="form-control" placeholder="The e-mail of the account" required>
+                                <input type="email" id="newemail" name="email" class="form-control" placeholder="The e-mail of the account" required>
                             </div>
                             <div class="form-group" id="disabledmsg"></div>
                             <div class="form-group">
                                 <label>Group</label>
-                                <select name="group" id="group" name="group" class="form-control m-b">
+                                <select name="userGroup" id="newgroup" name="group" class="form-control m-b">
                                     <?php echo implode("", Constants::getSelectGroups()); ?>
                                 </select>
                             </div>
@@ -202,7 +201,7 @@ require_once __DIR__ . "/../login.php";
                             
                             <div class="form-group">
                                 <label>Username</label>
-                                <input value=" " type="text" id="username" name="username" class="form-control" placeholder="The username of the account" required>
+                                <input value="" type="text" id="username" name="username" class="form-control" placeholder="The username of the account" required>
                             </div>
                             <div class="form-group">
                                 <label>Password</label>
@@ -243,7 +242,7 @@ require_once __DIR__ . "/../login.php";
             </div>
         
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("userForm");handleForm("newExternalUser");$("#ext_users").select2({
+        <script>handleForm("newLocalUser");handleForm("newExternalUser");handleForm("userForm");$("#ext_users").select2({
             ajax: {
                 method: "GET",
                 url: "../functions.php",
