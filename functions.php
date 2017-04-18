@@ -9,7 +9,36 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+//addGame=0&deleteGame=0&gameId=3&updateGame=1&game_name=Baguette's%20game123&game_location=La%20boulangerie&startscript=Bonjour%2C%20j'aime%20bien%20les%20baguettes%20mdr
+if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['updateGame']) === 1) {
+    $dat = Game::updateGame($sql, $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
+    if (intval($dat['rows_affected']) === 1) {
+        die(json_encode(array("href" => ".")));
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+    }
+}
 
+
+//addGame=0&deleteGame=1&gameId=1&updateGame=1&game_name=Test&game_location=test&startscript=test
+if (isset($_POST['deleteGame'], $_POST['gameId']) && intval($_POST['deleteGame']) === 1) {
+    $dat = Game::deleteGame($sql, $_POST['gameId']);
+    if (intval($dat['rows_affected']) === 1) {
+        die(json_encode(array("href" => ".")));
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+    }
+}
+
+if (isset($_POST['getGame'], $_POST['game_id']) && intval($_POST['game_id']) > 0) {
+    $dat = Game::getGames($sql, $_POST['game_id']);
+    if (sizeof($dat) === 1) {
+        $dat = $dat[0];
+        die(json_encode($dat));
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+    }
+}
 
 if (isset($_GET['logout'])) {
     session_destroy();
@@ -208,7 +237,7 @@ if (isset($_POST['getUserData'], $_POST['user_id'])) {
     echo json_encode();
 }
 
-if (isset($_POST['addGame'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript'])) {
+if (isset($_POST['addGame'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['addGame']) === 1) {
     $data = Game::saveGame($sql, $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
     if (intval($data['rows_affected']) === 1) {
         die(json_encode(array("href" => ".")));

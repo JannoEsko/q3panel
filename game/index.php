@@ -42,6 +42,7 @@ require_once __DIR__ . "/../login.php";
                                             <th>Game name</th>
                                             <th>Game location</th>
                                             <th>Game startscript</th>
+                                            <th>Actions</th>
                                             </thead>
                                             <tbody>
                                                 <?php
@@ -52,6 +53,7 @@ require_once __DIR__ . "/../login.php";
                                                     <td><?php echo $game['game_name']; ?></td>
                                                     <td><?php echo $game['game_location']; ?></td>
                                                     <td><?php echo $game['startscript']; ?></td>
+                                                    <td><button type="button" class="btn btn-default btn-block" onclick="initEditGameModal('gameModal', '<?php echo $game['game_id'];?>');">Edit game</button></td>
                                                 </tr>
                                                 <?php }
                                                 
@@ -60,7 +62,7 @@ require_once __DIR__ . "/../login.php";
                                         </table>
                                     </div>
                                     <br>
-                                    <button type="button" class="btn btn-default btn-block" onclick="$('#gameModal').modal();">Add new game</button>
+                                    <button type="button" class="btn btn-default btn-block" onclick="$('#addGame').val(1);$('#deleteGame').val(0);$('#updateGame').val(0);$('#gameModal').modal();">Add new game</button>
                                 </div>
                             </div>
                             
@@ -141,20 +143,23 @@ require_once __DIR__ . "/../login.php";
                         
                     </div>
                         <form id="gameForm" role="form" method="post" action="../functions.php">
-                            <input type="hidden" name="addGame" value="1">
+                            <input id='addGame' type="hidden" name="addGame" value="1">
+                            <input id='deleteGame' type="hidden" name="deleteGame" value="0">
+                            <input id='gameId' type="hidden" name="gameId" value="0">
+                            <input id='updateGame' type="hidden" name="updateGame" value="1">
                             <div class="form-group">
                                 <label>Game name</label>
-                                <input type="text" name="game_name" class="form-control" required placeholder="Friendly name for the game (will be used later on in the panel)">
+                                <input id='game_name' type="text" name="game_name" class="form-control" required placeholder="Friendly name for the game (will be used later on in the panel)">
                                 
                             </div>
                             <div class="form-group">
                                 <label>Game location</label>
-                                <input type="text" name="game_location" class="form-control" required placeholder="Location of the game on the server">
+                                <input id='game_location' type="text" name="game_location" class="form-control" required placeholder="Location of the game on the server">
                                 <small>Small tip about this one. Best usage to this is to keep the required server files with this location, the actual game in a different one (can be handled within startscript by using <code>ln -s</code> before starting the game.</small>
                             </div>
                             <div class="form-group">
                                 <label>Startscript</label>
-                                <textarea class="textarea form-control" name="startscript" required></textarea>
+                                <textarea id='startscript' class="textarea form-control" name="startscript" required></textarea>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-default btn-block">Submit</button>
@@ -165,10 +170,9 @@ require_once __DIR__ . "/../login.php";
                         </div>
                     <div class="modal-footer">
                         <div class="clearfix">
-                            <div id="save" class="pull-left">
-                                <button type="button" class="btn btn-success" onclick="$('#gameForm').submit();">Save</button>
-                            </div>
+                            
                             <div class="pull-right">
+                                <button id="deleteGame" type="button" class="btn btn-danger" onclick="$('#addGame').val(0);$('#deleteGame').val(1);$('#updateGame').val(0);$('#gameForm').submit();" hidden>Delete</button>
                                 <button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
                             </div>
                         </div>

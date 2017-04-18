@@ -77,6 +77,7 @@ class Constants {
     static $DELETE_QUERIES = array(
         "DELETE_USER_BY_ID" => "DELETE FROM q3panel_users WHERE user_id = ?"
         , "DELETE_FORGOTTEN_DATA" => "DELETE FROM q3panel_forgottenpsw WHERE user_id = ?"
+        , "DELETE_GAME_BY_ID" => "DELETE FROM q3panel_games WHERE game_id = ?"
     );
     
     static $ERRORS = array(

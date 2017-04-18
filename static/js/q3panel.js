@@ -86,6 +86,10 @@ function initEditUserModal(id, user_id, username, email, origin, group, canChang
     $("#editSubmit").show();
     $("#newUserForm").hide();
     $("#accountButtons").hide();
+    $("#newUserForm").hide();
+    $("#accountButtons").hide();
+    $("#newExternalUser").hide();
+    $("#newLocalUser").hide();
     $("#" + id).modal();
 }
 
@@ -98,4 +102,20 @@ function initRegisterModal(id) {
     $("#" + id).modal();
 }
 
+function initEditGameModal(modal_id, game_id) {
+    $.post(".", {
+        getGame: 1,
+        game_id: game_id
+    }, function(data) {
+        data = JSON.parse(data);
+        $('#addGame').val(0);
+        $('#deleteGame').val(0);
+        $('#updateGame').val(1);
+        $("#gameId").val(game_id);
+        $("#game_name").val(data.game_name);
+        $("#game_location").val(data.game_location);
+        $("#startscript").html(data.startscript);
+        $("#" + modal_id).modal();
+    });
+}
 
