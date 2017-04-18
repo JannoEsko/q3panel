@@ -9,6 +9,19 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+
+//addHost=1&deleteHost=0&hostId=0&updateHost=0&servername=Janno's%20VPS&hostname=www.3d-sof2.com&sshport=22&host_username=&host_password=
+if (isset($_POST['addHost'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['addHost']) === 1) {
+    $host = new Host(null, $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']);
+    $dat = $host->addHost($sql);
+    if (isset($dat['rows_affected']) && intval($dat['rows_affected']) === 1) {
+        die(json_encode(array("href" => ".")));
+    } else {
+        die(json_encode($dat));
+    }
+}
+
+
 //addGame=0&deleteGame=0&gameId=3&updateGame=1&game_name=Baguette's%20game123&game_location=La%20boulangerie&startscript=Bonjour%2C%20j'aime%20bien%20les%20baguettes%20mdr
 if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['updateGame']) === 1) {
     $dat = Game::updateGame($sql, $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);

@@ -39,21 +39,20 @@ require_once __DIR__ . "/../login.php";
                                     <div class="table-responsive table-bordered">
                                         <table class="table table-hover">
                                             <thead>
-                                            <th>Game name</th>
-                                            <th>Game location</th>
-                                            <th>Game startscript</th>
-                                            <th>Actions</th>
+                                            <th>Server name</th>
+                                            <th>Host:Port</th>
+                                            <th>Host username</th>
                                             </thead>
                                             <tbody>
                                                 <?php
-                                                $games = Game::getGames($sql);
-                                                foreach ($games as $game) {
+                                                $hosts = Host::getHosts($sql, null);
+                                                foreach ($hosts as $host) {
                                                     ?>
                                                 <tr>
-                                                    <td><?php echo $game['game_name']; ?></td>
-                                                    <td><?php echo $game['game_location']; ?></td>
-                                                    <td><?php echo $game['startscript']; ?></td>
-                                                    <td><button type="button" class="btn btn-default btn-block" onclick="initEditGameModal('gameModal', '<?php echo $game['game_id'];?>');">Edit game</button></td>
+                                                    <td><?php echo $host['servername']; ?></td>
+                                                    <td><?php echo $host['hostname'] . ":" . $host['sshport']; ?></td>
+                                                    <td><?php echo $host['host_username'] ?></td>
+                                                    <td><button type="button" class="btn btn-default btn-block" onclick="initEditHostModal('hostModal', '<?php echo $host['host_id'];?>');">Edit host</button></td>
                                                 </tr>
                                                 <?php }
                                                 
@@ -62,7 +61,7 @@ require_once __DIR__ . "/../login.php";
                                         </table>
                                     </div>
                                     <br>
-                                    <button type="button" class="btn btn-default btn-block" onclick="$('#gameModalTitle').html('Add a new game');$('#addGame').val(1);$('#deleteGame').val(0);$('#updateGame').val(0);$('#gameModal').modal();">Add new game</button>
+                                    <button type="button" class="btn btn-default btn-block" onclick="$('#addHost').val(1);$('#deleteHost').val(0);$('#updateHost').val(0);$('#hostModal').modal();">Add new host</button>
                                 </div>
                             </div>
                             
@@ -123,14 +122,14 @@ require_once __DIR__ . "/../login.php";
             </section>
 
         </div>
-        <div id="gameModal" role="dialog" aria-labelledby="gameModalTitle" aria-hidden="true" class="modal fade">
+        <div id="hostModal" role="dialog" aria-labelledby="gameModalTitle" aria-hidden="true" class="modal fade">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h4 id="gameModalTitle" class="modal-title">Add a new game</h4>
+                        <h4 id="hostModalTitle" class="modal-title">Add a new game</h4>
                     </div>
                     <div class="modal-body" id="gameModalBody">
                          <div class="panel janno-panel" id="formMsgPanel" hidden>
@@ -142,24 +141,33 @@ require_once __DIR__ . "/../login.php";
                         </div>
                         
                     </div>
-                        <form id="gameForm" role="form" method="post" action="../functions.php">
-                            <input id='addGame' type="hidden" name="addGame" value="1">
-                            <input id='deleteGame' type="hidden" name="deleteGame" value="0">
-                            <input id='gameId' type="hidden" name="gameId" value="0">
-                            <input id='updateGame' type="hidden" name="updateGame" value="1">
+                        <form id="hostForm" role="form" method="post" action="../functions.php">
+                            <input id='addHost' type="hidden" name="addHost" value="1">
+                            <input id='deleteHost' type="hidden" name="deleteHost" value="0">
+                            <input id='hostId' type="hidden" name="hostId" value="0">
+                            <input id='updateHost' type="hidden" name="updateHost" value="1">
                             <div class="form-group">
-                                <label>Game name</label>
-                                <input id='game_name' type="text" name="game_name" class="form-control" required placeholder="Friendly name for the game (will be used later on in the panel)">
+                                <label>Server name</label>
+                                <input id='servername' type="text" name="servername" class="form-control" required placeholder="Friendly name for the server (so it would be easier to recognize)">
                                 
                             </div>
                             <div class="form-group">
-                                <label>Game location</label>
-                                <input id='game_location' type="text" name="game_location" class="form-control" required placeholder="Location of the game on the server">
-                                <small>Small tip about this one. Best usage to this is to keep the required server files with this location, the actual game in a different one (can be handled within startscript by using <code>ln -s</code> before starting the game.</small>
+                                <label>Server hostname</label>
+                                <input id='hostname' type="text" name="hostname" class="form-control" required placeholder="Hostname of the server">
+                                <small>Can be IP, can be a domain</small>
                             </div>
                             <div class="form-group">
-                                <label>Startscript</label>
-                                <textarea id='startscript' class="textarea form-control" name="startscript" required></textarea>
+                                <label>SSH Port</label>
+                                <input type="number" class="form-control" name="sshport" id="sshport" required placeholder="SSH port of the server">
+                            </div>
+                            <div class="form-group">
+                                <label>Host Username</label>
+                                <input type="text" class="form-control" name="host_username" id="host_username" required placeholder="Host username of the server">
+                            </div>
+                            <div class="form-group">
+                                <label>Host Password</label>
+                                <input type="password" class="form-control" name="host_password" id="host_password" required placeholder="Host password of the server">
+                                <small>This value is required if you're making any sort of a change to the connection.</small>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-default btn-block">Submit</button>
@@ -172,8 +180,9 @@ require_once __DIR__ . "/../login.php";
                         <div class="clearfix">
                             
                             <div class="pull-right">
-                                <button id="deleteGame" type="button" class="btn btn-danger" onclick="$('#addGame').val(0);$('#deleteGame').val(1);$('#updateGame').val(0);$('#gameForm').submit();" hidden>Delete</button>
-                                <button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
+                                <div id="deleteGameBtn" hidden class="pull-left">
+                                <button  type="button" class="btn btn-danger" onclick="$('#addHost').val(0);$('#deleteHost').val(1);$('#updateHost').val(0);$('#hostForm').submit();" >Delete</button>
+                                </div>&nbsp;<button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
                             </div>
                         </div>
                     </div>
@@ -181,6 +190,6 @@ require_once __DIR__ . "/../login.php";
             </div>
         
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("gameForm");</script>
+        <script>handleForm("hostForm");</script>
     </body>
 </html>

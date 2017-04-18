@@ -45,29 +45,24 @@
                                 <span>Q3Panel</span>
                             </li>
                             <li>
-                                <a href="#" title="Home">
-                                    <em class="icon-info"></em>
+                                <a href="<?php echo "$HOST_URL/"; ?>" title="Home">
+                                    <em class="icon-home"></em>
                                     <span>Home</span>
                                 </a>
                             </li>
                             <li class="nav-heading">
-                                <span>Servers</span>
+                                <span>Server management</span>
                             </li>
                             <li>
-                                <a href="#servers" title="Server1" data-toggle="collapse">
-                                    <em class="fa fa-map-o"></em>
-                                    <span>Server1</span>
+                                <a href="#servers" title="Servers">
+                                    <em class="fa fa-server"></em>
+                                    <span>Servers</span>
                                 </a>
-                                <ul id="servers" class="nav sidebar-subnav collapse">
-                                    <li class="sidebar-subnav-header">Servers</li>
-                                    <li class=" ">
-                                        <a href="/Server1/" title="Server1" data-toggle="collapse">
-                                            <em class="fa fa-map-o"></em>
-                                            <span>Server1</span>
-                                        </a>
-
-                                    </li>
-                                </ul>
+                            </li><li>
+                                <a href="<?php echo "$HOST_URL/hosts/"; ?>" title="Host servers">
+                                    <em class="fa fa-desktop"></em>
+                                    <span>Host servers</span>
+                                </a>
                             </li>
 
                             <li class="nav-heading">
@@ -77,7 +72,7 @@
                                 <a href="<?php echo "$HOST_URL/users/"; ?>" title="Users">
                                     <em class="icon-user"></em>
                                     <span>Users</span>
-                                </a>
+                                </a></li><li>
                                 <a href="<?php echo "$HOST_URL/game/"; ?>" title="Users">
                                     <em class="icon-settings"></em>
                                     <span>Game setup</span>

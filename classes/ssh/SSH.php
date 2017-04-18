@@ -17,15 +17,14 @@ class SSH {
     private $sshport;
     private $host_username;
     private $host_password;
-    private $ssh;
+    private $ssh = null;
     
     function __construct($hostname, $sshport, $host_username, $host_password) {
         $this->hostname = $hostname;
         $this->sshport = $sshport;
         $this->host_username = $host_username;
         $this->host_password = $host_password;
-        $this->ssh = ssh2_connect($hostname, $sshport);
-        ssh2_auth_passsword($this->ssh, $host_username, $host_password);
+        
     }
     
     /**
@@ -35,10 +34,16 @@ class SSH {
      * @return string Returns the output of the command, if output is requested.
      */
     function sendCommand($command, $output = false) {
+        if ($this->ssh === null) {
+            $this->ssh = ssh2_connect($this->hostname, $this->sshport);
+            if (!ssh2_auth_password($this->ssh, $this->host_username, $this->host_password)) {
+                return array("error" => Constants::$ERRORS['SSH2_AUTH_ERROR']);
+            }
+        }
         $command = $command . PHP_EOL;
-        stream_set_blocking($this->ssh, $output);
         if ($output) {
             $stream = ssh2_exec($this->ssh, $command);
+            stream_set_blocking($stream, $output);
             return fgets($stream);
         } else {
             ssh2_exec($this->ssh, $command);

@@ -45,6 +45,7 @@ class Constants {
         , "SET_STYLE_PREFERENCE" => "INSERT INTO q3panel_style_preference (style_id, user_id) VALUES (?, ?)"
         , "SET_FORGOTTEN_PASSWORD" => "INSERT INTO q3panel_forgottenpsw (user_id, request_key) VALUES (?, ?)"
         , "ADD_NEW_GAME" => "INSERT INTO q3panel_games (game_name, game_location, startscript) VALUES (?, ?, ?)"
+        , "ADD_NEW_HOST" => "INSERT INTO q3panel_hosts (servername, hostname, sshport, host_username, host_password) VALUES (?, ?, ?, ?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -68,6 +69,10 @@ class Constants {
         , "GET_ALL_GAMES" => "SELECT * FROM q3panel_games"
         , "GET_GAME_BY_ID" => "SELECT * FROM q3panel_games WHERE game_id = ?"
         , "GET_USER_BY_ID_AND_GROUP" => "SELECT * FROM q3panel_users WHERE user_id = ? AND group_id = ?"
+        , "GET_ALL_HOSTS" => "SELECT * FROM q3panel_hosts"
+        , "GET_HOST_BY_ID" => "SELECT * FROM q3panel_hosts WHERE host_id = ?"
+        , "GET_ALL_HOSTS_WITHOUT_PASSWORD" => "SELECT host_id, servername, sshport, host_username FROM q3panel_hosts"
+        , "GET_HOST_BY_ID_WITHOUT_PASSWORD" => "SELECT host_id, servername, sshport, host_username FROM q3panel_hosts WHERE host_id = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -89,6 +94,7 @@ class Constants {
         , "CHANGE_FORGOTTEN_ERROR" => "Error occurred during the recovery process. Please request a new recovery key."
         , "GENERIC_PRIVILEGE_ERROR" => "You're not privileged enough to perform this action."
         , "GENERIC_ERROR" => "Something went wrong with your action, please try again or refresh the page and try again."
+        , "SSH2_AUTH_ERROR" => "Wrong username and/or password. Please recheck them. Also, if you got any SSH restrictions (where can accounts connect from etc), please, whitelist this page so it can have a connection with the host server."
     );
     
     static $EMAIL_TEMPLATE = array(

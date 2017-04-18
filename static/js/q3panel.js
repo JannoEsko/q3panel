@@ -4,6 +4,18 @@
  * and open the template in the editor.
  */
 
+$(document).ready(function() {
+    
+    /*
+     * Taken from http://stackoverflow.com/a/12950620/5529540.
+     * Adds active class automatically to the link you're currently on.
+     */
+    var url = window.location.href;
+    $('ul.nav a').filter(function() {
+        return this.href === url;
+    }).parent().addClass('active');
+});
+
 function handleForm(id) {
     var form = $("#" + id);
     var formMsg = $("#formMsg");
@@ -115,6 +127,7 @@ function initEditGameModal(modal_id, game_id) {
         $("#game_name").val(data.game_name);
         $("#game_location").val(data.game_location);
         $("#startscript").html(data.startscript);
+        $('#gameModalTitle').html('Edit game ' + data.game_name);
         $("#" + modal_id).modal();
     });
 }
