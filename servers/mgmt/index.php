@@ -1,11 +1,11 @@
 
 <?php
-if (!file_exists(__DIR__ . "/../config.php")) {
-    header("Location: ../install/");
+if (!file_exists(__DIR__ . "/../../config.php")) {
+    header("Location: ../../install/");
 }
 session_start();
-require_once __DIR__ . "/../classes/loader.php";
-require_once __DIR__ . "/../login.php";
+require_once __DIR__ . "/../../classes/loader.php";
+require_once __DIR__ . "/../../login.php";
 ?>
 
 <!DOCTYPE html>
@@ -22,7 +22,7 @@ require_once __DIR__ . "/../login.php";
     </head>
     <body>
         <div class="wrapper">
-            <?php require_once __DIR__ . "/../static/html/header_aside.php"; ?>
+            <?php require_once __DIR__ . "/../../static/html/header_aside.php"; ?>
             <section>
                 <div class="content-wrapper">
                     <div class="content-heading">
@@ -32,49 +32,11 @@ require_once __DIR__ . "/../login.php";
                     <div class="row">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
-                                    Game servers
+                                    Server management
                                 </div>
                                 <div class="panel-body">
-                                    <div class="table-responsive table-bordered">
-                                        <table class="table table-hover">
-                                            <thead>
-                                            <th>Name</th>
-                                            <th>Host:Port</th>
-                                            <th>Host name</th>
-                                            <th>Players</th>
-                                            <th>Status</th>
-                                            <th>RCON Password</th>
-                                            <th>Game</th>
-                                            <th>FTP Account</th>
-                                            <th>FTP Password</th>
-                                            
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $servers = Server::getServersWithHostAndGame($sql);
-                                                foreach ($servers as $server) {
-                                                    ?>
-                                                
-                                                <tr>
-                                                    <td><?php echo $server['server_name']; ?></td>
-                                                    <td><?php echo $server['hostname'] . ":" . $server['server_port']; ?></td>
-                                                    <td><?php echo $server['servername']; ?></td>
-                                                    <td><?php echo $server['current_players'] . "/" . $server['max_players']; ?></td>
-                                                    <td><?php echo Constants::$MESSAGES['SERVER_STATUSES'][$server['server_status']]; ?></td>
-                                                    <td><?php echo $server['rconpassword']; ?></td>
-                                                    <td><?php echo $server['game_name']; ?></td>
-                                                    <td><?php echo $server['server_account']; ?></td>
-                                                    <td><?php echo $server['server_password']; ?></td>
-                                                    <td><button type="button" class="btn btn-default btn-block" onclick="location.href='mgmt/?server_id=<?php echo $server['server_id']; ?>';">Manage</button></td>
-                                                </tr>
-                                                <?php }
-                                                
-                                                ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <br>
-                                    <button type="button" class="btn btn-default btn-block" onclick="$('#addServer').val(1);$('#deleteServer').val(0);$('#updateServer').val(0);$('#serverModal').modal();">Add new server</button>
+                                    This will have the mapping to the users (who can do what), adding server owners (who can do everything with this server).
+                                    Server editing will happen here, web FTP will be accessed from here, starting/stopping server will happen here etc
                                 </div>
                             </div>
                             
@@ -176,6 +138,6 @@ require_once __DIR__ . "/../login.php";
             </div>
         
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("serverForm");</script>
+        <script></script>
     </body>
 </html>
