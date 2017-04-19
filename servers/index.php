@@ -33,7 +33,7 @@ require_once __DIR__ . "/../login.php";
                         <div class="col-md-8">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
-                                    Hosts
+                                    Game servers
                                 </div>
                                 <div class="panel-body">
                                     <div class="table-responsive table-bordered">

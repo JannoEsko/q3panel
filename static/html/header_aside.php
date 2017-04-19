@@ -54,9 +54,9 @@
                                 <span>Server management</span>
                             </li>
                             <li>
-                                <a href="#servers" title="Servers">
+                                <a href="<?php echo "$HOST_URL/servers/"; ?>" title="Servers">
                                     <em class="fa fa-server"></em>
-                                    <span>Servers</span>
+                                    <span>Game servers</span>
                                 </a>
                             </li><li>
                                 <a href="<?php echo "$HOST_URL/hosts/"; ?>" title="Host servers">

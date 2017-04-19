@@ -10,6 +10,33 @@ require_once __DIR__ . "/classes/loader.php";
  */
 
 
+if (isset($_POST['updateHost'], $_POST['hostId'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['updateHost']) === 1) {
+    $host = new Host($_POST['hostId'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']);
+    $out = $host->updateHost($sql);
+    if (isset($out['rows_affected']) && intval($out['rows_affected']) === 1) {
+        die(json_encode(array("href" => ".")));
+    } else {
+        die(json_encode($out));
+    }
+}
+
+if (isset($_POST['deleteHost'], $_POST['hostId']) && intval($_POST['deleteHost']) === 1 ) {
+    if (User::canPerformAction($sql, $_SESSION['user_id'], 3)) {
+        $dat = Host::deleteHost($sql, $_POST['hostId']);
+        if (isset($dat['rows_affected']) && intval($dat['rows_affected']) === 1) {
+            die(json_encode(array("href" => ".")));
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+        }
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
+}
+
+if (isset($_POST['getHostData'], $_POST['host_id']) && intval($_POST['getHostData']) === 1 && intval($_POST['host_id']) > 0) {
+    die(json_encode(Host::getHosts($sql, $_POST['host_id'])[0]));
+}
+
 //addHost=1&deleteHost=0&hostId=0&updateHost=0&servername=Janno's%20VPS&hostname=www.3d-sof2.com&sshport=22&host_username=&host_password=
 if (isset($_POST['addHost'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['addHost']) === 1) {
     $host = new Host(null, $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']);
@@ -22,7 +49,6 @@ if (isset($_POST['addHost'], $_POST['servername'], $_POST['hostname'], $_POST['s
 }
 
 
-//addGame=0&deleteGame=0&gameId=3&updateGame=1&game_name=Baguette's%20game123&game_location=La%20boulangerie&startscript=Bonjour%2C%20j'aime%20bien%20les%20baguettes%20mdr
 if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['updateGame']) === 1) {
     $dat = Game::updateGame($sql, $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
     if (intval($dat['rows_affected']) === 1) {

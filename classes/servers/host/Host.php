@@ -83,21 +83,41 @@ class Host extends SSH {
         $this->host_password = $host_password;
     }
     
-    static function editHost(SQL $sql, $host_id) {
-        
+    function updateHost(SQL $sql) {
+        $out = parent::sendCommand("whoami", true);
+        if (trim($out) === trim($this->host_username)) {
+            $query = Constants::$UPDATE_QUERIES['UPDATE_HOST_BY_ID'];
+            $params = array($this->servername, $this->hostname, $this->sshport, $this->host_username, 
+                $this->host_password, $this->host_id);
+            return $sql->query($query, $params);
+        } else {
+            return array("error" => Constants::$ERRORS['GENERIC_ERROR']);
+        }
     }
     
     static function deleteHost(SQL $sql, $host_id) {
-        
+        //first check for servers. We cannot delete a host which has servers deployed to it.
+        $chksrv = Constants::$SELECT_QUERIES['GET_SERVER_BY_HOSTID'];
+        $chkparam = array($host_id);
+        $data = $sql->query($chksrv, $chkparam);
+        if (sizeof($data) === 0) {
+            //proceed
+            $deletesrvquery = Constants::$DELETE_QUERIES['DELETE_HOST_BY_ID'];
+            $params = array($host_id);
+            return $sql->query($deletesrvquery, $params);
+            
+        } else {
+            return array("error" => Constants::$ERRORS['DELETE_HOST_HAS_SERVERS']);
+        }
     }
     
     static function getHosts(SQL $sql, $host_id = null) {
         $query = "";
         $params = null;
         if ($host_id === null) {
-            $query = Constants::$SELECT_QUERIES['GET_ALL_HOSTS'];
+            $query = Constants::$SELECT_QUERIES['GET_ALL_HOSTS_WITHOUT_PASSWORD'];
         } else {
-            $query = Constants::$SELECT_QUERIES['GET_HOST_BY_ID'];
+            $query = Constants::$SELECT_QUERIES['GET_HOST_BY_ID_WITHOUT_PASSWORD'];
             $params = array($host_id);
         }
         return $sql->query($query, $params);

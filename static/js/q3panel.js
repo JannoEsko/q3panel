@@ -132,3 +132,23 @@ function initEditGameModal(modal_id, game_id) {
     });
 }
 
+function initEditHostModal(modal_id, host_id) {
+    $.post(".", {
+        getHostData: 1,
+        host_id: host_id
+    }, function(data) {
+        data = JSON.parse(data);
+        console.log(data);
+        $("#updateHost").val(1);
+        $("#addHost").val(0);
+        $("#hostId").val(data.host_id);
+        $("#deleteHost").val(0);
+        $("#servername").val(data.servername);
+        $("#hostname").val(data.hostname);
+        $("#sshport").val(data.sshport);
+        $("#host_username").val(data.host_username);
+        $("#deleteGameBtn").show();
+        $("#" + modal_id).modal();
+    });
+}
+

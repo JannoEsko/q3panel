@@ -431,5 +431,12 @@ class User {
         return array("error" => "Couldn't load new style");
         
     }
+    
+    static function canPerformAction(SQL $sql, $user_id, $action_level) {
+        $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID_AND_GROUP_LARGER_THAN'];
+        $params = array($user_id, $action_level);
+        $data = $sql->query($query, $params);
+        return sizeof($data) === 1;        
+    }
 }
 
