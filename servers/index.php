@@ -30,7 +30,6 @@ require_once __DIR__ . "/../login.php";
                         <small>Welcome to Q3Panel</small>
                     </div>
                     <div class="row">
-                        <div class="col-md-8">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
                                     Game servers
@@ -41,6 +40,7 @@ require_once __DIR__ . "/../login.php";
                                             <thead>
                                             <th>Name</th>
                                             <th>Host:Port</th>
+                                            <th>Host name</th>
                                             <th>Players</th>
                                             <th>Status</th>
                                             <th>RCON Password</th>
@@ -53,10 +53,19 @@ require_once __DIR__ . "/../login.php";
                                                 <?php
                                                 $servers = Server::getServersWithHostAndGame($sql);
                                                 foreach ($servers as $server) {
-                                                    $server['host_password'] = "<i>hidden</i>";
-                                                    echo nl2br(print_r($server, true));
                                                     ?>
+                                                
                                                 <tr>
+                                                    <td><?php echo $server['server_name']; ?></td>
+                                                    <td><?php echo $server['hostname'] . ":" . $server['server_port']; ?></td>
+                                                    <td><?php echo $server['servername']; ?></td>
+                                                    <td><?php echo $server['current_players'] . "/" . $server['max_players']; ?></td>
+                                                    <td><?php echo Constants::$MESSAGES['SERVER_STATUSES'][$server['server_status']]; ?></td>
+                                                    <td><?php echo $server['rconpassword']; ?></td>
+                                                    <td><?php echo $server['game_name']; ?></td>
+                                                    <td><?php echo $server['server_account']; ?></td>
+                                                    <td><?php echo $server['server_password']; ?></td>
+                                                    <td><button type="button" class="btn btn-default btn-block" onclick="console.log('<?php echo $server['server_id']; ?>')">Edit server</button></td>
                                                 </tr>
                                                 <?php }
                                                 
@@ -75,52 +84,7 @@ require_once __DIR__ . "/../login.php";
                                 </div>
                                 <div class="panel-body"><?php echo nl2br(print_r(get_required_files(), true)); ?></div>
                             </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="panel janno-panel">
-                                <div class="panel-heading">
-                                    <div class="panel-title">Latest news</div>
-                                </div>
-                                <div class="panel-body list-group">
-                                    <div class="list-group-item">
-                                        <div class="media-box">
-                                            <div class="pull-left">
-                                                <span class="fa-stack">
-
-                                                    <em class="fa text-success fa-check fa-stack-2x"></em>
-                                                </span>
-                                            </div>
-                                            <div class="media-box-body clearfix">
-                                                <div class="media-box-heading text-success m0">some logs</div>
-                                                <p class="m0">
-                                                    <small>xxx<br>xxxxx</small>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="panel-body list-group">
-                                    <div class="list-group-item">
-                                        <div class="media-box">
-                                            <div class="pull-left">
-                                                <span class="fa-stack">
-
-                                                    <em class="fa text-success fa-check fa-stack-2x"></em>
-                                                </span>
-                                            </div>
-                                            <div class="media-box-body clearfix">
-                                                <div class="media-box-heading text-success m0">some other stuff</div>
-                                                <p class="m0">
-                                                    <small>text<br>text</small>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             </section>

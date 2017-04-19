@@ -132,6 +132,7 @@ class Constants {
         "FPSW_SUCCESS" => "Further instructions sent to e-mail."
         , "ORIGIN" => array(0 => "Local", 1 => "External")
         , "GROUP" => array(0 => "Disabled", 1 => "Normal user", 2 => "Server owner", 3 => "Panel admin")
+        , "SERVER_STATUSES" => array(0 => "Disabled", 1 => "Offline", 2 => "Online")
     );
     
     static $SSH_COMMANDS = array(
