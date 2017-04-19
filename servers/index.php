@@ -51,7 +51,7 @@ require_once __DIR__ . "/../login.php";
                                             </thead>
                                             <tbody>
                                                 <?php
-                                                $servers = Server::getServersWithHost($sql);
+                                                $servers = Server::getServersWithHostAndGame($sql);
                                                 foreach ($servers as $server) {
                                                     $server['host_password'] = "<i>hidden</i>";
                                                     echo nl2br(print_r($server, true));

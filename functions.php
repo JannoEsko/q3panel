@@ -47,10 +47,10 @@ if (isset($_POST['updateHost'], $_POST['hostId'], $_POST['servername'], $_POST['
 if (isset($_POST['deleteHost'], $_POST['hostId']) && intval($_POST['deleteHost']) === 1 ) {
     if (User::canPerformAction($sql, $_SESSION['user_id'], 3)) {
         $dat = Host::deleteHost($sql, $_POST['hostId']);
-        if (isset($dat['rows_affected']) && intval($dat['rows_affected']) === 1) {
-            die(json_encode(array("href" => ".")));
+        if (isset($dat['error'])) {
+            die(json_encode($dat));
         } else {
-            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+            die(json_encode(array("href" => ".")));
         }
     } else {
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
@@ -84,10 +84,10 @@ if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['g
 
 if (isset($_POST['deleteGame'], $_POST['gameId']) && intval($_POST['deleteGame']) === 1) {
     $dat = Game::deleteGame($sql, $_POST['gameId']);
-    if (intval($dat['rows_affected']) === 1) {
-        die(json_encode(array("href" => ".")));
+    if (isset($dat['error'])) {
+        die(json_encode($dat));
     } else {
-        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+        die(json_encode(array("href" => ".")));
     }
 }
 

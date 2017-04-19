@@ -84,6 +84,16 @@ class Constants {
         , "GET_SERVERS_WITH_HOST_BY_HOST_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id WHERE q3panel_servers.host_id = ?"
         , "GET_SERVERS_WITH_HOST_BY_SERVER_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id WHERE q3panel_servers.server_id = ?"
         , "GET_SERVERS_WITH_HOST_BY_HOST_ID_SERVER_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id WHERE q3panel_servers.host_id = ? AND q3panel_servers.server_id = ?"
+        , "GET_SERVERS_WITH_GAME_BY_GAME_ID" => "SELECT * FROM q3panel_servers WHERE game_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID_SERVER_ID_GAME_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.host_id = ? AND q3panel_servers.server_id = ? AND q3panel_servers.game_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID_SERVER_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.host_id = ? AND q3panel_servers.server_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_SERVER_ID_GAME_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.server_id = ? AND q3panel_servers.game_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID_GAME_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.host_id = ? AND q3panel_servers.game_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_SERVER_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.server_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_GAME_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.game_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.host_id = ?"
+        , "GET_SERVERS_BY_GAME_ID" => "SELECT * FROM q3panel_servers WHERE game_id = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -109,6 +119,7 @@ class Constants {
         , "GENERIC_ERROR" => "Something went wrong with your action, please, check the data you provided (if any), try again or refresh the page and try again."
         , "SSH2_AUTH_ERROR" => "Wrong username and/or password. Please recheck them. Also, if you got any SSH restrictions (where can accounts connect from etc), please, whitelist this page so it can have a connection with the host server."
         , "DELETE_HOST_HAS_SERVERS" => "You cannot delete this host, because it has gameservers deployed. Delete the servers first, then delete the host"
+        , "DELETE_GAME_HAS_SERVERS" => "You cannot delete this game, because it has gameservers deployed. Delete the servers first, then delete the game."
     );
     
     static $EMAIL_TEMPLATE = array(

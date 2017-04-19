@@ -277,5 +277,35 @@ class Server extends SSH {
         }
         return $sql->query($query, $params);
     }
+    
+    static function getServersWithHostAndGame(SQL $sql, $server_id = null, $host_id = null, $game_id = null) {
+        $query = "";
+        $params = null;
+        if ($server_id !== null && $host_id !== null && $game_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID_SERVER_ID_GAME_ID'];
+            $params = array($host_id, $server_id, $game_id);
+        } else if ($server_id !== null && $host_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID_SERVER_ID'];
+            $params = array($host_id, $server_id);
+        } else if ($server_id !== null && $game_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_SERVER_ID_GAME_ID'];
+            $params = array($server_id, $game_id);
+        } else if ($host_id !== null && $game_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID_GAME_ID'];
+            $params = array($host_id, $game_id);
+        } else if ($game_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_GAME_ID'];
+            $params = array($game_id);
+        } else if ($server_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_SERVER_ID'];
+            $params = array($server_id);
+        } else if ($host_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID'];
+            $params = array($host_id);
+        } else {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME'];
+        }
+        return $sql->query($query, $params);
+    }
 
 }

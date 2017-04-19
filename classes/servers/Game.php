@@ -77,9 +77,17 @@ class Game {
     }
     
     static function deleteGame(SQL $sql, $game_id) {
-        $query = Constants::$DELETE_QUERIES['DELETE_GAME_BY_ID'];
-        $params = array($game_id);
-        return $sql->query($query, $params);
+        //first check that do we got any games deployed.
+        $checkGames = Constants::$SELECT_QUERIES['GET_SERVERS_BY_GAME_ID'];
+        $checkGamesParam = array($game_id);
+        if (sizeof($sql->query($checkGames, $checkGamesParam)) === 0) {
+            $query = Constants::$DELETE_QUERIES['DELETE_GAME_BY_ID'];
+            $params = array($game_id);
+            return $sql->query($query, $params);
+        } else {
+            return array("error" => Constants::$ERRORS['DELETE_GAME_HAS_SERVERS']);
+        }
+        
     }
     
     static function updateGame(SQL $sql, $game_id, $game_name = null, $game_location = null, $startscript = null) {
