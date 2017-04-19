@@ -84,7 +84,11 @@ class Host extends SSH {
     }
     
     function updateHost(SQL $sql) {
-        $out = parent::sendCommand("whoami", true);
+        $outArr = parent::sendCommand("whoami", true);
+        if (strlen(trim($outArr['stderr'])) > 0) {
+            return array("error" => $outArr['stderr']);
+        }
+        $out = $outArr['stdio'];
         if (trim($out) === trim($this->host_username)) {
             $query = Constants::$UPDATE_QUERIES['UPDATE_HOST_BY_ID'];
             $params = array($this->servername, $this->hostname, $this->sshport, $this->host_username, 
@@ -111,13 +115,23 @@ class Host extends SSH {
         }
     }
     
-    static function getHosts(SQL $sql, $host_id = null) {
+    static function getHosts(SQL $sql, $host_id = null, $includePassword = false) {
         $query = "";
         $params = null;
         if ($host_id === null) {
-            $query = Constants::$SELECT_QUERIES['GET_ALL_HOSTS_WITHOUT_PASSWORD'];
+            if ($includePassword) {
+                $query = Constants::$SELECT_QUERIES['GET_ALL_HOSTS'];
+            } else {
+                $query = Constants::$SELECT_QUERIES['GET_ALL_HOSTS_WITHOUT_PASSWORD'];
+            }
+            
         } else {
-            $query = Constants::$SELECT_QUERIES['GET_HOST_BY_ID_WITHOUT_PASSWORD'];
+            if ($includePassword) {
+                $query = Constants::$SELECT_QUERIES['GET_HOST_BY_ID'];
+            } else {
+                $query = Constants::$SELECT_QUERIES['GET_HOST_BY_ID_WITHOUT_PASSWORD'];
+            }
+            
             $params = array($host_id);
         }
         return $sql->query($query, $params);
@@ -126,7 +140,11 @@ class Host extends SSH {
     function addHost(SQL $sql) {
         //first check that can we actually send a command.
         //lets do it by sending a whoami command to the VPS and checking the output.
-        $out = parent::sendCommand("whoami", true);
+        $outArr = parent::sendCommand("whoami", true);
+        if (strlen(trim($outArr['stderr'])) > 0) {
+            return array("error" => $outArr['stderr']);
+        }
+        $out = $outArr['stdio'];
         if (trim($out) === trim($this->host_username)) {
             $query = Constants::$INSERT_QUERIES['ADD_NEW_HOST'];
             $params = array($this->servername, $this->hostname, $this->sshport, $this->host_username, $this->host_password);
@@ -134,7 +152,15 @@ class Host extends SSH {
         } else {
             return array("error" => Constants::$ERRORS['GENERIC_ERROR']);
         }
-        
     }
 
+    static function getHostsSelect(SQL $sql) {
+        $hosts = self::getHosts($sql);
+        $str = "";
+        foreach ($hosts as $host) {
+            $str .= "<option value='" . $host['host_id'] . "'>" . $host['servername'] . "</option>";
+        }
+        return $str;
+    }
+    
 }

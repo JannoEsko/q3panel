@@ -15,7 +15,7 @@ class Server extends SSH {
     
     private $host;
     private $server_name;
-    private $game_id;
+    private $game;
     private $server_port;
     private $server_account;
     private $server_password;
@@ -26,10 +26,10 @@ class Server extends SSH {
     private $rconpassword;
     private $ssh;
     
-    function __construct(Host $host, $server_name, $game_id, $server_port, $server_account, $server_password, $server_status, $server_startscript, $current_players, $max_players, $rconpassword) {
+    function __construct(Host $host, $server_name, Game $game, $server_port, $server_account, $server_password, $server_status, $server_startscript, $current_players, $max_players, $rconpassword) {
         $this->host = $host;
         $this->server_name = $server_name;
-        $this->game_id = $game_id;
+        $this->game = $game;
         $this->server_port = $server_port;
         $this->server_account = $server_account;
         $this->server_password = $server_password;
@@ -49,8 +49,8 @@ class Server extends SSH {
         return $this->server_name;
     }
 
-    function getGame_id() {
-        return $this->game_id;
+    function getGame() {
+        return $this->game;
     }
 
     function getServer_port() {
@@ -148,7 +148,134 @@ class Server extends SSH {
     }
     
     function addServer(SQL $sql) {
+        //start off by checking if we need to autofill port and username.
+        $getServers = self::getServers($sql);
+        $getPort = false;
+        $gotPort = false;
+        if (intval($this->server_port) === 0) {
+            $getPort = true;
+        }
+        $getServerAccount = false;
+        $newAccountId = 0;
+        $gotAccountId = false;
+        if (strlen(trim($this->server_account)) === 0) {
+            $getServerAccount = true;
+        }
+        foreach ($getServers as $server) {
+            if ($getPort && intval($server['server_port']) >= $this->server_port) {
+                $this->server_port = intval($server['server_port']) + 1;
+                $gotPort = true;
+            } else {
+                if (intval($server['server_port']) === intval($this->server_port)) {
+                    return array("error" => "Server port " . $this->server_port . " already exists. Please change and submit again.");
+                }
+            }
+            if ($getServerAccount) {
+                $account = $server['server_account'];
+                $account = intval(substr_replace($account, "", 0, 3));
+                if ($account >= $newAccountId) {
+                    $newAccountId = $account + 1;
+                    $this->server_account = "srv" . $newAccountId;
+                    $gotAccountId = true;
+                }
+            } else {
+                if (trim($server['server_account']) === trim($this->server_account)) {
+                    return array("error" => "Server account " . $this->server_account . " already exists. Please change and submit again.");
+                }
+            }
+            if (trim($server['server_name']) === trim($this->server_name)) {
+                return array("error" => "Server name " . $this->server_name . " already exists. Please change and submit again.");
+            }
+        }
+        if (!$gotPort && $getPort) {
+            $this->server_port = 20100;
+        }
         
+        if (!$gotAccountId && $getServerAccount) {
+            $this->server_account = "srv1";
+        }
+        $add_user = Constants::$SSH_COMMANDS['ADD_USER'];
+        $add_user = str_replace("{server_account}", $this->server_account, $add_user);
+        $change_password = Constants::$SSH_COMMANDS['CHANGE_PASSWORD'];
+        $change_password = str_replace("{server_account}", $this->server_account, $change_password);
+        $change_password = str_replace("{server_password}", $this->server_password, $change_password);
+        $copy_game_files = Constants::$SSH_COMMANDS['COPY_GAME_FILES'];
+        $copy_game_files = str_replace("{game_location}", $this->game->getGame_location(), $copy_game_files);
+        $copy_game_files = str_replace("{server_account}", $this->server_account, $copy_game_files);
+        $chown_game_files = Constants::$SSH_COMMANDS['CHOWN_GAME_FILES'];
+        $chown_game_files = str_replace("{server_account}", $this->server_account, $chown_game_files);
+        //These actions must be done with an account which can perform these actions.
+        $out1 = $this->host->sendCommand($add_user, true);
+        if (strlen(trim($out1['stderr'])) > 0) {
+            return array("error" => $out1['stderr']);
+        }
+        $out2 = $this->host->sendCommand($change_password, true);
+        if (strlen(trim($out2['stderr'])) > 0) {
+            return array("error" => $out2['stderr']);
+        }
+        $out3 = $this->host->sendCommand($copy_game_files, true);
+        if (strlen(trim($out3['stderr'])) > 0) {
+            return array("error" => $out3['stderr']);
+        }
+        $out4 = $this->host->sendCommand($chown_game_files, true);
+        if (strlen(trim($out4['stderr'])) > 0) {
+            return array("error" => $out4['stderr']);
+        }
+        $serverInsertQuery = Constants::$INSERT_QUERIES['ADD_NEW_SERVER'];
+        $serverInsertParams = array(
+            $this->host->getHost_id(),
+            $this->game->getGame_id(),
+            $this->server_name,
+            $this->server_port,
+            $this->server_account,
+            $this->server_password,
+            1,
+            $this->game->getStartscript(),
+            0,
+            $this->getMax_players(),
+            $this->rconpassword
+        );
+        try {
+            $serverInsert = $sql->query($serverInsertQuery, $serverInsertParams);
+        } catch (PDOException $ex) {
+            return array("error" => $ex->getMessage());
+        }
+        
+        if (isset($serverInsert['last_insert_id']) && intval($serverInsert['last_insert_id']) > 0) {
+            return array($out1, $out2, $out3, $out4);
+        }
+        return array("error" => "ssomethingwrong");
+        
+    }
+    
+    static function getServers(SQL $sql, $server_id = null) {
+        $query = "";
+        $params = null;
+        if ($server_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVER_BY_ID'];
+            $params = array($server_id);
+        } else {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS'];
+        }
+        return $sql->query($query, $params);
+    }
+    
+    static function getServersWithHost(SQL $sql, $server_id = null, $host_id = null) {
+        $query = "";
+        $params = null;
+        if ($server_id !== null && $host_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_BY_HOST_ID_SERVER_ID'];
+            $params = array($host_id, $server_id);
+        } else if ($server_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_BY_SERVER_ID'];
+            $params = array($server_id);
+        } else if ($host_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_BY_HOST_ID'];
+            $params = array($host_id);
+        } else {
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST'];
+        }
+        return $sql->query($query, $params);
     }
 
 }

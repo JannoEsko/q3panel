@@ -20,7 +20,7 @@ class Constants {
     static $CREATE_TABLES = array(
         "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username))",
         "CREATE TABLE q3panel_hosts (host_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, servername VARCHAR(255), hostname VARCHAR(255), sshport TINYINT, host_username VARCHAR(255), host_password VARCHAR(255), status TINYINT COMMENT '1 - ok, 2 - SSH problem, 3 - FTP problem')",
-        "CREATE TABLE q3panel_servers (server_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host_id INTEGER NOT NULL, server_name VARCHAR(255), game_id INTEGER, server_port SMALLINT UNSIGNED NOT NULL, server_account VARCHAR(255), server_password VARCHAR(255), server_status TINYINT COMMENT '0 - disabled, 1 - offline, 2 - online', server_startscript TEXT, current_players TINYINT, max_players TINYINT, rconpassword VARCHAR(255))",
+        "CREATE TABLE q3panel_servers (server_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host_id INTEGER NOT NULL, server_name VARCHAR(255), game_id INTEGER, server_port SMALLINT UNSIGNED NOT NULL, server_account VARCHAR(255), server_password VARCHAR(255), server_status TINYINT COMMENT '0 - disabled, 1 - offline, 2 - online', server_startscript TEXT, current_players TINYINT, max_players TINYINT, rconpassword VARCHAR(255), CONSTRAINT server_name_must_be_unique UNIQUE(server_name), CONSTRAINT server_account_must_be_unique UNIQUE(server_account), CONSTRAINT server_port_must_be_unique UNIQUE(server_port))",
         "CREATE TABLE q3panel_servers_map (servers_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, server_id INTEGER NOT NULL, user_id INTEGER NOT NULL, can_see_rcon TINYINT, can_see_ftp TINYINT, can_access_config TINYINT, can_access_maps TINYINT, can_stop_server TINYINT)",
         "CREATE TABLE q3panel_servers_logs (server_log_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, server_id INTEGER NOT NULL, user_id INTEGER NOT NULL, user_ip VARCHAR(255), severity TINYINT, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)",
         "CREATE TABLE q3panel_logs (log_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id INTEGER NOT NULL, user_ip VARCHAR(255), action TEXT, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
@@ -46,6 +46,7 @@ class Constants {
         , "SET_FORGOTTEN_PASSWORD" => "INSERT INTO q3panel_forgottenpsw (user_id, request_key) VALUES (?, ?)"
         , "ADD_NEW_GAME" => "INSERT INTO q3panel_games (game_name, game_location, startscript) VALUES (?, ?, ?)"
         , "ADD_NEW_HOST" => "INSERT INTO q3panel_hosts (servername, hostname, sshport, host_username, host_password) VALUES (?, ?, ?, ?, ?)"
+        , "ADD_NEW_SERVER" => "INSERT INTO q3panel_servers (host_id, game_id, server_name, server_port, server_account, server_password, server_status, server_startscript, current_players, max_players, rconpassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -75,6 +76,14 @@ class Constants {
         , "GET_HOST_BY_ID_WITHOUT_PASSWORD" => "SELECT host_id, servername, hostname, sshport, host_username FROM q3panel_hosts WHERE host_id = ?"
         , "GET_USER_BY_ID_AND_GROUP_LARGER_THAN" => "SELECT * FROM q3panel_users WHERE user_id = ? AND group_id >= ?"
         , "GET_SERVER_BY_HOSTID" => "SELECT * FROM q3panel_servers WHERE host_id = ?"
+        , "GET_ALL_HOSTS" => "SELECT * FROM q3panel_hosts"
+        , "GET_HOST_BY_ID" => "SELECT * FROM q3panel_hosts WHERE host_id = ?"
+        , "GET_SERVER_BY_ID" => "SELECT * FROM q3panel_servers WHERE server_id = ?"
+        , "GET_SERVERS" => "SELECT * FROM q3panel_servers"
+        , "GET_SERVERS_WITH_HOST" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id"
+        , "GET_SERVERS_WITH_HOST_BY_HOST_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id WHERE q3panel_servers.host_id = ?"
+        , "GET_SERVERS_WITH_HOST_BY_SERVER_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id WHERE q3panel_servers.server_id = ?"
+        , "GET_SERVERS_WITH_HOST_BY_HOST_ID_SERVER_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id WHERE q3panel_servers.host_id = ? AND q3panel_servers.server_id = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -112,6 +121,14 @@ class Constants {
         "FPSW_SUCCESS" => "Further instructions sent to e-mail."
         , "ORIGIN" => array(0 => "Local", 1 => "External")
         , "GROUP" => array(0 => "Disabled", 1 => "Normal user", 2 => "Server owner", 3 => "Panel admin")
+    );
+    
+    static $SSH_COMMANDS = array(
+        "WHOAMI" => "whoami"
+        , "ADD_USER" => "useradd -m {server_account}"
+        , "CHANGE_PASSWORD" => "echo \"{server_account}:{server_password}\" | chpasswd"
+        , "COPY_GAME_FILES" => "cp -R {game_location}/* /home/{server_account}/"
+        , "CHOWN_GAME_FILES" => "chown -R {server_account} /home/{server_account}"
     );
     
     private static $CSS = <<<EOT

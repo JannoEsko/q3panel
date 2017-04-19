@@ -44,7 +44,8 @@ class SSH {
         if ($output) {
             $stream = ssh2_exec($this->ssh, $command);
             stream_set_blocking($stream, $output);
-            return fgets($stream);
+            $stream_err = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+            return array("stdio" => stream_get_contents($stream), "stderr" => stream_get_contents($stream_err));
         } else {
             ssh2_exec($this->ssh, $command);
         }

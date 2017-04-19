@@ -13,7 +13,51 @@
  */
 class Game {
     
+    private $game_id;
+    private $game_name;
+    private $game_location;
+    private $startscript;
     
+    function __construct($game_id, $game_name, $game_location, $startscript) {
+        $this->game_id = $game_id;
+        $this->game_name = $game_name;
+        $this->game_location = $game_location;
+        $this->startscript = $startscript;
+    }
+
+    function getGame_id() {
+        return $this->game_id;
+    }
+
+    function getGame_name() {
+        return $this->game_name;
+    }
+
+    function getGame_location() {
+        return $this->game_location;
+    }
+
+    function getStartscript() {
+        return $this->startscript;
+    }
+
+    function setGame_id($game_id) {
+        $this->game_id = $game_id;
+    }
+
+    function setGame_name($game_name) {
+        $this->game_name = $game_name;
+    }
+
+    function setGame_location($game_location) {
+        $this->game_location = $game_location;
+    }
+
+    function setStartscript($startscript) {
+        $this->startscript = $startscript;
+    }
+
+        
     static function getGames(SQL $sql, $game_id = null) {
         $query = "";
         $params = null;
@@ -57,5 +101,14 @@ class Game {
         $query .= " WHERE game_id = ?";
         array_push($params, $game_id);
         return $sql->query($query, $params);
+    }
+    
+    static function getGamesSelect(SQL $sql) {
+        $games = self::getGames($sql);
+        $str = "";
+        foreach ($games as $game) {
+            $str .= "<option value='" . $game['game_id'] . "'>" . $game['game_name'] . "</option>";
+        }
+        return $str;
     }
 }

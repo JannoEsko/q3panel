@@ -39,20 +39,24 @@ require_once __DIR__ . "/../login.php";
                                     <div class="table-responsive table-bordered">
                                         <table class="table table-hover">
                                             <thead>
-                                            <th>Server name</th>
+                                            <th>Name</th>
                                             <th>Host:Port</th>
-                                            <th>Host username</th>
+                                            <th>Players</th>
+                                            <th>Status</th>
+                                            <th>RCON Password</th>
+                                            <th>Game</th>
+                                            <th>FTP Account</th>
+                                            <th>FTP Password</th>
+                                            
                                             </thead>
                                             <tbody>
                                                 <?php
-                                                $hosts = Host::getHosts($sql, null);
-                                                foreach ($hosts as $host) {
+                                                $servers = Server::getServersWithHost($sql);
+                                                foreach ($servers as $server) {
+                                                    $server['host_password'] = "<i>hidden</i>";
+                                                    echo nl2br(print_r($server, true));
                                                     ?>
                                                 <tr>
-                                                    <td><?php echo $host['servername']; ?></td>
-                                                    <td><?php echo $host['hostname'] . ":" . $host['sshport']; ?></td>
-                                                    <td><?php echo $host['host_username'] ?></td>
-                                                    <td><button type="button" class="btn btn-default btn-block" onclick="initEditHostModal('hostModal', '<?php echo $host['host_id'];?>');">Edit host</button></td>
                                                 </tr>
                                                 <?php }
                                                 
@@ -61,7 +65,7 @@ require_once __DIR__ . "/../login.php";
                                         </table>
                                     </div>
                                     <br>
-                                    <button type="button" class="btn btn-default btn-block" onclick="$('#addHost').val(1);$('#deleteHost').val(0);$('#updateHost').val(0);$('#hostModal').modal();">Add new host</button>
+                                    <button type="button" class="btn btn-default btn-block" onclick="$('#addServer').val(1);$('#deleteServer').val(0);$('#updateServer').val(0);$('#serverModal').modal();">Add new host</button>
                                 </div>
                             </div>
                             
@@ -122,16 +126,16 @@ require_once __DIR__ . "/../login.php";
             </section>
 
         </div>
-        <div id="hostModal" role="dialog" aria-labelledby="gameModalTitle" aria-hidden="true" class="modal fade">
+        <div id="serverModal" role="dialog" aria-labelledby="serverModalTitle" aria-hidden="true" class="modal fade">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h4 id="hostModalTitle" class="modal-title">Add a new game</h4>
+                        <h4 id="serverModalTitle" class="modal-title">Add a new game</h4>
                     </div>
-                    <div class="modal-body" id="hostModalBody">
+                    <div class="modal-body" id="serverModalBody">
                          <div class="panel janno-panel" id="formMsgPanel" hidden>
                         <div class="panel-heading" id="formTitle">
                             
@@ -141,33 +145,51 @@ require_once __DIR__ . "/../login.php";
                         </div>
                         
                     </div>
-                        <form id="hostForm" role="form" method="post" action="../functions.php">
-                            <input id='addHost' type="hidden" name="addHost" value="1">
-                            <input id='deleteHost' type="hidden" name="deleteHost" value="0">
-                            <input id='hostId' type="hidden" name="hostId" value="0">
-                            <input id='updateHost' type="hidden" name="updateHost" value="1">
+                        <form id="serverForm" role="form" method="post" action="../functions.php">
+                            <input id='addServer' type="hidden" name="addServer" value="1">
+                            <input id='deleteServer' type="hidden" name="deleteServer" value="0">
+                            <input id='server_id' type="hidden" name="server_id" value="0">
+                            <input id='updateServer' type="hidden" name="updateServer" value="1">
+                            <div class="form-group">
+                                <label>Host server</label>
+                                <select class="form-control" name="host_id" required>
+                                    <?php echo Host::getHostsSelect($sql); ?>
+                                </select>
+                                <small>If it's empty, click <a href="<?php echo "$HOST_URL/hosts/"; ?>">here</a> to add it.</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Game</label>
+                                <select class="form-control" name="game_id" required>
+                                    <?php echo Game::getGamesSelect($sql); ?>
+                                </select>
+                                <small>If it's empty, click <a href="<?php echo "$HOST_URL/hosts/"; ?>">here</a> to add it.</small>
+                            </div>
                             <div class="form-group">
                                 <label>Server name</label>
-                                <input id='servername' type="text" name="servername" class="form-control" required placeholder="Friendly name for the server (so it would be easier to recognize)">
-                                
+                                <input id='server_name' type="text" name="server_name" class="form-control" required placeholder="Friendly name for the server">
                             </div>
                             <div class="form-group">
-                                <label>Server hostname</label>
-                                <input id='hostname' type="text" name="hostname" class="form-control" required placeholder="Hostname of the server">
-                                <small>Can be IP, can be a domain</small>
+                                <label>Server port</label>
+                                <input type="number" class="form-control" name="server_port" id="server_port" placeholder="Port for the server">
+                                <small>This is not a requirement. If specified, the server will use that port. If not, then if there are no servers deployed, it will default to port 20100, otherwise it will pick the server with the largest port value and increment that.</small>
                             </div>
                             <div class="form-group">
-                                <label>SSH Port</label>
-                                <input type="number" class="form-control" name="sshport" id="sshport" required placeholder="SSH port of the server">
+                                <label>FTP Account</label>
+                                <input type="name" class="form-control" name="server_account" id="server_account" placeholder="Server account (for FTP usage)">
+                                <small>This value is not required. If set, the server will use the account specified. If not, then if there are no servers deployed, it will default it to srv1, otherwise it'll pick the server with the largest srv ID and increment that.<br>NB! The panel will create the account itself, so no such account can exist on the panel.</small>
                             </div>
                             <div class="form-group">
-                                <label>Host Username</label>
-                                <input type="text" class="form-control" name="host_username" id="host_username" required placeholder="Host username of the server">
+                                <label>FTP Password</label>
+                                <input type="password" class="form-control" name="server_password" id="server_password" placeholder="Server password (for FTP usage)">
+                                <small>Not required, it'll automatically generate a 8-character password for the account if not entered.</small>
                             </div>
                             <div class="form-group">
-                                <label>Host Password</label>
-                                <input type="password" class="form-control" name="host_password" id="host_password" required placeholder="Host password of the server">
-                                <small>This value is required if you're making any sort of a change to the connection.</small>
+                                <label>Max clients</label>
+                                <input type="number" class="form-control" name="max_players" id="max_players" required placeholder="Maximum amount of players the server can have.">
+                            </div>
+                            <div class="form-group">
+                                <label>RCONPassword</label>
+                                <input type="text" class="form-control" name="rconpassword" id="rconpassword" required placeholder="The RCON password for the server">
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-default btn-block">Submit</button>
@@ -190,6 +212,6 @@ require_once __DIR__ . "/../login.php";
             </div>
         
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("hostForm");</script>
+        <script>handleForm("serverForm");</script>
     </body>
 </html>

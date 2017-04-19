@@ -10,6 +10,30 @@ require_once __DIR__ . "/classes/loader.php";
  */
 
 
+if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['addServer']) === 1) {
+    $getHost = Host::getHosts($sql, $_POST['host_id'], true);
+    if (sizeof($getHost) === 1) {
+        $getGame = Game::getGames($sql, $_POST['game_id']);
+        if (sizeof($getGame) === 1) {
+            $getGame = $getGame[0];
+            $getHost = $getHost[0];
+            $host = new Host($getHost['host_id'], $getHost['servername'], $getHost['hostname'], $getHost['sshport'], $getHost['host_username'], $getHost['host_password']);
+            $game = new Game($getGame['game_id'], $getGame['game_name'], $getGame['game_location'], $getGame['startscript']);
+            $server = new Server($host, $_POST['server_name'], $game, $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], null, null, null, $_POST['max_players'], $_POST['rconpassword']);
+            if (strlen(trim($_POST['server_password'])) === 0) {
+                $server->setServer_password(generateRandomKey(8));
+            }
+            
+            $dat = $server->addServer($sql);
+            if (isset($dat['error'])) {
+                die(json_encode($dat));
+            }
+            die(json_encode(array("href" => ".")));
+        }
+        
+    }
+}
+
 if (isset($_POST['updateHost'], $_POST['hostId'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['updateHost']) === 1) {
     $host = new Host($_POST['hostId'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']);
     $out = $host->updateHost($sql);
@@ -37,7 +61,6 @@ if (isset($_POST['getHostData'], $_POST['host_id']) && intval($_POST['getHostDat
     die(json_encode(Host::getHosts($sql, $_POST['host_id'])[0]));
 }
 
-//addHost=1&deleteHost=0&hostId=0&updateHost=0&servername=Janno's%20VPS&hostname=www.3d-sof2.com&sshport=22&host_username=&host_password=
 if (isset($_POST['addHost'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['addHost']) === 1) {
     $host = new Host(null, $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']);
     $dat = $host->addHost($sql);
@@ -59,7 +82,6 @@ if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['g
 }
 
 
-//addGame=0&deleteGame=1&gameId=1&updateGame=1&game_name=Test&game_location=test&startscript=test
 if (isset($_POST['deleteGame'], $_POST['gameId']) && intval($_POST['deleteGame']) === 1) {
     $dat = Game::deleteGame($sql, $_POST['gameId']);
     if (intval($dat['rows_affected']) === 1) {
