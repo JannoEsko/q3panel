@@ -17,6 +17,15 @@ class Constants {
     /**
      * Holds all the table definitions which can be run on the database engine.
      */
+    
+    static $PANEL_ADMIN = 3;
+    static $SERVER_ADMIN = 2;
+    static $NORMAL_USER = 1;
+    static $DISABLED_USER = 0;
+    static $SERVER_STARTED = 2;
+    static $SERVER_STOPPED = 1;
+    static $SERVER_DISABLED = 0;
+    
     static $CREATE_TABLES = array(
         "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username))",
         "CREATE TABLE q3panel_hosts (host_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, servername VARCHAR(255), hostname VARCHAR(255), sshport TINYINT, host_username VARCHAR(255), host_password VARCHAR(255), status TINYINT COMMENT '1 - ok, 2 - SSH problem, 3 - FTP problem')",
@@ -47,6 +56,7 @@ class Constants {
         , "ADD_NEW_GAME" => "INSERT INTO q3panel_games (game_name, game_location, startscript) VALUES (?, ?, ?)"
         , "ADD_NEW_HOST" => "INSERT INTO q3panel_hosts (servername, hostname, sshport, host_username, host_password) VALUES (?, ?, ?, ?, ?)"
         , "ADD_NEW_SERVER" => "INSERT INTO q3panel_servers (host_id, game_id, server_name, server_port, server_account, server_password, server_status, server_startscript, current_players, max_players, rconpassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        , "ADD_NEW_SERVER_MAPPING" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT ? AS server_id, user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_users WHERE group_id = 3"
     );
     
     static $SELECT_QUERIES = array(
@@ -94,11 +104,14 @@ class Constants {
         , "GET_SERVERS_WITH_HOST_AND_GAME_BY_GAME_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.game_id = ?"
         , "GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.host_id = ?"
         , "GET_SERVERS_BY_GAME_ID" => "SELECT * FROM q3panel_servers WHERE game_id = ?"
+        , "GET_SERVERS_WITH_MAP" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_servers_map ON q3panel_servers_map.server_id = q3panel_servers.server_id INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers_map.user_id = ?"
+        , "GET_SERVER_WITH_MAP" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_servers_map ON q3panel_servers_map.server_id = q3panel_servers.server_id INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.server_id = ? AND q3panel_servers_map.user_id = ?"
     );
     
     static $UPDATE_QUERIES = array(
         "SET_STYLE_FOR_USER" => "UPDATE q3panel_style_preference SET style_id = ? WHERE user_id = ?"
         , "UPDATE_HOST_BY_ID" => "UPDATE q3panel_hosts SET servername = ?, hostname = ?, sshport = ?, host_username = ?, host_password = ? WHERE host_id = ?"
+        , "SET_SERVER_STATUS" => "UPDATE q3panel_servers SET server_status = ? WHERE server_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -141,6 +154,9 @@ class Constants {
         , "CHANGE_PASSWORD" => "echo \"{server_account}:{server_password}\" | chpasswd"
         , "COPY_GAME_FILES" => "cp -R {game_location}/* /home/{server_account}/"
         , "CHOWN_GAME_FILES" => "chown -R {server_account} /home/{server_account}"
+        , "START_SERVER" => "screen -d -S {server_account} -m sh -c \"{server_startscript}\""
+        , "GET_SCREEN_PID" => "screen -ls | grep -o '[0-9]\{1,5\}.{server_account}' | grep -o '[0-9]\{1,5\}' | head -1"
+        , "STOP_SERVER" => "kill {screen_pid}"
     );
     
     private static $CSS = <<<EOT

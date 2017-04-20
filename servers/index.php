@@ -51,8 +51,15 @@ require_once __DIR__ . "/../login.php";
                                             </thead>
                                             <tbody>
                                                 <?php
-                                                $servers = Server::getServersWithHostAndGame($sql);
+                                                $servers = Server::getServersWithHostAndGame($sql, $_SESSION['user_id']);
                                                 foreach ($servers as $server) {
+                                                    if (intval($server['can_see_rcon']) === 0) {
+                                                        $server['rconpassword'] = "<i>hidden</i>";
+                                                    }
+                                                    if (intval($server['can_see_ftp']) === 0) {
+                                                        $server['server_account'] = "<i>hidden</i>";
+                                                        $server['server_password'] = "<i>hidden</i>";
+                                                    }
                                                     ?>
                                                 
                                                 <tr>

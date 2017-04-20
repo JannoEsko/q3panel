@@ -9,6 +9,40 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startServer']) === 1 && intval($_POST['server_id']) > 0) {
+    //$data = Server::getServersWithHost($sql, $_POST['server_id']);
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_stop_server']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            die(json_encode($server->startServer($sql)));
+        }
+        
+    
+    }
+    
+}
+
+if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServer']) === 1 && intval($_POST['server_id']) > 0) {
+    //$data = Server::getServersWithHost($sql, $_POST['server_id']);
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_stop_server']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            die(json_encode($server->stopServer($sql)));
+        }
+        
+    
+    }
+    
+}
+
 
 if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['addServer']) === 1) {
     $getHost = Host::getHosts($sql, $_POST['host_id'], true);
@@ -19,7 +53,7 @@ if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_P
             $getHost = $getHost[0];
             $host = new Host($getHost['host_id'], $getHost['servername'], $getHost['hostname'], $getHost['sshport'], $getHost['host_username'], $getHost['host_password']);
             $game = new Game($getGame['game_id'], $getGame['game_name'], $getGame['game_location'], $getGame['startscript']);
-            $server = new Server($host, $_POST['server_name'], $game, $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], null, null, null, $_POST['max_players'], $_POST['rconpassword']);
+            $server = new Server(null, $host, $_POST['server_name'], $game, $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], null, null, null, $_POST['max_players'], $_POST['rconpassword']);
             if (strlen(trim($_POST['server_password'])) === 0) {
                 $server->setServer_password(generateRandomKey(8));
             }

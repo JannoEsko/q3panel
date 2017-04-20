@@ -152,3 +152,33 @@ function initEditHostModal(modal_id, host_id) {
     });
 }
 
+function startServer(server_id) {
+    $.post(".", {
+        startServer: 1,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        console.log(data);
+        if (typeof data.error !== "undefined") {
+            
+        } else if (typeof data.msg !== "undefined") {
+            
+        }
+    });
+}
+
+function stopServer(server_id) {
+    $.post(".", {
+        stopServer: 1,
+        server_id: server_id
+    }, function(data) {
+        console.log(data);
+        data = JSON.parse(data);
+        console.log(data);
+        if (typeof data.error !== "undefined") {
+            
+        } else if (typeof data.msg !== "undefined") {
+            
+        }
+    });
+}

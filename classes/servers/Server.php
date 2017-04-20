@@ -25,8 +25,10 @@ class Server extends SSH {
     private $max_players;
     private $rconpassword;
     private $ssh;
+    private $server_id;
     
-    function __construct(Host $host, $server_name, Game $game, $server_port, $server_account, $server_password, $server_status, $server_startscript, $current_players, $max_players, $rconpassword) {
+    function __construct($server_id, Host $host, $server_name, Game $game, $server_port, $server_account, $server_password, $server_status, $server_startscript, $current_players, $max_players, $rconpassword) {
+        $this->server_id = $server_id;
         $this->host = $host;
         $this->server_name = $server_name;
         $this->game = $game;
@@ -126,17 +128,39 @@ class Server extends SSH {
     }
 
 
-    function startServer() {
-        
+    function startServer(SQL $sql) {
+        $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
+        $params = array(Constants::$SERVER_STARTED, $this->server_id);
+        $startServer = Constants::$SSH_COMMANDS['START_SERVER'];
+        $startServer = str_replace("{server_account}", $this->server_account, $startServer);
+        $this->server_startscript = str_replace("{server_port}", $this->server_port, $this->server_startscript);
+        $this->server_startscript = str_replace("{server_account}", $this->server_account, $this->server_startscript);
+        $startServer = str_replace("{server_startscript}", $this->server_startscript, $startServer);
+        $this->sendCommand($startServer);
+        $sql->query($query, $params);
+        return true;
     }
     
-    function stopServer() {
-        
+    function stopServer(SQL $sql) {
+        $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
+        $params = array(Constants::$SERVER_STOPPED, $this->server_id);
+        $getScreenPID = Constants::$SSH_COMMANDS['GET_SCREEN_PID'];
+        $getScreenPID = str_replace("{server_account}", $this->server_account, $getScreenPID);
+        $output = $this->sendCommand($getScreenPID, true);
+        if (strlen($output['stdio']) !== 0) {
+            $pid = trim($output['stdio']);
+            $killServer = Constants::$SSH_COMMANDS['STOP_SERVER'];
+            $killServer = str_replace("{screen_pid}", $pid, $killServer);
+            $this->sendCommand($killServer);
+        } else if (strlen($output['stderr']) !== 0) {
+            return $output;
+        }
+        $sql->query($query, $params);
+        return true;
     }
     
-    function restartServer() {
-        $this->stopServer();
-        $this->startServer();
+    function restartServer($sql) {
+        return $this->stopServer($sql) && $this->startServer($sql);
     }
     
     function deleteServer() {
@@ -235,8 +259,12 @@ class Server extends SSH {
             $this->getMax_players(),
             $this->rconpassword
         );
+        
         try {
             $serverInsert = $sql->query($serverInsertQuery, $serverInsertParams);
+            $serverMapping = Constants::$INSERT_QUERIES['ADD_NEW_SERVER_MAPPING'];
+            $serverMappingParams = array($serverInsert['last_insert_id']);
+            $sql->query($serverMapping, $serverMappingParams);
         } catch (PDOException $ex) {
             return array("error" => $ex->getMessage());
         }
@@ -278,10 +306,17 @@ class Server extends SSH {
         return $sql->query($query, $params);
     }
     
-    static function getServersWithHostAndGame(SQL $sql, $server_id = null, $host_id = null, $game_id = null) {
+    static function getServersWithHostAndGame(SQL $sql, $user_id = null, $server_id = null, $host_id = null, $game_id = null) {
         $query = "";
         $params = null;
-        if ($server_id !== null && $host_id !== null && $game_id !== null) {
+        if ($user_id !== null && $server_id !== null) {
+            $query = Constants::$SELECT_QUERIES['GET_SERVER_WITH_MAP'];
+            $params = array($server_id, $user_id);
+        } else if ($user_id !== null) {
+            //means we want to get it all for the servers page.
+            $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_MAP'];
+            $params = array($user_id);
+        } else if ($server_id !== null && $host_id !== null && $game_id !== null) {
             $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_HOST_ID_SERVER_ID_GAME_ID'];
             $params = array($host_id, $server_id, $game_id);
         } else if ($server_id !== null && $host_id !== null) {

@@ -6,6 +6,18 @@ if (!file_exists(__DIR__ . "/../../config.php")) {
 session_start();
 require_once __DIR__ . "/../../classes/loader.php";
 require_once __DIR__ . "/../../login.php";
+if (!isset($_GET['server_id']) || intval($_GET['server_id']) === 0) {
+    header("Location: ../");
+}
+
+$server = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_GET['server_id']);
+if (sizeof($server) !== 1) {
+    header("Location: ../");
+}
+$server = $server[0];
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -30,6 +42,7 @@ require_once __DIR__ . "/../../login.php";
                         <small>Welcome to Q3Panel</small>
                     </div>
                     <div class="row">
+                        <div class="col-md-8">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
                                     Server management
@@ -37,6 +50,7 @@ require_once __DIR__ . "/../../login.php";
                                 <div class="panel-body">
                                     This will have the mapping to the users (who can do what), adding server owners (who can do everything with this server).
                                     Server editing will happen here, web FTP will be accessed from here, starting/stopping server will happen here etc
+                                    
                                 </div>
                             </div>
                             
@@ -47,6 +61,84 @@ require_once __DIR__ . "/../../login.php";
                                 <div class="panel-body"><?php echo nl2br(print_r(get_required_files(), true)); ?></div>
                             </div>
                         
+                    </div>
+                        <div class="col-md-4">
+                            <div class="panel janno-panel">
+                                <div class="panel-heading">
+                                    <div class="panel-title">Quick actions</div>
+                                </div>
+                                <div class="panel-body">
+                                    
+                                        <?php
+                                            if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+                                                ?> 
+                                    <div class="clearfix">
+                                        <div class="pull-left">
+                                        <?php 
+                                                if (intval($server['server_status']) === 0) {
+                                                    ?>
+                                                <button class="btn btn-danger btn-block" onclick="reenableServer('<?php echo $server['server_id']; ?>');">Enable server</button>
+                                                <?php
+                                                } else {
+                                                    ?>
+                                                <button class="btn btn-danger btn-block" onclick="disableServer('<?php echo $server['server_id']; ?>');">Disable server</button>
+                                                <?php } 
+                                                ?>
+                                                 </div>
+                                        <div class="pull-right">
+                                            <button class="btn btn-danger btn-block" onclick="deleteServer('<?php echo $server['server_id']; ?>');">Delete server</button>
+                                        </div>
+                                        </div>
+                                    <br>
+                                    <div class="clearfix">
+                                        <div class="pull-left">
+                                            <button class="btn btn-default btn-block" onclick="mapUsersToServer('<?php echo $server['server_id']; ?>');">Map users to server</button>
+                                        </div>
+                                        <div class="pull-right">
+                                            <button class="btn btn-default btn-block" onclick="resetFtpPassword('<?php echo $server['server_id']; ?>');">Reset FTP password</button>
+                                        </div>
+                                    </div>
+                                    <br>
+                                                <?php 
+                                                
+                                                
+                                            }
+                                                ?>
+                                        
+                                            
+                                       
+                                        
+                                   
+                                    <div class="clearfix">
+                                        <div class="pull-left">
+                                            <?php 
+                                            if (intval($server['can_stop_server']) === 1) {
+                                                
+                                                if (intval($server['server_status']) === 1) {
+                                                    ?>
+                                            <button class="btn btn-default btn-block" onclick="startServer('<?php echo $server['server_id'];?>');">Start server</button>
+                                          <?php      } else {
+                                              ?>
+                                            <button class="btn btn-default btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
+                                            <?php
+                                          }
+                                                
+                                            }
+                                                ?>
+                                        </div>
+                                        <div class="pull-right">
+                                            <?php
+                                            
+                                            if (intval($server['can_see_ftp']) === 1) {
+                                                ?>
+                                            <button class="btn btn-default btn-block" onclick="location.href='webftp/?server_id=<?php echo $server['server_id']; ?>';">Web FTP</button>
+                                            <?php }
+                                                
+                                                ?>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
