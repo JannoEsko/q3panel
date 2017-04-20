@@ -362,6 +362,9 @@ function initFileEditModal(modal_id, filename, server_id) {
                     toastr.error(data.error);
                 } else if (typeof data.href !== "undefined") {
                     toastr.success("File " + filename + " download will begin shortly.");
+                    /*
+                     * http://stackoverflow.com/questions/3499597/javascript-jquery-to-download-file-via-post-with-json-data
+                     */
                     var link=document.createElement('a');
                     link.href=data.href;
                     link.download=filename;
