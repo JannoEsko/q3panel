@@ -341,15 +341,37 @@ function initFileEditModal(modal_id, filename, server_id) {
         fileName: filename,
         server_id: server_id
     }, function(data) {
-        data = JSON.parse(data);
-        if (typeof data.error !== "undefined") {
-            toastr.error(data.error);
-        } else {
-            $("#fileContents").html(data.filecontents);
-            $("#" + modal_id + "Title").html(filename);
-            $("#filename").val(filename);
-            $("#" + modal_id).modal();
+        try {
+            data = JSON.parse(data);
+            if (typeof data.error !== "undefined") {
+                toastr.error(data.error);
+            } else {
+                $("#fileContents").html(data.filecontents);
+                $("#" + modal_id + "Title").html(filename);
+                $("#filename").val(filename);
+                $("#" + modal_id).modal();
+            }
+        } catch (SyntaxError) {
+            $.post(".", {
+                getFTPURIForFile: 1,
+                fileName: filename,
+                server_id: server_id
+            }, function(data) {
+                data = JSON.parse(data);
+                if (typeof data.error !== "undefined") {
+                    toastr.error(data.error);
+                } else if (typeof data.href !== "undefined") {
+                    toastr.success("File " + filename + " download will begin shortly.");
+                    var link=document.createElement('a');
+                    link.href=data.href;
+                    link.download=filename;
+                    link.click();
+                    
+                }
+                
+            });
         }
+        
     });
 }
 

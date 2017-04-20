@@ -137,7 +137,7 @@ class Constants {
         , "DELETE_GAME_HAS_SERVERS" => "You cannot delete this game, because it has gameservers deployed. Delete the servers first, then delete the game."
         , "SERVER_DISABLED_OR_NOT_AUTHORIZED" => "You cannot perform this action, because either you're not privileged enough or the server is disabled."
         , "FTP_DELETE_ERROR" => "Couldn't remove the file you tried to update. Please check permissions."
-        , "GENERIC_FTP_ERROR" => "Couldn't update the file. Please check the permissions on the host server"
+        , "GENERIC_FTP_ERROR" => "Couldn't perform the action with FTP. Please check the permissions on the host server, if the file already exists on FTP or check if you're privileged enough."
     );
     
     static $EMAIL_TEMPLATE = array(

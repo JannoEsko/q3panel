@@ -51,6 +51,10 @@ class FTP {
         return array("filecontents" => file_get_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/". $filename));
     }
     
+    function getFileDownloadURI($filename) {
+        return "ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/". $filename;
+    }
+    
     function renameFileOrFolder($oldfilename, $newfilename) {
         return ftp_rename($this->ftp, $oldfilename, $newfilename);
     }
@@ -79,8 +83,8 @@ class FTP {
     
     function uploadNewFile($dir, $uploadedFileName, $uploadedFile) {
         $dir = rtrim($dir, "/");
-        error_log("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/$dir/". $uploadedFileName);
-        return file_put_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/$dir/". $uploadedFileName, $uploadedFile);
+        
+        return file_put_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/$dir/". $uploadedFileName, file_get_contents($uploadedFile));
     }
     
     function writeFile($filename, $filecontents) {
