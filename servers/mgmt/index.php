@@ -41,6 +41,7 @@ $server = $server[0];
                         Homepage
                         <small>Welcome to Q3Panel</small>
                     </div>
+                    <div id="toast"></div>
                     <div class="row">
                         <div class="col-md-8">
                             <div class="panel janno-panel">
@@ -113,15 +114,15 @@ $server = $server[0];
                                         <div class="pull-left">
                                             <?php 
                                             if (intval($server['can_stop_server']) === 1) {
-                                                
-                                                if (intval($server['server_status']) === 1) {
-                                                    ?>
-                                            <button class="btn btn-default btn-block" onclick="startServer('<?php echo $server['server_id'];?>');">Start server</button>
-                                          <?php      } else {
-                                              ?>
-                                            <button class="btn btn-default btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
-                                            <?php
-                                          }
+                                                ?>
+                                            <div id="startServer"  <?php if (intval($server['server_status']) === 2) {?>hidden <?php } ?>>
+                                                <button  class="btn btn-default btn-block" onclick="startServer('<?php echo $server['server_id'];?>');">Start server</button>
+                                            </div>
+                                            <div id="stopServer" <?php if (intval($server['server_status']) === 1) {?>hidden <?php } ?>>
+                                            <button id="stopServer"  class="btn btn-default btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
+                                            </div>
+                                                <?php
+                                          
                                                 
                                             }
                                                 ?>

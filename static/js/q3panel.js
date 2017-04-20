@@ -4,6 +4,20 @@
  * and open the template in the editor.
  */
 
+toastr.options = {
+    "debug": false,
+    "progressBar": false,
+    "positionClass": "toast-top-right",
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+}
+
 $(document).ready(function() {
     
     /*
@@ -158,11 +172,12 @@ function startServer(server_id) {
         server_id: server_id
     }, function(data) {
         data = JSON.parse(data);
-        console.log(data);
         if (typeof data.error !== "undefined") {
-            
+            toastr.error(data.error);
         } else if (typeof data.msg !== "undefined") {
-            
+            $("#startServer").hide(500);
+            $("#stopServer").show(500);
+            toastr.success(data.msg);
         }
     });
 }
@@ -172,13 +187,13 @@ function stopServer(server_id) {
         stopServer: 1,
         server_id: server_id
     }, function(data) {
-        console.log(data);
         data = JSON.parse(data);
-        console.log(data);
         if (typeof data.error !== "undefined") {
-            
+            toastr.error(data.error);
         } else if (typeof data.msg !== "undefined") {
-            
+            $("#stopServer").hide(500);
+            $("#startServer").show(500);
+            toastr.success(data.msg);
         }
     });
 }

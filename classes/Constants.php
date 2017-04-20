@@ -167,6 +167,7 @@ class Constants {
         <link rel="stylesheet" href="{}/css/whirl.css">
         <link rel="stylesheet" href="{}/css/bootstrap.css">
         <link rel="stylesheet" href="{}/css/select2.css">
+        <link rel="stylesheet" href="{}/css/toastr.min.css">
         <link rel="stylesheet" href="{}/css/app.css"> 
 
 EOT;
@@ -185,6 +186,7 @@ EOT;
         <script src="{}/js/jquery.storageapi.js"></script>
         <script src="{}/js/app.js"></script>
         <script src="{}/js/select2.js"></script>
+        <script src="{}/js/toastr.min.js"></script>
         <script src="{}/js/q3panel.js"></script>
 
 EOT;

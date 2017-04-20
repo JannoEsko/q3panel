@@ -18,7 +18,11 @@ if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startSer
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
-            die(json_encode($server->startServer($sql)));
+            if ($server->startServer($sql)) {
+                die(json_encode(array("msg" => "Server successfully started")));
+            } else {
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+            }
         }
         
     
@@ -35,7 +39,11 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
-            die(json_encode($server->stopServer($sql)));
+            if ($server->stopServer($sql)) {
+                die(json_encode(array("msg" => "Server successfully stopped")));
+            } else {
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+            }
         }
         
     
