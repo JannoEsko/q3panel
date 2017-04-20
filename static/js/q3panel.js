@@ -197,3 +197,54 @@ function stopServer(server_id) {
         }
     });
 }
+
+function disableServer(server_id) {
+    $.post(".", {
+        disableServer: 1,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else if (typeof data.msg !== "undefined") {
+            $("#stopServer").hide(500);
+            $("#startServer").hide(500);
+            $("#enableServerBtn").show(500);
+            $("#disableServerBtn").hide(500);
+            toastr.success(data.msg);
+        }
+    });
+}
+
+function deleteServer(server_id) {
+    $.post(".", {
+        deleteServer: 1,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else if (typeof data.href !== "undefined") {
+            location.href = data.href;
+        }
+    });
+}
+
+function enableServer(server_id) {
+    $.post(".", {
+        enableServer: 1,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else if (typeof data.msg !== "undefined") {
+            $("#stopServer").hide(500);
+            $("#startServer").show(500);
+            $("#enableServerBtn").hide(500);
+            $("#disableServerBtn").show(500);
+            
+            toastr.success(data.msg);
+        }
+    });
+}

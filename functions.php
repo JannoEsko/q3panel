@@ -9,12 +9,59 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+
+if (isset($_POST['deleteServer'], $_POST['server_id']) && intval($_POST['deleteServer']) === 1 && intval($_POST['server_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        if ($server->deleteServer($sql)) {
+            die(json_encode(array("href" => "../")));
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+        }
+    }
+}
+
+
+if (isset($_POST['disableServer'], $_POST['server_id']) && intval($_POST['disableServer']) === 1 && intval($_POST['server_id']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        if ($server->disableServer($sql)) {
+            die(json_encode(array("msg" => "Server successfully disabled")));
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+        }
+    }
+}
+
+if (isset($_POST['enableServer'], $_POST['server_id']) && intval($_POST['enableServer']) === 1 && intval($_POST['server_id']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        if ($server->enableServer($sql)) {
+            die(json_encode(array("msg" => "Server successfully enabled")));
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+        }
+    }
+}
+
 if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startServer']) === 1 && intval($_POST['server_id']) > 0) {
     //$data = Server::getServersWithHost($sql, $_POST['server_id']);
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_stop_server']) === 1) {
+        if (intval($data['can_stop_server']) === 1 && intval($data['server_status']) !== Constants::$SERVER_DISABLED) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -23,6 +70,8 @@ if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startSer
             } else {
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
             }
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['SERVER_DISABLED_OR_NOT_AUTHORIZED'])));
         }
         
     
@@ -35,7 +84,7 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_stop_server']) === 1) {
+        if (intval($data['can_stop_server']) === 1 && intval($data['server_status']) !== Constants::$SERVER_DISABLED) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -44,6 +93,8 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
             } else {
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
             }
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['SERVER_DISABLED_OR_NOT_AUTHORIZED'])));
         }
         
     

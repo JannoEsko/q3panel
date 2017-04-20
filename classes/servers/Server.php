@@ -164,12 +164,42 @@ class Server extends SSH {
         return $this->stopServer($sql) && $this->startServer($sql);
     }
     
-    function deleteServer() {
-        
+    function deleteServer(SQL $sql) {
+        if ($this->stopServer($sql)) {
+            $removeServerQuery = Constants::$DELETE_QUERIES['DELETE_SERVER_BY_ID'];
+            $removeMappingsQuery = Constants::$DELETE_QUERIES['DELETE_NONEXISTANT_MAPPINGS'];
+            $removeServerQueryParams = array($this->server_id);
+            $removeServerSSH = Constants::$SSH_COMMANDS['DELETE_ACCOUNT'];
+            $removeServerSSH = str_replace("{server_account}", $this->server_account, $removeServerSSH);
+            $this->host->sendCommand($removeServerSSH);
+            $sql->query($removeServerQuery, $removeServerQueryParams);
+            $sql->query($removeMappingsQuery);
+            return true;
+        } else {
+            return false;
+        }
     }
     
     function updateServer(SQL $sql) {
         
+    }
+    
+    function disableServer(SQL $sql) {
+        if ($this->stopServer($sql)) {
+            $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
+            $params = array(Constants::$SERVER_DISABLED, $this->server_id);
+            $sql->query($query, $params);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    function enableServer(SQL $sql) {
+        $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
+        $params = array(Constants::$SERVER_STOPPED, $this->server_id);
+        $sql->query($query, $params);
+        return true;
     }
     
     function addServer(SQL $sql) {

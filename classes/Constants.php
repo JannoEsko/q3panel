@@ -119,6 +119,8 @@ class Constants {
         , "DELETE_FORGOTTEN_DATA" => "DELETE FROM q3panel_forgottenpsw WHERE user_id = ?"
         , "DELETE_GAME_BY_ID" => "DELETE FROM q3panel_games WHERE game_id = ?"
         , "DELETE_HOST_BY_ID" => "DELETE FROM q3panel_hosts WHERE host_id = ?"
+        , "DELETE_SERVER_BY_ID" => "DELETE FROM q3panel_servers WHERE server_id = ?"
+        , "DELETE_NONEXISTANT_MAPPINGS" => "DELETE FROM q3panel_servers_map WHERE server_id NOT IN (SELECT server_id FROM q3panel_servers)"
     );
     
     static $ERRORS = array(
@@ -133,6 +135,7 @@ class Constants {
         , "SSH2_AUTH_ERROR" => "Wrong username and/or password. Please recheck them. Also, if you got any SSH restrictions (where can accounts connect from etc), please, whitelist this page so it can have a connection with the host server."
         , "DELETE_HOST_HAS_SERVERS" => "You cannot delete this host, because it has gameservers deployed. Delete the servers first, then delete the host"
         , "DELETE_GAME_HAS_SERVERS" => "You cannot delete this game, because it has gameservers deployed. Delete the servers first, then delete the game."
+        , "SERVER_DISABLED_OR_NOT_AUTHORIZED" => "You cannot perform this action, because either you're not privileged enough or the server is disabled."
     );
     
     static $EMAIL_TEMPLATE = array(
@@ -157,6 +160,7 @@ class Constants {
         , "START_SERVER" => "screen -d -S {server_account} -m sh -c \"{server_startscript}\""
         , "GET_SCREEN_PID" => "screen -ls | grep -o '[0-9]\{1,5\}.{server_account}' | grep -o '[0-9]\{1,5\}' | head -1"
         , "STOP_SERVER" => "kill {screen_pid}"
+        , "DELETE_ACCOUNT" => "userdel -fr {server_account}"
     );
     
     private static $CSS = <<<EOT

@@ -75,20 +75,19 @@ $server = $server[0];
                                                 ?> 
                                     <div class="clearfix">
                                         <div class="pull-left">
-                                        <?php 
-                                                if (intval($server['server_status']) === 0) {
-                                                    ?>
-                                                <button class="btn btn-danger btn-block" onclick="reenableServer('<?php echo $server['server_id']; ?>');">Enable server</button>
-                                                <?php
-                                                } else {
-                                                    ?>
+
+                                            <div <?php if (intval($server['server_status']) !== Constants::$SERVER_DISABLED) {?> hidden <?php } ?> id="enableServerBtn">
+                                                <button class="btn btn-danger btn-block" onclick="enableServer('<?php echo $server['server_id']; ?>');">Enable server</button>
+                                                
+                                                </div>
+<div <?php if (intval($server['server_status']) === Constants::$SERVER_DISABLED) {?> hidden <?php } ?> id="disableServerBtn">
                                                 <button class="btn btn-danger btn-block" onclick="disableServer('<?php echo $server['server_id']; ?>');">Disable server</button>
-                                                <?php } 
-                                                ?>
+                                                </div>
                                                  </div>
                                         <div class="pull-right">
                                             <button class="btn btn-danger btn-block" onclick="deleteServer('<?php echo $server['server_id']; ?>');">Delete server</button>
                                         </div>
+
                                         </div>
                                     <br>
                                     <div class="clearfix">
@@ -115,10 +114,10 @@ $server = $server[0];
                                             <?php 
                                             if (intval($server['can_stop_server']) === 1) {
                                                 ?>
-                                            <div id="startServer"  <?php if (intval($server['server_status']) === 2) {?>hidden <?php } ?>>
+                                            <div id="startServer"  <?php if (intval($server['server_status']) === Constants::$SERVER_STARTED || intval($server['server_status']) === Constants::$SERVER_DISABLED) {?>hidden <?php } ?>>
                                                 <button  class="btn btn-default btn-block" onclick="startServer('<?php echo $server['server_id'];?>');">Start server</button>
                                             </div>
-                                            <div id="stopServer" <?php if (intval($server['server_status']) === 1) {?>hidden <?php } ?>>
+                                            <div id="stopServer" <?php if (intval($server['server_status']) === Constants::$SERVER_STOPPED || intval($server['server_status']) === Constants::$SERVER_DISABLED) {?>hidden <?php } ?>>
                                             <button id="stopServer"  class="btn btn-default btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
                                             </div>
                                                 <?php
