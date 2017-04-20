@@ -20,6 +20,7 @@ require_once "$d/servers/host/Host.php";
 require_once "$d/servers/Server.php";
 require_once "$d/servers/Game.php";
 require_once "$d/users/User.php";
+require_once "$d/ftp/FTP.php";
 require_once "$d/Constants.php";
 require_once "$d/../functions.php";
 

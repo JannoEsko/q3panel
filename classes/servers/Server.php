@@ -136,6 +136,7 @@ class Server extends SSH {
         $this->server_startscript = str_replace("{server_port}", $this->server_port, $this->server_startscript);
         $this->server_startscript = str_replace("{server_account}", $this->server_account, $this->server_startscript);
         $this->server_startscript = str_replace("{rconpassword}", $this->rconpassword, $this->server_startscript);
+        $this->server_startscript = str_replace("{max_clients}", $this->max_players, $this->server_startscript);
         $startServer = str_replace("{server_startscript}", $this->server_startscript, $startServer);
         $this->sendCommand($startServer);
         $sql->query($query, $params);
@@ -165,19 +166,16 @@ class Server extends SSH {
     }
     
     function deleteServer(SQL $sql) {
-        if ($this->stopServer($sql)) {
-            $removeServerQuery = Constants::$DELETE_QUERIES['DELETE_SERVER_BY_ID'];
-            $removeMappingsQuery = Constants::$DELETE_QUERIES['DELETE_NONEXISTANT_MAPPINGS'];
-            $removeServerQueryParams = array($this->server_id);
-            $removeServerSSH = Constants::$SSH_COMMANDS['DELETE_ACCOUNT'];
-            $removeServerSSH = str_replace("{server_account}", $this->server_account, $removeServerSSH);
-            $this->host->sendCommand($removeServerSSH);
-            $sql->query($removeServerQuery, $removeServerQueryParams);
-            $sql->query($removeMappingsQuery);
-            return true;
-        } else {
-            return false;
-        }
+        $this->stopServer($sql);
+        $removeServerQuery = Constants::$DELETE_QUERIES['DELETE_SERVER_BY_ID'];
+        $removeMappingsQuery = Constants::$DELETE_QUERIES['DELETE_NONEXISTANT_MAPPINGS'];
+        $removeServerQueryParams = array($this->server_id);
+        $removeServerSSH = Constants::$SSH_COMMANDS['DELETE_ACCOUNT'];
+        $removeServerSSH = str_replace("{server_account}", $this->server_account, $removeServerSSH);
+        $this->host->sendCommand($removeServerSSH);
+        $sql->query($removeServerQuery, $removeServerQueryParams);
+        $sql->query($removeMappingsQuery);
+        return true;
     }
     
     function updateServer(SQL $sql) {

@@ -136,6 +136,8 @@ class Constants {
         , "DELETE_HOST_HAS_SERVERS" => "You cannot delete this host, because it has gameservers deployed. Delete the servers first, then delete the host"
         , "DELETE_GAME_HAS_SERVERS" => "You cannot delete this game, because it has gameservers deployed. Delete the servers first, then delete the game."
         , "SERVER_DISABLED_OR_NOT_AUTHORIZED" => "You cannot perform this action, because either you're not privileged enough or the server is disabled."
+        , "FTP_DELETE_ERROR" => "Couldn't remove the file you tried to update. Please check permissions."
+        , "GENERIC_FTP_ERROR" => "Couldn't update the file. Please check the permissions on the host server"
     );
     
     static $EMAIL_TEMPLATE = array(
@@ -149,6 +151,9 @@ class Constants {
         , "ORIGIN" => array(0 => "Local", 1 => "External")
         , "GROUP" => array(0 => "Disabled", 1 => "Normal user", 2 => "Server owner", 3 => "Panel admin")
         , "SERVER_STATUSES" => array(0 => "Disabled", 1 => "Offline", 2 => "Online")
+        , "FTP_FILE_UPDATE_SUCCESS" => "File has been successfully updated."
+        , "FTP_FILE_OR_FOLDER_DELETE_SUCCESS" => "File/Folder has been successfully deleted."
+        , "FTP_FILE_OR_FOLDER_RENAME_SUCCESS" => "File/Folder has been successfully renamed."
     );
     
     static $SSH_COMMANDS = array(

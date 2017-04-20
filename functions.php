@@ -9,6 +9,106 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+     
+if (isset($_POST['renameFileOrFolder'], $_POST['oldfilename'], $_POST['server_id'], $_POST['newfilename']) && intval($_POST['renameFileOrFolder']) === 1 && intval($_POST['server_id']) > 0 && strlen(trim($_POST['oldfilename'])) > 0 && strlen(trim($_POST['newfilename'])) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            $output = $ftp->renameFileOrFolder($_POST['oldfilename'], $_POST['newfilename']);
+            if ($output === false) {
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
+            } else {
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_OR_FOLDER_RENAME_SUCCESS'], "refreshwebftptable" => "1")));
+            }
+        }
+
+    } 
+}
+
+if (isset($_POST['deleteFromFTP'], $_POST['filename'], $_POST['server_id']) && intval($_POST['deleteFromFTP']) === 1 && intval($_POST['server_id']) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            $output = $ftp->deleteFileOrDir($_POST['filename']);
+            if ($output === false) {
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
+            } else {
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_OR_FOLDER_DELETE_SUCCESS'])));
+            }
+        }
+
+    } 
+}
+
+
+if (isset($_POST['editFile'], $_POST['server_id'], $_POST['filename'], $_POST['fileContents']) && intval($_POST['editFile']) === 1 && intval($_POST['server_id']) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            $output = $ftp->writeFile($_POST['filename'], $_POST['fileContents']);
+            if ($output === false) {
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
+            } else {
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_UPDATE_SUCCESS'])));
+            }
+        }
+
+    } 
+}
+
+
+if (isset($_POST['getFile'], $_POST['fileName'], $_POST['server_id']) && intval($_POST['getFile']) === 1 && intval($_POST['server_id']) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            die(json_encode($ftp->getFileContents($_POST['fileName'])));
+        }
+
+    } 
+}
+
+if (isset($_POST['ftp'], $_POST['getDirContents'], $_POST['server_id']) && intval($_POST['ftp']) === 1 && strlen($_POST['getDirContents']) > 0 && intval($_POST['server_id']) > 0) {
+    if (!isset($_SESSION['ftp_last_dir'])) {
+        $_SESSION['ftp_last_dir'] = ".";
+    } 
+    if ($_POST['getDirContents'] === "../") {
+        $_POST['getDirContents'] = $_SESSION['ftp_last_dir'] . "/..";
+        
+    }
+    $_SESSION['ftp_last_dir'] = $_POST['getDirContents'];
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            die(json_encode($ftp->getDirectoryFileList($_POST['getDirContents'])));
+        }
+
+    } 
+}
 
 if (isset($_POST['deleteServer'], $_POST['server_id']) && intval($_POST['deleteServer']) === 1 && intval($_POST['server_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);

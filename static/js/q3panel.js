@@ -31,6 +31,22 @@ $(document).ready(function() {
 });
 
 function handleForm(id) {
+    handleForm(id, false);
+}
+
+function setPreferencedTheme(theme) {
+    $.post(window.location.href, {
+        theme: "1",
+        themename: theme
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data !== "undefined" && typeof data.style_bg !== "undefined") {
+            $("#themecolor").attr("content", data.style_bg);
+        }
+    });
+}
+
+function handleForm(id, useToaster) {
     var form = $("#" + id);
     var formMsg = $("#formMsg");
     var formMsgPanel = $("#formMsgPanel");
@@ -52,18 +68,31 @@ function handleForm(id) {
             console.log(response);
             response = JSON.parse(response);
             if (typeof response.error !== "undefined") {
-                formTitle.html("Error");
-                formMsgPanel.removeClass("janno-panel");
-                formMsgPanel.addClass("panel-danger");
-                formMsg.html(response.error);
-                formMsgPanel.show(500);
+                if (useToaster) {
+                    toastr.error(response.error);
+                } else {
+                    formTitle.html("Error");
+                    formMsgPanel.removeClass("janno-panel");
+                    formMsgPanel.addClass("panel-danger");
+                    formMsg.html(response.error);
+                    formMsgPanel.show(500);
+                }
             } else {
                 if (typeof response.href !== "undefined") {
                     location.href = response.href;
                 } else {
-                    formTitle.html("Success");
-                    formMsg.html(response.msg);
-                    formMsgPanel.show(500);
+                    if (useToaster) {
+                        toastr.success(response.msg);
+                        if (typeof response.refreshwebftptable !== "undefined") {
+                            initWebFTPTable("webftptable", ".", $("#server_id").val());
+                            $("#fileRenameModal").modal('toggle');
+                        }
+                    } else {
+                        formTitle.html("Success");
+                        formMsg.html(response.msg);
+                        formMsgPanel.show(500);
+                    }
+                    
                 }
             }
         });
@@ -245,6 +274,109 @@ function enableServer(server_id) {
             $("#disableServerBtn").show(500);
             
             toastr.success(data.msg);
+        }
+    });
+}
+
+function initWebFTPTable(table_id, dir, server_id) {
+    var table = $("#" + table_id);
+    var tableItems = $("#" + table_id + "body");
+    
+    $.post(".", {
+        ftp: 1,
+        getDirContents: dir,
+        server_id: server_id
+    }, function(data) {
+        console.log(data);
+        data = JSON.parse(data);
+        if (data === null) {
+            table.append("<tr><td><em class='fa fa-folder'></em> <a href='#' onclick='initWebFTPTable(\"" + table_id + "\", \"../\", \"" + server_id + "\");'>../</a></td></tr>");
+        } else {
+            if (typeof data.error !== "undefined") {
+                toastr.error(data.error);
+            } else {
+                tableItems.empty();
+                table.append("<tr><td><em class='fa fa-folder'></em> <a href='#' onclick='initWebFTPTable(\"" + table_id + "\", \"../\", \"" + server_id + "\");'>../</a></td></tr>");
+                $.each(data, function(item_id, items) {
+                   
+                    var actionsButton = "";
+                    if (items.content !== "../") {
+                        actionsButton = " <button class=\"btn btn-default btn-sm\" onclick='deleteFromFTP(\"\",\"" + items.content + "\", \"" + server_id + "\", \"" + table_id + "\", \"" + dir + "\");'><em class=\"fa fa-trash-o\"></em> Delete</button><button class=\"btn btn-default btn-sm\" onclick='renameFileOrFolderModal(\"fileRenameModal\", \"" + items.content + "\");'><em class=\"fa fa-pencil-square-o\"> </em>Rename</button>";
+                    }
+                    var dirIcon = "";
+                    if (parseInt(items.dir) === 1) {
+                        dirIcon = "<em class='fa fa-folder'></em> ";
+                        table.append("<tr><td width=\"66%\">" + dirIcon + "<a href='#' onclick='initWebFTPTable(\"" + table_id + "\", \"" + items.content + "\", \"" + server_id + "\");'>" + items.content + "</a></td><td>" + actionsButton + "</td></tr>");
+                    } else {
+                        dirIcon = "<em class='fa fa-file'></em> ";
+                        table.append("<tr><td width=\"66%\">" + dirIcon + "<a href='#' onclick='initFileEditModal(\"fileEditModal\", \"" + items.content + "\", \"" + server_id + "\");'>" + items.content + "</td><td>" + actionsButton + "</td></tr>");
+                    }
+                    
+
+
+                });
+             }
+
+    }
+});
+}
+
+function initFileEditModal(modal_id, filename, server_id) {
+    $.post(".", {
+        getFile: 1,
+        fileName: filename,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else {
+            $("#fileContents").html(data.filecontents);
+            $("#" + modal_id + "Title").html(filename);
+            $("#filename").val(filename);
+            $("#" + modal_id).modal();
+        }
+    });
+}
+
+function deleteFromFTP(name, server_id, table_id, currdir) {
+    $.post(".", {
+        deleteFromFTP: 1,
+        filename: name,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else {
+            toastr.success(data.msg);
+            console.log(data.msg);
+            initWebFTPTable(table_id, currdir, server_id);
+        }
+    });
+}
+
+function renameFileOrFolderModal(modal_id, name) {
+    $("#oldfilename").val(name);
+    $("#newfilename").val(name);
+    $("#" + modal_id + "Title").html("Rename file " + name);
+    $("#" + modal_id).modal();
+}
+
+function renameFileOrFolder(oldname, newname, server_id, table_id, currdir) {
+    $.post(".", {
+        renameFileOrFolder: 1,
+        oldfilename: name,
+        newfilename: newname,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else {
+            toastr.success(data.msg);
+            console.log(data.msg);
+            initWebFTPTable(table_id, currdir, server_id);
         }
     });
 }
