@@ -87,6 +87,18 @@ function handleForm(id, useToaster) {
                             initWebFTPTable("webftptable", ".", $("#server_id").val());
                             $("#fileRenameModal").modal('toggle');
                         }
+                        if (typeof response.successnewfolder !== "undefined") {
+                            initWebFTPTable("webftptable", response.successnewfolder, $("#server_id").val());
+                            $("#newFileFolderModal").modal('toggle');
+                        }
+                        if (typeof response.successnewfile !== "undefined") {
+                            initWebFTPTable("webftptable", response.successnewfile, $("#server_id").val());
+                            $("#newFileFolderModal").modal('toggle');
+                        }
+                        if (typeof response.successuploadfile !== "undefined") {
+                            initWebFTPTable("webftptable", response.successuploadfile, $("#server_id").val());
+                            $("#newFileFolderModal").modal('toggle');
+                        }
                     } else {
                         formTitle.html("Success");
                         formMsg.html(response.msg);
@@ -281,7 +293,8 @@ function enableServer(server_id) {
 function initWebFTPTable(table_id, dir, server_id) {
     var table = $("#" + table_id);
     var tableItems = $("#" + table_id + "body");
-    
+    $("#newcurrdir").val(dir);
+    $("#newFileUploadCurrDir").val(dir);
     $.post(".", {
         ftp: 1,
         getDirContents: dir,
@@ -303,6 +316,7 @@ function initWebFTPTable(table_id, dir, server_id) {
                     if (items.content !== "../") {
                         actionsButton = " <button class=\"btn btn-default btn-sm\" onclick='deleteFromFTP(\"\",\"" + items.content + "\", \"" + server_id + "\", \"" + table_id + "\", \"" + dir + "\");'><em class=\"fa fa-trash-o\"></em> Delete</button><button class=\"btn btn-default btn-sm\" onclick='renameFileOrFolderModal(\"fileRenameModal\", \"" + items.content + "\");'><em class=\"fa fa-pencil-square-o\"> </em>Rename</button>";
                     }
+                    
                     var dirIcon = "";
                     if (parseInt(items.dir) === 1) {
                         dirIcon = "<em class='fa fa-folder'></em> ";

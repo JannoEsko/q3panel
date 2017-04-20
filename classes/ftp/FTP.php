@@ -55,6 +55,15 @@ class FTP {
         return ftp_rename($this->ftp, $oldfilename, $newfilename);
     }
     
+    function createNewFolder($location, $newFolderName) {
+        return ftp_mkdir($this->ftp, rtrim($location, "/") . "/" . $newFolderName);
+    }
+    
+    function createNewFile($location, $newfilename, $newfilecontents) {
+        $location = rtrim($location, "/");
+        return file_put_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/". $location . "/" . $newfilename, $newfilecontents);
+    }
+    
     function deleteFileOrDir($filename) {
         if (ftp_delete($this->ftp, $filename) === false) {
             if ($children = ftp_nlist($this->ftp, $filename)) {
@@ -68,10 +77,15 @@ class FTP {
     }
     
     
+    function uploadNewFile($dir, $uploadedFileName, $uploadedFile) {
+        $dir = rtrim($dir, "/");
+        error_log("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/$dir/". $uploadedFileName);
+        return file_put_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/$dir/". $uploadedFileName, $uploadedFile);
+    }
+    
     function writeFile($filename, $filecontents) {
-        
         if (ftp_delete($this->ftp, $filename)) {
-            return file_put_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/". $filename, $filecontents, 0);
+            return file_put_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/". $filename, $filecontents);
         } else {
             return array("error" => Constants::$ERRORS['FTP_DELETE_ERROR']);
         }

@@ -154,6 +154,9 @@ class Constants {
         , "FTP_FILE_UPDATE_SUCCESS" => "File has been successfully updated."
         , "FTP_FILE_OR_FOLDER_DELETE_SUCCESS" => "File/Folder has been successfully deleted."
         , "FTP_FILE_OR_FOLDER_RENAME_SUCCESS" => "File/Folder has been successfully renamed."
+        , "FTP_NEW_FOLDER_SUCCESS" => "New folder has been successfully created."
+        , "FTP_NEW_FILE_SUCCESS" => "New file has been successfully created."
+        , "FTP_FILE_UPLOAD_SUCCESS" => "New file has been successfully uploaded."
     );
     
     static $SSH_COMMANDS = array(

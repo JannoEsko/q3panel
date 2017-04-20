@@ -9,7 +9,73 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
-     
+
+if (isset($_POST['server_id'], $_POST['newFileUpload'], $_POST['newcurrdir']) && intval($_POST['server_id']) > 0 && intval($_POST['newFileUpload']) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            $output = $ftp->uploadNewFile($_POST['newcurrdir'], $_FILES['newUploadedFile']['name'], $_FILES['newUploadedFile']['tmp_name']);
+            if ($output === false) {
+                $_SESSION['fileUploadStatus'] = "error";
+                $_SESSION['fileUploadMsg'] = Constants::$ERRORS['GENERIC_FTP_ERROR'];
+            } else {
+                $_SESSION['fileUploadStatus'] = "success";
+                $_SESSION['fileUploadMsg'] = Constants::$MESSAGES['FTP_FILE_UPLOAD_SUCCESS'];
+            }
+        }
+
+    } 
+}
+
+
+if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], $_POST['creatableFileName'], $_POST['newfilecontents']) && 
+        intval($_POST['server_id']) > 0 && intval($_POST['newFileOrFolder']) === 1 && strlen(trim($_POST['newcurrdir'])) > 0
+        && strlen(trim($_POST['creatableFileName'])) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            $output = $ftp->createNewFile($_POST['newcurrdir'], $_POST['creatableFileName'], $_POST['newfilecontents']);
+            if ($output === false) {
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
+            } else {
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_NEW_FILE_SUCCESS'], "successnewfile" => $_POST['newcurrdir'])));
+            }
+        }
+
+    } 
+}
+
+  
+if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], $_POST['newfoldername']) && intval($_POST['newFileOrFolder']) === 1 && strlen(trim($_POST['newcurrdir'])) > 0 && strlen(trim($_POST['newfoldername'])) > 0 && intval($_POST['server_id']) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $ftp = new FTP($server);
+            $output = $ftp->createNewFolder($_POST['newcurrdir'], $_POST['newfoldername']);
+            if ($output === false) {
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
+            } else {
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_NEW_FOLDER_SUCCESS'], "successnewfolder" => $_POST['newcurrdir'])));
+            }
+        }
+
+    } 
+}
+
 if (isset($_POST['renameFileOrFolder'], $_POST['oldfilename'], $_POST['server_id'], $_POST['newfilename']) && intval($_POST['renameFileOrFolder']) === 1 && intval($_POST['server_id']) > 0 && strlen(trim($_POST['oldfilename'])) > 0 && strlen(trim($_POST['newfilename'])) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {

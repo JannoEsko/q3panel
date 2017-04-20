@@ -60,6 +60,12 @@ $ftp = new FTP($server);
                                         <tbody id="webftptablebody"></tbody>
                                         </table>
                                     </div>
+                                    <br>
+                                    <button class="btn btn-default btn-block" onclick="$('#newFileUploadForm').show();$('#newFileFolderForm').hide();$('#newFileFolderModalTitle').html('Upload a new file');$('#newFileFolderModal').modal();">Upload file</button>
+                                    <button class="btn btn-default btn-block" onclick="$('#newFileUploadForm').hide();$('#newfile').hide();$('#creatableFileName').prop('disabled', true);$('#newfilecontents').prop('disabled', true);$('#newfolder').show();$('#newfoldername').prop('disabled', false);$('#newFileFolderForm').show();$('#newFileFolderModalTitle').html('Create a new folder');$('#newFileFolderModal').modal();">New folder</button>
+                                    <button class="btn btn-default btn-block" onclick="$('#newFileUploadForm').hide();$('#newfile').show();$('#creatableFileName').prop('disabled', false);$('#newfilecontents').prop('disabled', false);$('#newfolder').hide();$('#newfoldername').prop('disabled', true);$('#newFileFolderForm').show();$('#newFileFolderModalTitle').html('Create a new file');$('#newFileFolderModal').modal();">New file</button>
+                                    </div>
+                                    
                                 </div>
                             </div>
                             
@@ -166,7 +172,72 @@ $ftp = new FTP($server);
                     </div>
                 </div> </div>
             </div>
+        <div id="newFileFolderModal" role="dialog" aria-labelledby="newFileFolderModalTitle" aria-hidden="true" class="modal fade">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" data-dismiss="modal" aria-label="Close" class="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 id="newFileFolderModalTitle" class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body" id="serverModalBody">
+                         
+                        <form hidden id="newFileFolderForm" role="form" method="post" action="../../../functions.php">
+                            <input type="hidden" id="server_id" name="server_id" value="<?php echo $_GET['server_id']; ?>">
+                            <input type="hidden" name="newFileOrFolder" value="1">
+                            <input type="hidden" id="newcurrdir" name="newcurrdir">
+                            <div id="newfile" hidden>
+                            <div class="form-group" >
+                                <label>New file name</label>
+                                <input disabled id="creatableFileName" name="creatableFileName" type="text" class="form-control" required>
+                            </div>
+                            <div class="form-group" >
+                                <label>New file contents</label>
+                                <textarea disabled id="newfilecontents" name="newfilecontents" class="form-control"></textarea>
+                            </div>
+                            </div>
+                            <div id="newfolder" hidden>
+                            <div class="form-group" >
+                                <label>New folder name</label>
+                                <input disabled id="newfoldername" name="newfoldername" type="text" class="form-control" required>
+                            </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default btn-block">Submit</button>
+                            </div>
+                        </form>
+                        <form id="newFileUploadForm" hidden method="post" enctype="multipart/form-data">
+                            <input type="hidden" name="server_id" value="<?php echo $_GET['server_id']; ?>">
+                            <input type="hidden" name="newFileUpload" value="1">
+                            <input type="hidden" name="newcurrdir" id="newFileUploadCurrDir">
+                            <div class="form-group">
+                                <label>Choose a file</label>
+                                <input type="file" class="form-control" name="newUploadedFile" required>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-default btn-block">Submit</button>
+                        </form>
+                        
+                        </div>
+                    <div class="modal-footer">
+                        <div class="clearfix">
+                            
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> </div>
+            </div>
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("fileForm");handleForm("fileRenameForm", true);$(document).ready(function() {initWebFTPTable('webftptable', '.', '<?php echo $_GET['server_id']; ?>');});</script>
+        <script>
+    
+    
+    handleForm("newFileFolderForm", true);handleForm("fileForm");handleForm("fileRenameForm", true);$(document).ready(function() {<?php if (isset($_SESSION['fileUploadStatus'])) {
+        echo "toastr." . $_SESSION['fileUploadStatus'] . "(\"" . $_SESSION['fileUploadMsg'] . "\");";
+        unset($_SESSION['fileUploadStatus']);
+        unset($_SESSION['fileUploadMsg']);
+    }        ?>initWebFTPTable('webftptable', '.', '<?php echo $_GET['server_id']; ?>');});</script>
     </body>
 </html>
