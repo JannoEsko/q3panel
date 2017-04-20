@@ -135,6 +135,7 @@ class Server extends SSH {
         $startServer = str_replace("{server_account}", $this->server_account, $startServer);
         $this->server_startscript = str_replace("{server_port}", $this->server_port, $this->server_startscript);
         $this->server_startscript = str_replace("{server_account}", $this->server_account, $this->server_startscript);
+        $this->server_startscript = str_replace("{rconpassword}", $this->rconpassword, $this->server_startscript);
         $startServer = str_replace("{server_startscript}", $this->server_startscript, $startServer);
         $this->sendCommand($startServer);
         $sql->query($query, $params);
