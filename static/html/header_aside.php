@@ -58,13 +58,14 @@
                                     <em class="fa fa-server"></em>
                                     <span>Game servers</span>
                                 </a>
-                            </li><li>
+                            </li><?php if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+                             ?><li>
                                 <a href="<?php echo "$HOST_URL/hosts/"; ?>" title="Host servers">
                                     <em class="fa fa-desktop"></em>
                                     <span>Host servers</span>
                                 </a>
                             </li>
-
+                            <?php } ?>
                             <li class="nav-heading">
                                 <span>Management</span>
                             </li>
@@ -72,12 +73,14 @@
                                 <a href="<?php echo "$HOST_URL/users/"; ?>" title="Users">
                                     <em class="icon-user"></em>
                                     <span>Users</span>
-                                </a></li><li>
+                                </a></li>
+                                <?php if (User::canPerformAction($sql, $_SESSION['user'], Constants::$PANEL_ADMIN)) { ?>
+                                <li>
                                 <a href="<?php echo "$HOST_URL/game/"; ?>" title="Users">
                                     <em class="icon-settings"></em>
                                     <span>Game setup</span>
                                 </a>
-                            </li>
+                                </li><?php } ?>
                             <li class="nav-heading">
                                 <span>Links</span>
                             </li>

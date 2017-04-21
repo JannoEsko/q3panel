@@ -290,21 +290,29 @@ class User {
         $params2 = array($editable_user_id);
         $editableUser = $sql->query($query, $params2);
         if (sizeof($data) === 1 && sizeof($editableUser) === 1) {
+            
             $data = $data[0];
             $editableUser = $editableUser[0];
+            if (intval($user_id === $editable_user_id)) {
+                if (intval($editableUser['origin']) === Constants::$EXTERNAL_ACCOUNT) {
+                    return Constants::$CANNOT_EDIT_USER;
+                } else {
+                    return Constants::$CANNOT_EDIT_GROUP;
+                }
+            }
             $user_group_id = intval($data['group_id']);
             if ($user_group_id === 3) {
                 if (intval($editableUser['origin']) === 1) {
                     if ($user_id === $editable_user_id) {
-                        return 0;
+                        return Constants::$CANNOT_EDIT_USER;
                     } else {
-                        return 2;
+                        return Constants::$ONLY_GROUP_EDIT;
                     }
                 } else {
                     if ($user_id === $editable_user_id) {
-                        return 3;
+                        return Constants::$CANNOT_EDIT_GROUP;
                     } else {
-                        return 1;
+                        return Constants::$CAN_EDIT_USER;
                     }
                 }
             }

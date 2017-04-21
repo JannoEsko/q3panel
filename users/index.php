@@ -63,9 +63,9 @@ require_once __DIR__ . "/../login.php";
                                         </table>
                                     </div>
                                     <br>
-                                    
+                                    <?php if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) { ?>
                                     <button type="button" class="btn btn-default btn-block" onclick="initRegisterModal('userModal');">Register new user</button>
-                                </div>
+                                    <?php } ?></div>
                             </div>
                             
                             <div class="panel janno-panel">

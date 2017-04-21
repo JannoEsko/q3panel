@@ -6,7 +6,7 @@ require_once __DIR__ . "/local_SQL.php";
 require_once __DIR__ . "/classes/loader.php";
 /**
  * This file holds all the generic functions and is also the starting point for all of the class 
- * function callouts, POST/GET requests etc.
+ * function callouts, POST/GET requests etc. Here it all gets logged as well.
  */
 
 if (isset($_POST['server_id'], $_POST['generateNewFTP']) && intval($_POST['server_id']) > 0 && intval($_POST['generateNewFTP']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
@@ -19,15 +19,19 @@ if (isset($_POST['server_id'], $_POST['generateNewFTP']) && intval($_POST['serve
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             $output = $server->changeServerAccountPassword($sql, generateRandomKey(8));
             if (isset($output['error'])) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERATE_NEW_FTP_ERROR'] . $output['error']);
                 die(json_encode($output));
             } else {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['FTP_PSW_GENERATE'] . $_POST['server_id']);
                 die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'])));
             }
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FTP_PSW_GENERATE_PRIVILEGE'] . $_POST['server_id']);
             die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
         }
 
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
 }
@@ -42,15 +46,19 @@ if (isset($_POST['server_id'], $_POST['resetFTPPassword'], $_POST['newFTPPasswor
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             $output = $server->changeServerAccountPassword($sql, $_POST['newFTPPassword']);
             if (isset($output['error'])) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_SERVER_HOST_ERROR'] . " Server id: " . $_POST['server_id'] . ", Host id: " . $data['host_id'] . ". Error: " . $output['error']);
                 die(json_encode($output));
             } else {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['FTP_PSW_EDIT'] . $_POST['server_id']);
                 die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'], "newFTPPasswordSet" => "1")));
             }
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FTP_PSW_CHANGE_PRIVILEGE'] . $_POST['server_id']);
             die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
         }
 
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
 }
@@ -68,10 +76,15 @@ if (isset($_POST['getFTPURIForFile'], $_POST['fileName'], $_POST['server_id']) &
             $uri = $ftp->getFileDownloadURI($_POST['fileName']);
             die(json_encode(array("href" => $ftp->getFileDownloadURI($_POST['fileName']))));
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_FTP_FILE_NOT_PRIVILEGED'] . ", server id: " . $_POST['server_id'] . ", file name: " . $_POST['fileName']);
             die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
+            
         }
 
-    } 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
 }
 
 if (isset($_POST['server_id'], $_POST['newFileUpload'], $_POST['newcurrdir']) && intval($_POST['server_id']) > 0 && intval($_POST['newFileUpload']) > 0) {
@@ -86,14 +99,20 @@ if (isset($_POST['server_id'], $_POST['newFileUpload'], $_POST['newcurrdir']) &&
             $output = $ftp->uploadNewFile($_POST['newcurrdir'], $_FILES['newUploadedFile']['name'], $_FILES['newUploadedFile']['tmp_name']);
             if ($output === false) {
                 $_SESSION['fileUploadStatus'] = "error";
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_ERROR'] . "Server id: " . $_POST['server_id']);
                 $_SESSION['fileUploadMsg'] = Constants::$ERRORS['GENERIC_FTP_ERROR'];
             } else {
                 $_SESSION['fileUploadStatus'] = "success";
                 $_SESSION['fileUploadMsg'] = Constants::$MESSAGES['FTP_FILE_UPLOAD_SUCCESS'];
             }
+        } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FILE_UPLOAD_NOT_PRIVILEGED'] . $_POST['server_id']);
         }
 
-    } 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
 }
 
 
@@ -110,13 +129,17 @@ if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], 
             $ftp = new FTP($server);
             $output = $ftp->createNewFile($_POST['newcurrdir'], $_POST['creatableFileName'], $_POST['newfilecontents']);
             if ($output === false) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_ERROR'] . "Server id: " . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
             } else {
                 die(json_encode(array("msg" => Constants::$MESSAGES['FTP_NEW_FILE_SUCCESS'], "successnewfile" => $_POST['newcurrdir'])));
             }
         }
 
-    } 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
 }
 
   
@@ -131,13 +154,17 @@ if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], 
             $ftp = new FTP($server);
             $output = $ftp->createNewFolder($_POST['newcurrdir'], $_POST['newfoldername']);
             if ($output === false) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_ERROR'] . "Server id: " . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
             } else {
                 die(json_encode(array("msg" => Constants::$MESSAGES['FTP_NEW_FOLDER_SUCCESS'], "successnewfolder" => $_POST['newcurrdir'])));
             }
         }
 
-    } 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
 }
 
 if (isset($_POST['renameFileOrFolder'], $_POST['oldfilename'], $_POST['server_id'], $_POST['newfilename']) && intval($_POST['renameFileOrFolder']) === 1 && intval($_POST['server_id']) > 0 && strlen(trim($_POST['oldfilename'])) > 0 && strlen(trim($_POST['newfilename'])) > 0) {
@@ -151,12 +178,16 @@ if (isset($_POST['renameFileOrFolder'], $_POST['oldfilename'], $_POST['server_id
             $ftp = new FTP($server);
             $output = $ftp->renameFileOrFolder($_POST['oldfilename'], $_POST['newfilename']);
             if ($output === false) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_ERROR'] . "Server id: " . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
             } else {
                 die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_OR_FOLDER_RENAME_SUCCESS'], "refreshwebftptable" => "1")));
             }
         }
 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     } 
 }
 
@@ -171,13 +202,17 @@ if (isset($_POST['deleteFromFTP'], $_POST['filename'], $_POST['server_id']) && i
             $ftp = new FTP($server);
             $output = $ftp->deleteFileOrDir($_POST['filename']);
             if ($output === false) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_ERROR'] . "Server id: " . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
             } else {
                 die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_OR_FOLDER_DELETE_SUCCESS'])));
             }
         }
 
-    } 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
 }
 
 
@@ -192,12 +227,16 @@ if (isset($_POST['editFile'], $_POST['server_id'], $_POST['filename'], $_POST['f
             $ftp = new FTP($server);
             $output = $ftp->writeFile($_POST['filename'], $_POST['fileContents']);
             if ($output === false) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_ERROR'] . "Server id: " . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
             } else {
                 die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_UPDATE_SUCCESS'])));
             }
         }
 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     } 
 }
 
@@ -212,9 +251,14 @@ if (isset($_POST['getFile'], $_POST['fileName'], $_POST['server_id']) && intval(
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             $ftp = new FTP($server);
             die(json_encode($ftp->getFileContents($_POST['fileName'])));
+        } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_PERMISSION_ERROR'] . $_POST['server_id']);
         }
 
-    } 
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
 }
 
 if (isset($_POST['ftp'], $_POST['getDirContents'], $_POST['server_id']) && intval($_POST['ftp']) === 1 && strlen($_POST['getDirContents']) > 0 && intval($_POST['server_id']) > 0) {
@@ -235,9 +279,15 @@ if (isset($_POST['ftp'], $_POST['getDirContents'], $_POST['server_id']) && intva
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             $ftp = new FTP($server);
             die(json_encode($ftp->getDirectoryFileList($_POST['getDirContents'])));
+        } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_PERMISSION_ERROR'] . $_POST['server_id']);
         }
 
-    } 
+
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
 }
 
 if (isset($_POST['deleteServer'], $_POST['server_id']) && intval($_POST['deleteServer']) === 1 && intval($_POST['server_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
@@ -248,10 +298,15 @@ if (isset($_POST['deleteServer'], $_POST['server_id']) && intval($_POST['deleteS
         $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
         $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
         if ($server->deleteServer($sql)) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['DELETE_SERVER'] . $_POST['server_id'] . " and name " . $data['server_name']);
             die(json_encode(array("href" => "../")));
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['DELETE_SERVER_GENERIC_ERROR'] . $_POST['server_id']);
             die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
         }
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
 }
 
@@ -264,10 +319,15 @@ if (isset($_POST['disableServer'], $_POST['server_id']) && intval($_POST['disabl
         $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
         $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
         if ($server->disableServer($sql)) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['SERVER_DISABLED'] . $_POST['server_id']);
             die(json_encode(array("msg" => "Server successfully disabled")));
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['DISABLE_SERVER_GENERIC_ERROR'] . $_POST['server_id']);
             die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
         }
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
 }
 
@@ -279,10 +339,15 @@ if (isset($_POST['enableServer'], $_POST['server_id']) && intval($_POST['enableS
         $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
         $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
         if ($server->enableServer($sql)) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['ENABLE_SERVER'] . $_POST['server_id']);
             die(json_encode(array("msg" => "Server successfully enabled")));
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['ENABLE_SERVER_GENERIC_ERROR'] . $_POST['server_id']);
             die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
         }
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
 }
 
@@ -296,19 +361,25 @@ if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startSer
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             if ($server->startServer($sql)) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['START_SERVER'] . $_POST['server_id']);
                 die(json_encode(array("msg" => "Server successfully started")));
             } else {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['START_SERVER_GENERIC_ERROR'] . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
             }
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['START_SERVER_DISABLED_OR_NO_AUTH'] . $_POST['server_id']);
             die(json_encode(array("error" => Constants::$ERRORS['SERVER_DISABLED_OR_NOT_AUTHORIZED'])));
         }
         
     
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
     
 }
-
+//16:23 - @TODO
 if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServer']) === 1 && intval($_POST['server_id']) > 0) {
     //$data = Server::getServersWithHost($sql, $_POST['server_id']);
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
@@ -328,13 +399,16 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
         }
         
     
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
     
 }
 
 
-if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['addServer']) === 1) {
-    $getHost = Host::getHosts($sql, $_POST['host_id'], true);
+if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['addServer']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    $getHost = Host::getHosts($sql, $_POST['host_id'], Constants::$INCLUDE_PASSWORD);
     if (sizeof($getHost) === 1) {
         $getGame = Game::getGames($sql, $_POST['game_id']);
         if (sizeof($getGame) === 1) {
@@ -354,6 +428,9 @@ if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_P
             die(json_encode(array("href" => ".")));
         }
         
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['DIDNT_FIND_HOST']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
 }
 
@@ -617,9 +694,6 @@ function isExternalAuthEnabled($sql) {
     return false;
 }
 
-if (isset($_POST['getUserData'], $_POST['user_id'])) {
-    echo json_encode();
-}
 
 if (isset($_POST['addGame'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['addGame']) === 1) {
     $data = Game::saveGame($sql, $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
@@ -650,15 +724,42 @@ if (isset($_POST['user_id'], $_POST['delete']) && intval($_POST['delete']) === 1
 if (isset($_POST['user_id'], $_POST['origin'], $_POST['editUser']) && intval($_POST['editUser']) === 1) {
     //first check that if he is editing his own account,
     //is he trying to edit his own group to a lower group (hence, locking himself out from the system).
-    if (User::canEditUser($sql, $_SESSION['user_id'], $_POST['user_id']) > 0) {
+    $canEditUser = User::canEditUser($sql, $_SESSION['user_id'], $_POST['user_id']);
+    if ($canEditUser === Constants::$CANNOT_EDIT_GROUP) {
+        $_POST['group'] = null;
+    } else if ($canEditUser === Constants::$ONLY_GROUP_EDIT) {
+        $_POST['username'] = null;
+    } 
+    if ($canEditUser > Constants::$CANNOT_EDIT_USER) {
         User::editAccount($sql, $_POST['user_id'], $_POST['username'], $_POST['password'], null, $_POST['email'], $_POST['group']);
         die(json_encode(array("href" => ".")));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['EDIT_ACCOUNT_ERROR']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
     }
     
 }
 
-if (isset($_POST['origin'], $_POST['register'], $_POST['extUser'], $_POST['group'])) {
-    
+/**
+ * Taken from http://stackoverflow.com/questions/15699101/get-the-client-ip-address-using-php
+ * @return string Returns the requestor IP
+ */
+function getUserIP() {
+    $ipaddress = "";
+    if (isset($_SERVER['HTTP_CLIENT_IP'])) {
+        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+    } else if(isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } else if(isset($_SERVER['HTTP_X_FORWARDED'])) {
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+    } else if(isset($_SERVER['HTTP_FORWARDED_FOR'])) {
+        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+    } else if(isset($_SERVER['HTTP_FORWARDED'])) {
+        $ipaddress = $_SERVER['HTTP_FORWARDED'];
+    } else if(isset($_SERVER['REMOTE_ADDR'])) {
+        $ipaddress = $_SERVER['REMOTE_ADDR'];
+    } else {
+        $ipaddress = "UNKNOWN";
+    }
+    return $ipaddress;
 }

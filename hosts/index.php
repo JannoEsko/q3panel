@@ -6,6 +6,9 @@ if (!file_exists(__DIR__ . "/../config.php")) {
 session_start();
 require_once __DIR__ . "/../classes/loader.php";
 require_once __DIR__ . "/../login.php";
+if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    header("Location: ../");
+}
 ?>
 
 <!DOCTYPE html>

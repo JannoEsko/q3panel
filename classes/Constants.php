@@ -25,6 +25,15 @@ class Constants {
     static $SERVER_STARTED = 2;
     static $SERVER_STOPPED = 1;
     static $SERVER_DISABLED = 0;
+    static $EXTERNAL_ACCOUNT = 1;
+    static $LOCAL_ACCOUNT = 0;
+    static $CANNOT_EDIT_USER = 0;
+    static $CANNOT_EDIT_GROUP = 3;
+    static $ONLY_GROUP_EDIT = 2;
+    static $CAN_EDIT_USER = 1;
+    static $INCLUDE_PASSWORD = true;
+    static $EXCLUDE_PASSWORD = false;
+    
     
     static $CREATE_TABLES = array(
         "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username))",
@@ -57,6 +66,7 @@ class Constants {
         , "ADD_NEW_HOST" => "INSERT INTO q3panel_hosts (servername, hostname, sshport, host_username, host_password) VALUES (?, ?, ?, ?, ?)"
         , "ADD_NEW_SERVER" => "INSERT INTO q3panel_servers (host_id, game_id, server_name, server_port, server_account, server_password, server_status, server_startscript, current_players, max_players, rconpassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         , "ADD_NEW_SERVER_MAPPING" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT ? AS server_id, user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_users WHERE group_id = 3"
+        , "GENERIC_LOG_INSERT" => "INSERT INTO q3panel_logs (user_id, user_ip, action) VALUES (?, ?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -122,6 +132,37 @@ class Constants {
         , "DELETE_HOST_BY_ID" => "DELETE FROM q3panel_hosts WHERE host_id = ?"
         , "DELETE_SERVER_BY_ID" => "DELETE FROM q3panel_servers WHERE server_id = ?"
         , "DELETE_NONEXISTANT_MAPPINGS" => "DELETE FROM q3panel_servers_map WHERE server_id NOT IN (SELECT server_id FROM q3panel_servers)"
+    );
+    
+    static $LOGGER_MESSAGES = array(
+        "ERRORS" => array(
+            "GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST" => "Tried to access a server which doesn't exist or isn't mapped. Server ID: "
+            , "DIDNT_FIND_HOST" => "User requested a host, which couldn't be found."
+            , "EDIT_ACCOUNT_ERROR" => "User tried to edit an account, but he/she was underprivileged to do so."
+            , "GENERATE_NEW_FTP_ERROR" => "User tried to generate a new FTP password for a server, but an error occured. Message: "
+            , "FTP_PSW_GENERATE_PRIVILEGE" => "User tried to generate a new FTP password for a server, but was underprivileged to do so. Server id: "
+            , "GENERIC_SERVER_HOST_ERROR" => "User tried to perform an action which was executed on the host machine, but an error occured. "
+            , "FTP_PSW_CHANGE_PRIVILEGE" => "User tried to generate a new FTP password for a server, but was underprivileged to do so. Server id: "
+            , "FILE_UPLOAD_NOT_PRIVILEGED" => "User tried to upload a file to FTP, but he/she wasn't privileged enough to do so. Server id: "
+            , "GENERIC_FTP_ERROR" => "User tried to perform an action in the Web FTP interface, but an error occured. "
+            , "GENERIC_FTP_PERMISSION_ERROR" => "User tried to perform an action in the Web FTP interface, but he/she is underprivileged to do so. Server id: "
+            , "DELETE_SERVER_GENERIC_ERROR" => "User tried to delete a server, but an error occured. Server id: "
+            , "DISABLE_SERVER_GENERIC_ERROR" => "User tried to disable a server, but an error occured. Server id: "
+            , "ENABLE_SERVER_GENERIC_ERROR" => "User tried to enable a server, but an error occured. Server id: "
+            , "START_SERVER_GENERIC_ERROR" => "User tried to start a server, but an error occured. Server id: "
+            , "START_SERVER_DISABLED_OR_NO_AUTH" => "User tried to start a server, which was either disabled or he had no permission to start it. Server id: "
+        ),
+        "SUCCESSES" => array(
+            "FTP_PSW_GENERATE" => "User generated a new FTP password for server id "
+            , "FTP_PSW_EDIT" => "User edited the FTP password for server id "
+            , "DELETE_SERVER" => "User deleted a server with the id "
+            , "SERVER_DISABLED" => "User disabled a server with the id "
+            , "SERVER_ENABLED" => "User enabled a server with the id "
+            , "START_SERVER" => "User started a server with the id "
+        ),
+        "INFORMATION" => array(
+            
+        )
     );
     
     static $ERRORS = array(
