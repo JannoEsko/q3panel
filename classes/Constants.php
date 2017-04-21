@@ -67,6 +67,8 @@ class Constants {
         , "ADD_NEW_SERVER" => "INSERT INTO q3panel_servers (host_id, game_id, server_name, server_port, server_account, server_password, server_status, server_startscript, current_players, max_players, rconpassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         , "ADD_NEW_SERVER_MAPPING" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT ? AS server_id, user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_users WHERE group_id = 3"
         , "GENERIC_LOG_INSERT" => "INSERT INTO q3panel_logs (user_id, user_ip, action) VALUES (?, ?, ?)"
+        , "MAP_USER_TO_ALL_SERVERS" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT server_id AS server_id, ? AS user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_servers"
+        , "FAILED_LOGIN_INSERT" => "INSERT INTO q3panel_failed_logins (failed_username, failed_ip) VALUES (?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -151,6 +153,19 @@ class Constants {
             , "ENABLE_SERVER_GENERIC_ERROR" => "User tried to enable a server, but an error occured. Server id: "
             , "START_SERVER_GENERIC_ERROR" => "User tried to start a server, but an error occured. Server id: "
             , "START_SERVER_DISABLED_OR_NO_AUTH" => "User tried to start a server, which was either disabled or he had no permission to start it. Server id: "
+            , "STOP_SERVER_GENERIC" => "User tried to stop a server, but an error occured. Server id: "
+            , "ADD_SERVER_GENERIC" => "User tried to add a server, but an error occured. Host id: "
+            , "HOST_UPDATE_GENERIC" => "User tried to update a host server, but an error occured. Host id: "
+            , "HOST_DELETE_GENERIC" => "User tried to delete a host server, but an error occured. Host id: "
+            , "NEW_HOSTSERVER_GENERIC" => "User tried to add a new host server, but an error occured. Error message: "
+            , "UPDATE_GAME_GENERIC" => "User tried to update a game, but an error occured. Game id: "
+            , "DELETE_GAME_GENERIC" => "User tried to delete a game, but an error occured. Game id: "
+            , "GENERIC_NEW_EXT_USER_ERROR" => "User tried to add a new external user, but an error occured. Ext user id: "
+            , "GENERIC_NEW_USER_ERROR" => "User tried to add a new user, but an error occured. New username: "
+            , "EMAIL_SETUP_ERROR" => "User tried to set up / edit e-mail preferences, but an error occured. Error message: "
+            , "ADD_GAME_GENERIC" => "User tried to add a new game, but an error occured."
+            , "DELETE_USER_ERROR_GENERIC" => "User tried to delete an user, but an error occured. User id: "
+            , "DELETE_USER_PRIVILEGE_ERROR" => "User tried to delete an user, but he/she is not privileged enough. User id: "
         ),
         "SUCCESSES" => array(
             "FTP_PSW_GENERATE" => "User generated a new FTP password for server id "
@@ -159,6 +174,19 @@ class Constants {
             , "SERVER_DISABLED" => "User disabled a server with the id "
             , "SERVER_ENABLED" => "User enabled a server with the id "
             , "START_SERVER" => "User started a server with the id "
+            , "SERVER_STOPPED" => "User stopped a server with the id "
+            , "ADD_SERVER" => "User added a new server to host with id "
+            , "HOST_UPDATE" => "User updated a host server with id "
+            , "HOST_DELETED" => "User deleted a host server with id "
+            , "NEW_HOSTSERVER" => "User added a new host server with id "
+            , "UPDATE_GAME" => "User updated a game with id "
+            , "DELETE_GAME" => "User deleted a game with id "
+            , "NEW_LOCAL_USER" => "User added a new local user with username "
+            , "NEW_EXT_USER" => "User added a new external user with user id "
+            , "EMAIL_SETUP" => "User has changed the e-mail preferences."
+            , "ADD_GAME" => "User added a new game with id "
+            , "DELETE_USER" => "User deleted an user with id "
+            , "EDIT_USER" => "User edited an user with id "
         ),
         "INFORMATION" => array(
             
@@ -200,6 +228,7 @@ class Constants {
         , "FTP_NEW_FILE_SUCCESS" => "New file has been successfully created."
         , "FTP_FILE_UPLOAD_SUCCESS" => "New file has been successfully uploaded."
         , "FTP_PASSWORD_CHANGE_SUCCESS" => "The server account password has been successfully changed."
+        , "EMAIL_SETUP" => "The new e-mail preferences have been saved successfully."
     );
     
     static $SSH_COMMANDS = array(

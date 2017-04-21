@@ -18,4 +18,10 @@ class Logger {
         $params = array($user_id, $user_ip, $action);
         $sql->query($query, $params);
     }
+    
+    static function logFailedLogin($sql, $username, $ip) {
+        $query = Constants::$INSERT_QUERIES['FAILED_LOGIN_INSERT'];
+        $params = array($username, $ip);
+        $sql->query($query, $params);
+    }
 }

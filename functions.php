@@ -379,9 +379,9 @@ if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startSer
     }
     
 }
-//16:23 - @TODO
+
+
 if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServer']) === 1 && intval($_POST['server_id']) > 0) {
-    //$data = Server::getServersWithHost($sql, $_POST['server_id']);
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
@@ -390,8 +390,10 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             if ($server->stopServer($sql)) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['SERVER_STOPPED'] . $_POST['server_id']);
                 die(json_encode(array("msg" => "Server successfully stopped")));
             } else {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['STOP_SERVER_GENERIC'] . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
             }
         } else {
@@ -423,9 +425,13 @@ if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_P
             
             $dat = $server->addServer($sql);
             if (isset($dat['error'])) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['ADD_SERVER_GENERIC'] . $_POST['host_id'] . ", error message: " . $_dat['error']);
                 die(json_encode($dat));
+            } else {
+                Logger.log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['ADD_SERVER'] . $_POST['host_id'] . ". New server name - " . $_POST['server_name']);
+                die(json_encode(array("href" => ".")));
             }
-            die(json_encode(array("href" => ".")));
+            
         }
         
     } else {
@@ -434,26 +440,26 @@ if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_P
     }
 }
 
-if (isset($_POST['updateHost'], $_POST['hostId'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['updateHost']) === 1) {
+if (isset($_POST['updateHost'], $_POST['hostId'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['updateHost']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $host = new Host($_POST['hostId'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']);
     $out = $host->updateHost($sql);
     if (isset($out['rows_affected']) && intval($out['rows_affected']) === 1) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['HOST_UPDATE'] . $_POST['hostId']);
         die(json_encode(array("href" => ".")));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['HOST_UPDATE_GENERIC'] . $_POST['hostId'] . ", error message: " . $out['error']);
         die(json_encode($out));
     }
 }
 
-if (isset($_POST['deleteHost'], $_POST['hostId']) && intval($_POST['deleteHost']) === 1 ) {
-    if (User::canPerformAction($sql, $_SESSION['user_id'], 3)) {
-        $dat = Host::deleteHost($sql, $_POST['hostId']);
-        if (isset($dat['error'])) {
-            die(json_encode($dat));
-        } else {
-            die(json_encode(array("href" => ".")));
-        }
+if (isset($_POST['deleteHost'], $_POST['hostId']) && intval($_POST['deleteHost']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    $dat = Host::deleteHost($sql, $_POST['hostId']);
+    if (isset($dat['error'])) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['HOST_DELETE_GENERIC'] . $_POST['hostId'] . ", error message: " . $dat['error']);
+        die(json_encode($dat));
     } else {
-        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['HOST_DELETED'] . $_POST['hostId']);
+        die(json_encode(array("href" => ".")));
     }
 }
 
@@ -461,37 +467,43 @@ if (isset($_POST['getHostData'], $_POST['host_id']) && intval($_POST['getHostDat
     die(json_encode(Host::getHosts($sql, $_POST['host_id'])[0]));
 }
 
-if (isset($_POST['addHost'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['addHost']) === 1) {
+if (isset($_POST['addHost'], $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']) && intval($_POST['addHost']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $host = new Host(null, $_POST['servername'], $_POST['hostname'], $_POST['sshport'], $_POST['host_username'], $_POST['host_password']);
     $dat = $host->addHost($sql);
     if (isset($dat['rows_affected']) && intval($dat['rows_affected']) === 1) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['NEW_HOSTSERVER'] . $dat['last_insert_id']);
         die(json_encode(array("href" => ".")));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['NEW_HOSTSERVER_GENERIC'] . $dat['error']);
         die(json_encode($dat));
     }
 }
 
 
-if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['updateGame']) === 1) {
+if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['updateGame']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $dat = Game::updateGame($sql, $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
     if (intval($dat['rows_affected']) === 1) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['UPDATE_GAME'] . $_POST['gameId']);
         die(json_encode(array("href" => ".")));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['UPDATE_GAME_GENERIC'] . $_POST['gameId']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
     }
 }
 
 
-if (isset($_POST['deleteGame'], $_POST['gameId']) && intval($_POST['deleteGame']) === 1) {
+if (isset($_POST['deleteGame'], $_POST['gameId']) && intval($_POST['deleteGame']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $dat = Game::deleteGame($sql, $_POST['gameId']);
     if (isset($dat['error'])) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['DELETE_GAME_GENERIC'] . $_POST['gameId'] . ", error message: " . $dat['error']);
         die(json_encode($dat));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['DELETE_GAME'] . $_POST['gameId']);
         die(json_encode(array("href" => ".")));
     }
 }
 
-if (isset($_POST['getGame'], $_POST['game_id']) && intval($_POST['game_id']) > 0) {
+if (isset($_POST['getGame'], $_POST['game_id']) && intval($_POST['game_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $dat = Game::getGames($sql, $_POST['game_id']);
     if (sizeof($dat) === 1) {
         $dat = $dat[0];
@@ -536,6 +548,7 @@ if (isset($_POST['login'], $_POST['username'], $_POST['password'])) {
     $user = new User($_POST['username'], $_POST['password']);
     $data = $user->authenticate($sql);
     if (isset($data['error'])) {
+        Logger::logFailedLogin($sql, $_POST['username'], getUserIP());
         echo json_encode($data);
     } else if (isset($_SESSION['installer'])) {
         echo json_encode(array("href" => "../step6/"));
@@ -566,27 +579,31 @@ if (isset($_GET['getExternalUser'], $_GET['extUserName'])) {
     echo json_encode(User::getExternalAccount($sql, $_GET['extUserName']));
 }
 
-if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (isset($_SESSION['installer']) || User::canAddUser($sql, $_SESSION['user_id']))) {
+if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (isset($_SESSION['installer']) || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))) {
     
     $user = new User($_POST['extUser'], null, "1", null, $_POST['extUserGroup'], 1);
     $dat = $user->register($sql);
     if (isset($dat['error'])) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_NEW_EXT_USER_ERROR'] . $_POST['extUser'] . ", error message: " . $dat['error']);
         echo json_encode($dat);
     } else if (isset($_SESSION['installer'])) {
         echo json_encode(array("href" => "../step6/"));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['NEW_EXT_USER'] . $_POST['extUser']);
         echo json_encode(array("href" => "."));
     }
 }
 
-if (isset($_POST['register'], $_POST['userGroup'], $_POST['username'], $_POST['password'], $_POST['email']) && (isset($_SESSION['installer']) || User::canAddUser($sql, $_SESSION['user_id']))) {
+if (isset($_POST['register'], $_POST['userGroup'], $_POST['username'], $_POST['password'], $_POST['email']) && (isset($_SESSION['installer']) || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))) {
     $user = new User($_POST['username'], $_POST['password'], 0, $_POST['email'], $_POST['userGroup'], 1);
     $dat = $user->register($sql);
     if (isset($dat['error'])) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_NEW_USER_ERROR'] . $_POST['username'] . ", error message: " . $dat['error']);
         echo json_encode($dat);
     } else if (isset($_SESSION['installer'])) {
         echo json_encode(array("href" => "../step6/"));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['NEW_LOCAL_USER'] . $_POST['username']);
         echo json_encode(array("href" => "."));
     }
 }
@@ -597,7 +614,7 @@ if (isset($_GET['setuptables'])) {
     print_r("Tables setup done");
 }
 
-if (isset($_POST['host']) && isset($_POST['username']) && isset($_POST['password']) && isset($_POST['db']) && isset($_POST['url'])) {
+if (isset($_POST['host']) && isset($_POST['username']) && isset($_POST['password']) && isset($_POST['db']) && isset($_POST['url']) && !file_exists(__DIR__ . "/config.php")) {
     require_once __DIR__ . "/classes/installation/Installation.php";
     $db_host = $_POST['host'];
     $db_username = $_POST['username'];
@@ -619,7 +636,7 @@ if (isset($_POST['host']) && isset($_POST['username']) && isset($_POST['password
     echo json_encode($r);
 }
 
-if (isset($_POST['exthost'], $_POST['extusername'], $_POST['password'], $_POST['extdb'], $_POST['usrtable'], $_POST['usrtableid'], $_POST['usrtablename'], $_POST['usrtablepsw'], $_POST['usrtableemail'])) {
+if (isset($_POST['exthost'], $_POST['extusername'], $_POST['password'], $_POST['extdb'], $_POST['usrtable'], $_POST['usrtableid'], $_POST['usrtablename'], $_POST['usrtablepsw'], $_POST['usrtableemail'], $_SESSION['installer'])) {
     require_once __DIR__ . "/classes/installation/Installation.php";
     $ext_host = $_POST['exthost'];
     $ext_user = $_POST['extusername'];
@@ -634,7 +651,7 @@ if (isset($_POST['exthost'], $_POST['extusername'], $_POST['password'], $_POST['
     echo json_encode(Installation::initializeExternalConnection($sql, $ext_host, $ext_user, $ext_pass, $ext_db, $ext_usrtable, $ext_usrtableid, $ext_usrtableusrname, $ext_usrtablepsw, $ext_usrtableemail));
 }
 
-if (isset($_POST['isSendgrid'], $_POST['fromName'], $_POST['fromEmail'])) {
+if (isset($_POST['isSendgrid'], $_POST['fromName'], $_POST['fromEmail']) && (isset($_SESSION['installer']) || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))) {
     $is_sendgrid = intval($_POST['isSendgrid']);
     $api_key = null;
     if ($is_sendgrid === 1) {
@@ -644,9 +661,15 @@ if (isset($_POST['isSendgrid'], $_POST['fromName'], $_POST['fromEmail'])) {
     $from_email = $_POST['fromEmail'];
     $result = Email::saveEmailPreferences($sql, $is_sendgrid, $from_name, $from_email, $api_key);
     if (isset($result['error'])) {
-        return json_encode($result);
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['EMAIL_SETUP_ERROR'] . $result['error']);
+        die(json_encode($result));
+    } else if (isset($_SESSION['installer'])) {
+        die(json_encode(array("href" => "../step5/")));
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['EMAIL_SETUP']);
+        die(json_encode(array("msg" => Constants::$MESSAGES['EMAIL_SETUP'])));
     }
-    echo json_encode(array("href" => "../step5/"));
+    
 }
 
 
@@ -695,27 +718,32 @@ function isExternalAuthEnabled($sql) {
 }
 
 
-if (isset($_POST['addGame'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['addGame']) === 1) {
+if (isset($_POST['addGame'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['addGame']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $data = Game::saveGame($sql, $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
     if (intval($data['rows_affected']) === 1) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['ADD_GAME'] . $data['last_insert_id']);
         die(json_encode(array("href" => ".")));
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['ADD_GAME_GENERIC']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
     }
 }
 
 if (isset($_POST['user_id'], $_POST['delete']) && intval($_POST['delete']) === 1) {
-    if (User::canEditUser($sql, $_SESSION['user_id'], $_POST['user_id']) > 0 && intval($_SESSION['user_id']) !== intval($_POST['user_id'])) {
+    if (User::canEditUser($sql, $_SESSION['user_id'], $_POST['user_id']) > Constants::$CANNOT_EDIT_USER && intval($_SESSION['user_id']) !== intval($_POST['user_id'])) {
         //We won't grab the group id from session data because someone might've changed it in the meantime
         //and thus, we will check it from SQL, so if the user can actually edit an user (delete incl), 
         //we'll let him do it if and only if it's allowed.
         $data = User::deleteAccount($sql, $_POST['user_id']);
         if (intval($data['rows_affected']) === 1) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['DELETE_USER'] . $_POST['user_id']);
             die(json_encode(array("href" => ".")));
         } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['DELETE_USER_ERROR_GENERIC'] . $_POST['user_id']);
             die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
         }
     } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['DELETE_USER_PRIVILEGE_ERROR'] . $_POST['user_id']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
     
@@ -731,7 +759,11 @@ if (isset($_POST['user_id'], $_POST['origin'], $_POST['editUser']) && intval($_P
         $_POST['username'] = null;
     } 
     if ($canEditUser > Constants::$CANNOT_EDIT_USER) {
+        if (isset($_POST['group']) && intval($_POST['group']) === Constants::$PANEL_ADMIN) {
+            Server::mapUserToAllServers($sql, $_POST['user_id']);
+        } 
         User::editAccount($sql, $_POST['user_id'], $_POST['username'], $_POST['password'], null, $_POST['email'], $_POST['group']);
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['EDIT_USER'] . $_POST['user_id']);
         die(json_encode(array("href" => ".")));
     } else {
         Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['EDIT_ACCOUNT_ERROR']);

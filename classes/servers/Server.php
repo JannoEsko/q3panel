@@ -384,5 +384,11 @@ class Server extends SSH {
         }
         return $sql->query($query, $params);
     }
+    
+    static function mapUserToAllServers(SQL $sql, $user_id) {
+        $query = Constants::$INSERT_QUERIES['MAP_USER_TO_ALL_SERVERS'];
+        $params = array($user_id);
+        $sql->query($query, $params);
+    }
 
 }

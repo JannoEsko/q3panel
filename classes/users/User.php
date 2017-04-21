@@ -399,19 +399,6 @@ class User {
         return array();
     }
     
-    static function canAddUser($sql, $user_id) {
-        //Panel admin can add accounts.
-        $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID'];
-        $params = array($user_id);
-        $data = $sql->query($query, $params);
-        if (sizeof($data) === 1) {
-            $data = $data[0];
-            return intval($data['group_id']) === 3;
-        }
-        return false;
-        
-    }
-    
     static function setSessionVariables($data) {
         session_start();
         $_SESSION['user_id'] = $data['user_id'];
