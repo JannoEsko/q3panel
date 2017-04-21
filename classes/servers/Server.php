@@ -178,6 +178,19 @@ class Server extends SSH {
         return true;
     }
     
+    function changeServerAccountPassword(SQL $sql, $newPass) {
+        $change_password = Constants::$SSH_COMMANDS['CHANGE_PASSWORD'];
+        $change_password = str_replace("{server_account}", $this->server_account, $change_password);
+        $change_password = str_replace("{server_password}", $newPass, $change_password);
+        $out = $this->host->sendCommand($change_password, true);
+        if (strlen(trim($out['stderr'])) > 0) {
+            return array("error" => $out['stderr']);
+        } else {
+            $sql->query(Constants::$UPDATE_QUERIES['SET_NEW_SERVER_ACCOUNT_PASSWORD'], array($newPass, $this->server_id));
+            return true;
+        }
+    }
+    
     function updateServer(SQL $sql) {
         
     }

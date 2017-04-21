@@ -9,6 +9,51 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc.
  */
 
+if (isset($_POST['server_id'], $_POST['generateNewFTP']) && intval($_POST['server_id']) > 0 && intval($_POST['generateNewFTP']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $output = $server->changeServerAccountPassword($sql, generateRandomKey(8));
+            if (isset($output['error'])) {
+                die(json_encode($output));
+            } else {
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'])));
+            }
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+        }
+
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
+}
+
+if (isset($_POST['server_id'], $_POST['resetFTPPassword'], $_POST['newFTPPassword']) && intval($_POST['server_id']) > 0 && intval($_POST['resetFTPPassword']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_ftp']) === 1) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $output = $server->changeServerAccountPassword($sql, $_POST['newFTPPassword']);
+            if (isset($output['error'])) {
+                die(json_encode($output));
+            } else {
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'], "newFTPPasswordSet" => "1")));
+            }
+        } else {
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+        }
+
+    } else {
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
+}
 
     
 if (isset($_POST['getFTPURIForFile'], $_POST['fileName'], $_POST['server_id']) && intval($_POST['getFTPURIForFile']) > 0) {
@@ -211,7 +256,7 @@ if (isset($_POST['deleteServer'], $_POST['server_id']) && intval($_POST['deleteS
 }
 
 
-if (isset($_POST['disableServer'], $_POST['server_id']) && intval($_POST['disableServer']) === 1 && intval($_POST['server_id']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+if (isset($_POST['disableServer'], $_POST['server_id']) && intval($_POST['disableServer']) === 1 && intval($_POST['server_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
@@ -226,7 +271,7 @@ if (isset($_POST['disableServer'], $_POST['server_id']) && intval($_POST['disabl
     }
 }
 
-if (isset($_POST['enableServer'], $_POST['server_id']) && intval($_POST['enableServer']) === 1 && intval($_POST['server_id']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+if (isset($_POST['enableServer'], $_POST['server_id']) && intval($_POST['enableServer']) === 1 && intval($_POST['server_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];

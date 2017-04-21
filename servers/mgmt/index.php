@@ -93,7 +93,7 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
                                                 <button class="btn btn-default btn-block" onclick="mapUsersToServer('<?php echo $server['server_id']; ?>');">Map users to server</button>
                                             </div>
                                             <div class="pull-right">
-                                                <button class="btn btn-default btn-block" onclick="resetFtpPassword('<?php echo $server['server_id']; ?>');">Reset FTP password</button>
+                                                <button class="btn btn-default btn-block" onclick="resetFtpPassword('ftppswreset');">Reset FTP password</button>
                                             </div>
                                         </div>
                                         <br>
@@ -220,8 +220,42 @@ if (intval($server['can_stop_server']) === 1) {
                     </div>
                 </div> </div>
         </div>
+                <div id="ftppswreset" role="dialog" aria-labelledby="ftppswresetModalTitle" aria-hidden="true" class="modal fade">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" data-dismiss="modal" aria-label="Close" class="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 id="ftppswresetModalTitle" class="modal-title">Reset FTP Password</h4>
+                    </div>
+                    <div class="modal-body">
+                        If you choose generate, it'll generate a random 8-digit password and change it itself. If you choose to type your own, it'll change the password to that.
+                        <div class="clearfix">
+                            <div class="pull-left">
+                                <button type="button" class="btn btn-default btn-block" onclick="autoGenerateNewFTPPsw('<?php echo $_GET['server_id']; ?>', 'ftppswreset');">Generate</button>
+                            </div>
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-default btn-block" onclick="$('#ftppswchangeform').show(500);">Type your own new password</button>
+                            </div>
+                        </div>
+                        <form id="ftppswchangeform" hidden method="post" action="../../functions.php" role="form">
+                            <input type="hidden" name="server_id" value="<?php echo $_GET['server_id']; ?>">
+                            <input type="hidden" name="resetFTPPassword" value="1">
+                            <div class="form-group">
+                                <label>New password</label>
+                                <input type="text" name="newFTPPassword" required class="form-control" placeholder="Type in the new FTP password you wish to use">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default btn-block">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+                </div>
 
 <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script></script>
+        <script>handleForm("ftppswchangeform", true);</script>
     </body>
 </html>

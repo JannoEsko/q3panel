@@ -112,6 +112,7 @@ class Constants {
         "SET_STYLE_FOR_USER" => "UPDATE q3panel_style_preference SET style_id = ? WHERE user_id = ?"
         , "UPDATE_HOST_BY_ID" => "UPDATE q3panel_hosts SET servername = ?, hostname = ?, sshport = ?, host_username = ?, host_password = ? WHERE host_id = ?"
         , "SET_SERVER_STATUS" => "UPDATE q3panel_servers SET server_status = ? WHERE server_id = ?"
+        , "SET_NEW_SERVER_ACCOUNT_PASSWORD" => "UPDATE q3panel_servers SET server_password = ? WHERE server_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -157,6 +158,7 @@ class Constants {
         , "FTP_NEW_FOLDER_SUCCESS" => "New folder has been successfully created."
         , "FTP_NEW_FILE_SUCCESS" => "New file has been successfully created."
         , "FTP_FILE_UPLOAD_SUCCESS" => "New file has been successfully uploaded."
+        , "FTP_PASSWORD_CHANGE_SUCCESS" => "The server account password has been successfully changed."
     );
     
     static $SSH_COMMANDS = array(

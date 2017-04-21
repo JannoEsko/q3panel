@@ -99,6 +99,9 @@ function handleForm(id, useToaster) {
                             initWebFTPTable("webftptable", response.successuploadfile, $("#server_id").val());
                             $("#newFileFolderModal").modal('toggle');
                         }
+                        if (typeof response.newFTPPasswordSet !== "undefined") {
+                            $("#ftppswreset").modal('toggle');
+                        }
                     } else {
                         formTitle.html("Success");
                         formMsg.html(response.msg);
@@ -418,4 +421,23 @@ function renameFileOrFolder(oldname, newname, server_id, table_id, currdir) {
             initWebFTPTable(table_id, currdir, server_id);
         }
     });
+}
+
+function resetFtpPassword(modal_id) {
+    $("#" + modal_id).modal();
+}
+
+function autoGenerateNewFTPPsw(server_id, modal_id) {
+    $.post(".", {
+        generateNewFTP: 1,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        $("#" + modal_id).modal('toggle');
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else if (typeof data.msg !== "undefined") {
+            toastr.success(data.msg);
+        }
+    })
 }
