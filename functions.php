@@ -576,7 +576,7 @@ function int2bool($input) {
 }
 
 if (isset($_GET['getExternalUser'], $_GET['extUserName'])) {
-    echo json_encode(User::getExternalAccount($sql, $_GET['extUserName']));
+    echo json_encode(User::getExternalAccountSelect2($sql, $_GET['extUserName']));
 }
 
 if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (isset($_SESSION['installer']) || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))) {
@@ -794,4 +794,12 @@ function getUserIP() {
         $ipaddress = "UNKNOWN";
     }
     return $ipaddress;
+}
+
+function intbool2str($input) {
+    $input = int2bool($input);
+    if ($input) {
+        return "Yes";
+    }
+    return "No";
 }

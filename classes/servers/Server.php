@@ -390,5 +390,11 @@ class Server extends SSH {
         $params = array($user_id);
         $sql->query($query, $params);
     }
+    
+    static function getServersWithUserMapping(SQL $sql, $server_id) {
+        $query = Constants::$SELECT_QUERIES['GET_MAP_WITH_SERVER_WITH_USERS_BY_SERVER_ID'];
+        $params = array($server_id);
+        return $sql->query($query, $params);
+    }
 
 }

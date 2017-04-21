@@ -90,7 +90,7 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
                                         <br>
                                         <div class="clearfix">
                                             <div class="pull-left">
-                                                <button class="btn btn-default btn-block" onclick="mapUsersToServer('<?php echo $server['server_id']; ?>');">Map users to server</button>
+                                                <button class="btn btn-default btn-block" onclick="location.href='mapping/?server_id=<?php echo $_GET['server_id']; ?>';">Map users to server</button>
                                             </div>
                                             <div class="pull-right">
                                                 <button class="btn btn-default btn-block" onclick="resetFtpPassword('ftppswreset');">Reset FTP password</button>

@@ -118,6 +118,8 @@ class Constants {
         , "GET_SERVERS_BY_GAME_ID" => "SELECT * FROM q3panel_servers WHERE game_id = ?"
         , "GET_SERVERS_WITH_MAP" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_servers_map ON q3panel_servers_map.server_id = q3panel_servers.server_id INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers_map.user_id = ?"
         , "GET_SERVER_WITH_MAP" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_servers_map ON q3panel_servers_map.server_id = q3panel_servers.server_id INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.server_id = ? AND q3panel_servers_map.user_id = ?"
+        , "GET_MAP_WITH_SERVERS_WITH_USERS" => "SELECT * FROM q3panel_servers_map INNER JOIN q3panel_servers ON q3panel_servers_map.server_id = q3panel_servers_map.server_id INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_servers_map.user_id"
+        , "GET_MAP_WITH_SERVER_WITH_USERS_BY_SERVER_ID" => "SELECT * FROM q3panel_servers_map INNER JOIN q3panel_servers ON q3panel_servers_map.server_id = q3panel_servers_map.server_id INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_servers_map.user_id WHERE q3panel_servers_map.server_id = ?"
     );
     
     static $UPDATE_QUERIES = array(

@@ -362,7 +362,36 @@ class User {
         return $localData;
     }
     
-    static function getExternalAccount(SQL $sql, $username) {
+    static function getExternalAccount(SQL $sql, $ext_user_id, $extTable_spec = false) {
+        $extData = self::getExtData($sql);
+        $extExists = false;
+        $extSql = null;
+        $extQuery = "";
+        $user_id = null;
+        $username_field = null;
+        $email_field = null;
+        if (sizeof($extData) !== 0) {
+            $db_host = $extData['host'];
+            $db_username = $extData['db_username'];
+            $db_password = $extData['db_password'];
+            $db = $extData['db_name'];
+            $users_table = $extData['users_table_name'];
+            $user_id = $extData['user_id_field'];
+            $username_field = $extData['username_field'];
+            $email_field = $extData['email_field'];
+            $extSql = self::getExternalConnection($db_host, $db_username, $db_password, $db);
+            $extExists = true;
+            $extQuery = self::getExternalQuery(Constants::$SELECT_QUERIES['GET_EXT_USER_BY_ID'], $users_table, $user_id, $username_field, null, $email_field);
+            if ($extTable_spec) {
+                return array("extTable_spec" => array("user_id_field" => $user_id, "username_field" => $username_field, "email_field" => $email_field), "data" => $extSql->query($extQuery, array($ext_user_id)));
+            }
+            return $extSql->query($extQuery, array($ext_user_id));
+            
+        }
+        return array();
+    }
+    
+    static function getExternalAccountSelect2(SQL $sql, $username) {
         $query = Constants::$SELECT_QUERIES['FIND_EXT_USER_SELECT2'];
         $data = self::getExtData($sql);
         if (sizeof($data) !== 0) {
