@@ -6,6 +6,9 @@ if (!file_exists(__DIR__ . "/../../../config.php")) {
 session_start();
 require_once __DIR__ . "/../../../classes/loader.php";
 require_once __DIR__ . "/../../../login.php";
+if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    header("Location: ../");
+}
 ?>
 
 <!DOCTYPE html>
@@ -48,9 +51,6 @@ require_once __DIR__ . "/../../../login.php";
                                             <tbody>
                                     <?php
                                     $serverMapping = Server::getServersWithUserMapping($sql, $_GET['server_id']);
-                                    if (sizeof($serverMapping) === 1) {
-                                        $serverMapping = $serverMapping[0];
-                                    }
                                     foreach($serverMapping as $serverMap) {
                                         ?><tr><?php
                                         if (intval($serverMap['origin']) === Constants::$EXTERNAL_ACCOUNT) {
