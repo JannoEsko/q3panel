@@ -314,7 +314,72 @@ class Server extends SSH {
         if (isset($serverInsert['last_insert_id']) && intval($serverInsert['last_insert_id']) > 0) {
             return array($out1, $out2, $out3, $out4);
         }
-        return array("error" => "ssomethingwrong");
+        return array("error" => Constants::$ERRORS['GENERIC_ERROR']);
+        
+    }
+    
+    function sendQ3Command($command, $output = false, $use_rcon = false) {
+        if ($use_rcon) {
+            $command = str_replace("{rconpassword}", $this->rconpassword, $command);
+        }
+        $resource = fsockopen("udp://" . gethostbyname($this->host->getHostname()), $this->server_port);
+        stream_set_timeout($resource, Constants::$Q3_RESOURCE_TIMEOUT);
+        if ($output) {
+            stream_set_blocking($resource, true);
+            fwrite($resource, $command);
+            $out = stream_get_contents($resource);
+            fclose($resource);
+            return $out;
+        } else {
+            fwrite($resource, $command);
+            fclose($resource);
+        }
+    }
+    
+    function checkServer(SQL $sql) {
+        //first, check if screen is up.
+        $getScreenPID = Constants::$SSH_COMMANDS['GET_SCREEN_PID'];
+        $getScreenPID = str_replace("{server_account}", $this->server_account, $getScreenPID);
+        $out = $this->sendCommand($getScreenPID, true);
+        if (strlen(trim($out['stderr'])) === 0) {
+            $pid = intval(trim($out['stdio']));
+            if ($pid > 0) {
+                //means screen is up, time to check the server itself.
+                $q3command = Constants::$SERVER_ACTIONS['GET_Q3_SERVER_INFO'];
+                $out = $this->sendQ3Command($q3command, true);
+                $outArr = explode("\\", $out);
+                $serverStatusGot = false;
+                $currentPlayers = 0;
+                
+                for ($i = 0; $i < sizeof($outArr); $i++) {
+                    if (trim($outArr[$i]) === "clients") {
+                        $i++;
+                        $currentPlayers = intval(trim($outArr[$i]));
+                        $serverStatusGot = true;
+                    }
+                }
+                if ($serverStatusGot) {
+                    return array("players" => $currentPlayers);
+                } else {
+                    //most likely we didnt get any output from the server.
+                    $reboot = $this->restartServer($sql);
+                    if ($reboot) {
+                        return array("msg" => Constants::$SERVER_ACTIONS['SERVER_REBOOT_SUCCESS_NO_INFOMSG']);
+                    } else {
+                        return array("error" => Constants::$SERVER_ACTIONS['SERVER_REBOOT_ERROR_NO_INFOMSG']);
+                    }
+                }
+            } else {
+                $reboot = $this->restartServer($sql);
+                if ($reboot) {
+                    return array("msg" => Constants::$SERVER_ACTIONS['SERVER_PID_DOWN_REBOOT_SUCCESSFUL']);
+                } else {
+                    return array("error" => Constants::$SERVER_ACTIONS['SERVER_PID_DOWN_REBOOT_ERROR']);
+                }
+            }
+        } else {
+            return $out;
+        }
         
     }
     
@@ -327,6 +392,12 @@ class Server extends SSH {
         } else {
             $query = Constants::$SELECT_QUERIES['GET_SERVERS'];
         }
+        return $sql->query($query, $params);
+    }
+    
+    static function getRunningServers(SQL $sql) {
+        $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_STATUS'];
+        $params = array(Constants::$SERVER_STARTED);
         return $sql->query($query, $params);
     }
     

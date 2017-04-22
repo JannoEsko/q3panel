@@ -74,7 +74,7 @@
                                     <em class="icon-user"></em>
                                     <span>Users</span>
                                 </a></li>
-                                <?php if (User::canPerformAction($sql, $_SESSION['user'], Constants::$PANEL_ADMIN)) { ?>
+                                <?php if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) { ?>
                                 <li>
                                 <a href="<?php echo "$HOST_URL/game/"; ?>" title="Users">
                                     <em class="icon-settings"></em>

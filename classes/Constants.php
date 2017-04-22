@@ -33,6 +33,15 @@ class Constants {
     static $CAN_EDIT_USER = 1;
     static $INCLUDE_PASSWORD = true;
     static $EXCLUDE_PASSWORD = false;
+    static $Q3_RESOURCE_TIMEOUT = 1;
+    static $HOST_RESOURCE_TIMEOUT = 2;
+    
+    
+    static $SERVER_LOG_SEVERITIES = array(
+        "error" => array("level" => 2, "fa-icon" => "fa-times")
+        , "info" => array("level" => 1, "fa-icon" => "fa-info")
+        , "success" => array("level" => 0, "fa-icon" => "fa-check")
+    );
     
     
     static $CREATE_TABLES = array(
@@ -69,6 +78,7 @@ class Constants {
         , "GENERIC_LOG_INSERT" => "INSERT INTO q3panel_logs (user_id, user_ip, action) VALUES (?, ?, ?)"
         , "MAP_USER_TO_ALL_SERVERS" => "INSERT IGNORE INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT server_id AS server_id, ? AS user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_servers"
         , "FAILED_LOGIN_INSERT" => "INSERT INTO q3panel_failed_logins (failed_username, failed_ip) VALUES (?, ?)"
+        , "SERVER_LOG_INSERT" => "INSERT INTO q3panel_servers_logs (server_id, user_id, user_ip, severity, action) VALUES (?, ?, ?, ?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -120,6 +130,7 @@ class Constants {
         , "GET_SERVER_WITH_MAP" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_servers_map ON q3panel_servers_map.server_id = q3panel_servers.server_id INNER JOIN q3panel_hosts ON q3panel_hosts.host_id = q3panel_servers.host_id INNER JOIN q3panel_games ON q3panel_games.game_id = q3panel_servers.game_id WHERE q3panel_servers.server_id = ? AND q3panel_servers_map.user_id = ?"
         , "GET_MAP_WITH_SERVERS_WITH_USERS" => "SELECT * FROM q3panel_servers_map INNER JOIN q3panel_servers ON q3panel_servers_map.server_id = q3panel_servers_map.server_id INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_servers_map.user_id"
         , "GET_MAP_WITH_SERVER_WITH_USERS_BY_SERVER_ID" => "SELECT * FROM q3panel_servers_map INNER JOIN q3panel_servers ON q3panel_servers_map.server_id = q3panel_servers.server_id INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_servers_map.user_id WHERE q3panel_servers_map.server_id = ?"
+        , "GET_SERVERS_WITH_HOST_AND_GAME_BY_STATUS" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_servers.host_id = q3panel_hosts.host_id INNER JOIN q3panel_games ON q3panel_servers.game_id = q3panel_games.game_id WHERE q3panel_servers.server_status = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -127,6 +138,7 @@ class Constants {
         , "UPDATE_HOST_BY_ID" => "UPDATE q3panel_hosts SET servername = ?, hostname = ?, sshport = ?, host_username = ?, host_password = ? WHERE host_id = ?"
         , "SET_SERVER_STATUS" => "UPDATE q3panel_servers SET server_status = ? WHERE server_id = ?"
         , "SET_NEW_SERVER_ACCOUNT_PASSWORD" => "UPDATE q3panel_servers SET server_password = ? WHERE server_id = ?"
+        , "SET_SERVER_PLAYERS_BY_ID" => "UPDATE q3panel_servers SET current_players = ? WHERE server_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -193,6 +205,15 @@ class Constants {
         "INFORMATION" => array(
             
         )
+    );
+    
+    static $SERVER_ACTIONS = array(
+        "SERVER_PID_DOWN_REBOOT_SUCCESSFUL" => "The server has been rebooted due to the screen being down."
+        , "SERVER_PID_DOWN_REBOOT_ERROR" => "The server couldn't be rebooted due to an unknown error. Screen PID was down."
+        , "GET_Q3_SERVER_INFO" => "\xFF\xFF\xFF\xFFgetinfo"
+        , "GET_Q3_SERVER_STATUS" => "\xFF\xFF\xFF\xFFgetstatus"
+        , "SERVER_REBOOT_SUCCESS_NO_INFOMSG" => "Restarted the server, because it didn't respond to the getinfo query."
+        , "SERVER_REBOOT_ERROR_NO_INFOMSG" => "The server didn't respond to the getinfo query and it couldn't be restarted"
     );
     
     static $ERRORS = array(

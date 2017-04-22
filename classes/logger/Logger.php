@@ -24,4 +24,10 @@ class Logger {
         $params = array($username, $ip);
         $sql->query($query, $params);
     }
+    
+    static function logServer($sql, $server_id, $user_id, $user_ip, $severity, $action) {
+        $query = Constants::$INSERT_QUERIES['SERVER_LOG_INSERT'];
+        $params = array($server_id, $user_id, $user_ip, $severity, $action);
+        $sql->query($query, $params);
+    }
 }
