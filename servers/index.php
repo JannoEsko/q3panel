@@ -6,6 +6,7 @@ if (!file_exists(__DIR__ . "/../config.php")) {
 session_start();
 require_once __DIR__ . "/../classes/loader.php";
 require_once __DIR__ . "/../login.php";
+$is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN);
 ?>
 
 <!DOCTYPE html>
@@ -53,10 +54,10 @@ require_once __DIR__ . "/../login.php";
                                                 <?php
                                                 $servers = Server::getServersWithHostAndGame($sql, $_SESSION['user_id']);
                                                 foreach ($servers as $server) {
-                                                    if (intval($server['can_see_rcon']) === 0) {
+                                                    if (intval($server['can_see_rcon']) === 0 && !$is_server_admin) {
                                                         $server['rconpassword'] = "<i>hidden</i>";
                                                     }
-                                                    if (intval($server['can_see_ftp']) === 0) {
+                                                    if (intval($server['can_see_ftp']) === 0 && !$is_server_admin) {
                                                         $server['server_account'] = "<i>hidden</i>";
                                                         $server['server_password'] = "<i>hidden</i>";
                                                     }

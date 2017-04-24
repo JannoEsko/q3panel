@@ -15,6 +15,7 @@ if (sizeof($server) !== 1) {
     header("Location: ../");
 }
 $server = $server[0];
+$is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN);
 ?>
 
 <!DOCTYPE html>
@@ -84,10 +85,13 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
                                             </div>
                                             <div class="pull-right">
                                                 <button class="btn btn-danger btn-block" onclick="deleteServer('<?php echo $server['server_id']; ?>');">Delete server</button>
-                                            </div>
-
-                                        </div>
+                                            </div></div>
                                         <br>
+<?php } 
+
+if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+?>
+                                        
                                         <div class="clearfix">
                                             <div class="pull-left">
                                                 <button class="btn btn-default btn-block" onclick="location.href='mapping/?server_id=<?php echo $_GET['server_id']; ?>';">Map users to server</button>
@@ -97,10 +101,8 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
                                             </div>
                                         </div>
                                         <br>
-    <?php
-}
-?>
 
+<?php } ?>
 
 
 
@@ -108,7 +110,7 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
                                     <div class="clearfix">
                                         <div class="pull-left">
 <?php
-if (intval($server['can_stop_server']) === 1) {
+if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
     ?>
                                                 <div id="startServer"  <?php if (intval($server['server_status']) === Constants::$SERVER_STARTED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
                                                     <button  class="btn btn-default btn-block" onclick="startServer('<?php echo $server['server_id']; ?>');">Start server</button>
@@ -122,7 +124,7 @@ if (intval($server['can_stop_server']) === 1) {
                                         </div>
                                         <div class="pull-right">
                                             <?php
-                                            if (intval($server['can_see_ftp']) === 1) {
+                                            if (intval($server['can_see_ftp']) === 1 || $is_server_admin) {
                                                 ?>
                                                 <button class="btn btn-default btn-block" onclick="location.href = 'webftp/?server_id=<?php echo $server['server_id']; ?>';">Web FTP</button>
 <?php }

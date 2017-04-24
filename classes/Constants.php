@@ -79,6 +79,7 @@ class Constants {
         , "MAP_USER_TO_ALL_SERVERS" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT server_id AS server_id, ? AS user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_servers ON DUPLICATE KEY UPDATE can_see_rcon = 1, can_see_ftp = 1, can_access_config = 1, can_access_maps = 1, can_stop_server = 1"
         , "FAILED_LOGIN_INSERT" => "INSERT INTO q3panel_failed_logins (failed_username, failed_ip) VALUES (?, ?)"
         , "SERVER_LOG_INSERT" => "INSERT INTO q3panel_servers_logs (server_id, user_id, user_ip, severity, action) VALUES (?, ?, ?, ?, ?)"
+        , "ADD_USER_TO_SERVER_MAP" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_stop_server, can_see_rcon, can_see_ftp) VALUES (?, ?, ?, ?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -140,6 +141,7 @@ class Constants {
         , "SET_SERVER_STATUS" => "UPDATE q3panel_servers SET server_status = ? WHERE server_id = ?"
         , "SET_NEW_SERVER_ACCOUNT_PASSWORD" => "UPDATE q3panel_servers SET server_password = ? WHERE server_id = ?"
         , "SET_SERVER_PLAYERS_BY_ID" => "UPDATE q3panel_servers SET current_players = ? WHERE server_id = ?"
+        , "UPDATE_SERVER_MAP_BY_SERVER_ID_USER_ID" => "UPDATE q3panel_servers_map SET can_stop_server = ?, can_see_rcon = ?, can_see_ftp = ? WHERE server_id = ? AND user_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -183,6 +185,8 @@ class Constants {
             , "DELETE_USER_ERROR_GENERIC" => "User tried to delete an user, but an error occured. User id: "
             , "DELETE_USER_PRIVILEGE_ERROR" => "User tried to delete an user, but he/she is not privileged enough. User id: "
             , "REMOVE_USER_SERVER_MAP" => "User tried to delete mapping for user id {user_id} on server {server_id} but something went wrong (most likely the deletable user was a panel admin)."
+            , "EDIT_MAPPING" => "User tried to edit mapping for user id {user_id} on server id {server_id} but the operation failed (most likely the editable user is a panel admin)."
+            , "ADD_MAPPING" => "User tried to map a server with id {server_id} to user id {user_id} but failed to do so. Most likely, the user is panel admin and is already mapped."
         ),
         "SUCCESSES" => array(
             "FTP_PSW_GENERATE" => "User generated a new FTP password for server id "
@@ -205,6 +209,8 @@ class Constants {
             , "DELETE_USER" => "User deleted an user with id "
             , "EDIT_USER" => "User edited an user with id "
             , "REMOVE_USER_SERVER_MAP_SUCCESS" => "User removed the server mapping for server id {server_id} for user {user_id}."
+            , "EDIT_MAPPING" => "User edited the server mapping for user id {user_id} on server id {server_id}."
+            , "ADD_MAPPING" => "User added a new user with id {user_id} to server id {server_id} map."
         ),
         "INFORMATION" => array(
             
@@ -235,6 +241,8 @@ class Constants {
         , "SERVER_DISABLED_OR_NOT_AUTHORIZED" => "You cannot perform this action, because either you're not privileged enough or the server is disabled."
         , "FTP_DELETE_ERROR" => "Couldn't remove the file you tried to update. Please check permissions."
         , "GENERIC_FTP_ERROR" => "Couldn't perform the action with FTP. Please check the permissions on the host server, if the file already exists on FTP or check if you're privileged enough."
+        , "EDIT_MAPPING_ERROR" => "Couldn't edit the mapping for the user. Most likely the user is a panel admin."
+        , "ADD_MAPPING_ERROR" => "Couldn't map the server to user. Please refresh the page and try again (most likely, the user is panel admin and thus, is already mapped)."
     );
     
     static $EMAIL_TEMPLATE = array(
@@ -262,6 +270,8 @@ class Constants {
         , "EMAIL_SETUP" => "The new e-mail preferences have been saved successfully."
         , "USER_MAPPING_REMOVED" => "The user has been successfully removed from the server map"
         , "USER_MAPPING_REMOVED_ERROR" => "Something went wrong with deleting the map for the user (most likely the user is a panel admin). Please refresh the page and try again."
+        , "EDIT_MAPPING_SUCCESS" => "Mapping edited successfully."
+        , "ADD_MAPPING_SUCCESS" => "User mapped successfully."
     );
     
     static $SSH_COMMANDS = array(

@@ -420,6 +420,28 @@ class Server extends SSH {
         
     }
     
+    static function addUserMapping(SQL $sql, $server_id, $user_id, $can_stop_server, $can_see_rcon, $can_see_ftp) {
+        if (User::checkUser($sql, $user_id, Constants::$PANEL_ADMIN) === false) {
+            $query = Constants::$INSERT_QUERIES['ADD_USER_TO_SERVER_MAP'];
+            $params = array($server_id, $user_id, $can_stop_server, $can_see_rcon, $can_see_ftp);
+            return $sql->query($query, $params);
+        } else {
+            return false;
+        }
+    }
+    
+    static function editUserMapping(SQL $sql, $server_id, $user_id, $can_stop_server, $can_see_rcon, $can_see_ftp) {
+        //first check if the user is a panel admin (so they can't be removed).
+        if (User::checkUser($sql, $user_id, Constants::$PANEL_ADMIN) === false) {
+            $query = Constants::$UPDATE_QUERIES['UPDATE_SERVER_MAP_BY_SERVER_ID_USER_ID'];
+            $params = array($can_stop_server, $can_see_rcon, $can_see_ftp, $server_id, $user_id);
+            return $sql->query($query, $params);
+        } else {
+            return false;
+        }
+        
+    }
+    
     static function getServersWithHost(SQL $sql, $server_id = null, $host_id = null) {
         $query = "";
         $params = null;

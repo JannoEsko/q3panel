@@ -6,7 +6,10 @@ if (!file_exists(__DIR__ . "/../../../config.php")) {
 session_start();
 require_once __DIR__ . "/../../../classes/loader.php";
 require_once __DIR__ . "/../../../login.php";
-if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+if (!isset($_GET['server_id']) || intval($_GET['server_id']) === 0) {
+    header("Location: ../");
+}
+if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     header("Location: ../");
 }
 ?>
@@ -39,7 +42,8 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                                     Server and User mapping and permissions
                                 </div>
                                 <div class="panel-body">
-                                    <div class="table-responsive table-bordered">
+                                    Users who are mapped, can see the server. There are 3 specific options what to show the user. Stopping server option means that the user can start/stop the server. Seeing RCON means that the user sees the RCON of the server. Using FTP means that the user sees the FTP login and password and can also use the Web FTP interface for the server. Panel admins are automatically mapped to the servers with the default options. After removing the panel admin group from the server, the permissions <b class="text-danger">will stay</b> for the user, so you have to remove the mappings / edit the mappings from those users.
+                                    <br><br><div class="table-responsive table-bordered">
                                         <table class="table table-hover" id="mapTable">
                                             <thead>
                                             <th>Username</th>
@@ -61,16 +65,16 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                                                 $extData = $extData[0];
                                             }
                                             ?><td><?php echo $extData[$tableSpec['username_field']]; ?></td>
-                                            <td><?php echo intbool2str($serverMap['can_stop_server']); ?></td>
-                                            <td><?php echo intbool2str($serverMap['can_see_rcon']); ?></td>
-                                            <td><?php echo intbool2str($serverMap['can_see_ftp']); ?></td>
-                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default" onclick="editServerMapping('<?php echo $serverMap['user_id']; ?>', 'modalId');">Edit</button><button type="button" class="btn btn-block btn-default" onclick="$('#removeMapUser').val('<?php echo $serverMap['user_id']; ?>');$('#submitRemoveMap').click();">Remove</button><?php } ?></td>
+                                            <td id="tdcss<?php echo $serverMap['user_id']; ?>"><?php echo intbool2str($serverMap['can_stop_server']); ?></td>
+                                            <td id="tdcsr<?php echo $serverMap['user_id']; ?>"><?php echo intbool2str($serverMap['can_see_rcon']); ?></td>
+                                            <td id="tdcsf<?php echo $serverMap['user_id']; ?>"><?php echo intbool2str($serverMap['can_see_ftp']); ?></td>
+                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default" onclick="editServerMapping('serverMap', '<?php echo $serverMap['user_id']; ?>', '<?php echo $extData[$tableSpec['username_field']]; ?>', <?php echo $serverMap['can_stop_server'] . ", " . $serverMap['can_see_rcon'] . ", " . $serverMap['can_see_ftp']; ?>);">Edit</button><button type="button" class="btn btn-block btn-default" onclick="$('#removeMapUser').val('<?php echo $serverMap['user_id']; ?>');$('#submitRemoveMap').click();">Remove</button><?php } ?></td>
                                         <?php } else { ?>
-                                            <td><?php echo $serverMap['username']; ?></td>
-                                            <td><?php echo intbool2str($serverMap['can_stop_server']); ?></td>
-                                            <td><?php echo intbool2str($serverMap['can_see_rcon']); ?></td>
-                                            <td><?php echo intbool2str($serverMap['can_see_ftp']); ?></td>
-                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default" onclick="editServerMapping('<?php echo $serverMap['user_id']; ?>', 'modalId');">Edit</button><button type="button" class="btn btn-block btn-default" onclick="$('#removeMapUser').val('<?php echo $serverMap['user_id']; ?>');$('#submitRemoveMap').click();">Remove</button><?php } ?></td>
+                                            <td ><?php echo $serverMap['username']; ?></td>
+                                            <td id="tdcss<?php echo $serverMap['user_id']; ?>"><?php echo intbool2str($serverMap['can_stop_server']); ?></td>
+                                            <td id="tdcsr<?php echo $serverMap['user_id']; ?>"><?php echo intbool2str($serverMap['can_see_rcon']); ?></td>
+                                            <td id="tdcsf<?php echo $serverMap['user_id']; ?>"><?php echo intbool2str($serverMap['can_see_ftp']); ?></td>
+                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default" onclick="editServerMapping('serverMap', '<?php echo $serverMap['user_id']; ?>', '<?php echo $serverMap['username']; ?>', <?php echo $serverMap['can_stop_server'] . ", " . $serverMap['can_see_rcon'] . ", " . $serverMap['can_see_ftp']; ?>);">Edit</button><button type="button" class="btn btn-block btn-default" onclick="$('#removeMapUser').val('<?php echo $serverMap['user_id']; ?>');$('#submitRemoveMap').click();">Remove</button><?php } ?></td>
                                         <?php }
                                         ?></tr><?php 
                                     }
@@ -80,6 +84,8 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                                         </table>
                                     </div>
                                     <small>The edit button appears only for accounts, which aren't in the Panel Admin group (Panel Admin can access all servers, all hosts).</small>
+                                    <br><br>
+                                    <button class="btn btn-block btn-default" onclick="$('#editMap').val(0);$('#addMap').val(1);$('#addUserId').prop('disabled', false);$('#editMapUserId').prop('disabled', true);$('#addMapSelect').show();$('#serverMapTitle').html('Map new user');$('#serverMap').modal();">Add new user to the map</button>
                                 </div>
                             </div>
                             
@@ -140,6 +146,57 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
             </section>
 
         </div>
+        <div id="serverMap" role="dialog" aria-labelledby="serverMapTitle" aria-hidden="true" class="modal fade">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" data-dismiss="modal" aria-label="Close" class="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 id="serverMapTitle" class="modal-title"></h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="mapForm" role="form" method="post" action="../../../functions.php">
+                            <input type="hidden" name="server_id" value="<?php echo $_GET['server_id']; ?>">
+                            <input type="hidden" name="editMap" value="0" id="editMap">
+                            <input type="hidden" name="addMap" value="0" id="addMap">
+                            <input type="hidden" name="user_id" id="editMapUserId" value="0" disabled>
+                            <div id="addMapSelect" hidden class="form-group">
+                                <select disabled id="addUserId" name="user_id" class="form-control">
+                                    <?php
+                                    $dat = User::getAllUsers($sql);
+                                    foreach ($dat as $user) {
+                                        echo "<option value=\"" . $user['user_id'] . "\">" . $user['realName'] . "</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label><input type="checkbox" id="can_stop_server" name="can_stop_server">Stopping server</label>
+                            </div>
+                            <div class="form-group">
+                                <label><input type="checkbox" id="can_see_rcon" name="can_see_rcon">Seeing RCON</label>
+                            </div>
+                            <div class="form-group">
+                                <label><input type="checkbox" id="can_see_ftp" name="can_see_ftp">Using FTP</label>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default btn-block">Submit</button>
+                            </div>
+                        </form>
+                        
+                        
+                        </div>
+                    <div class="modal-footer">
+                        <div class="clearfix">
+                            
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div> </div>
+            </div>
         <form id="removeMapping" hidden method="post" action="../../../functions.php">
             <input type="hidden" name="server_id" value="<?php echo $_GET['server_id']; ?>">
             <input type="hidden" name="deleteMap" value="1">
@@ -147,6 +204,6 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
             <button id="submitRemoveMap" type="submit" hidden></button>
         </form>
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("removeMapping", true);</script>
+        <script>handleForm("removeMapping", true);handleForm("mapForm", true);</script>
     </body>
 </html>

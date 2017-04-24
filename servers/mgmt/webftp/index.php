@@ -16,7 +16,8 @@ if (sizeof($data) !== 1) {
     header("Location: ../../");
 }
 $data = $data[0];
-if (intval($data['can_see_ftp']) === 0) {
+$is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN);
+if (intval($data['can_see_ftp']) === 0 && !$is_server_admin) {
     header("Location: ../../");
 }
 

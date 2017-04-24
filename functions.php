@@ -10,7 +10,46 @@ require_once __DIR__ . "/classes/loader.php";
  */
 
 
-if (isset($_POST['deleteMap'], $_POST['server_id'], $_POST['removeMapUser']) && intval($_POST['deleteMap']) > 0 && intval($_POST['server_id']) > 0 && intval($_POST['removeMapUser']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+if (isset($_POST['server_id'], $_POST['addMap'], $_POST['user_id']) && intval($_POST['server_id']) > 0 && intval($_POST['addMap']) === 1 && intval($_POST['user_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    $can_stop_server = bool2int(isset($_POST['can_stop_server']) && trim($_POST['can_stop_server']) === "on");
+    $can_see_rcon = bool2int(isset($_POST['can_see_rcon']) && trim($_POST['can_see_rcon']) === "on");
+    $can_see_ftp = bool2int(isset($_POST['can_see_ftp']) && trim($_POST['can_see_ftp']) === "on");
+    $dat = Server::addUserMapping($sql, $_POST['server_id'], $_POST['user_id'], $can_stop_server, $can_see_rcon, $can_see_ftp);
+    if ($dat === false || !isset($dat['last_insert_id'])) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{user_id}", $_POST['user_id'], str_replace("{server_id}", $_POST['server_id'], Constants::$LOGGER_MESSAGES['ERRORS']['ADD_MAPPING'])));
+        die(json_encode(array("error" => Constants::$ERRORS['ADD_MAPPING_ERROR'])));
+        
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{user_id}", $_POST['user_id'], str_replace("{server_id}", $_POST['server_id'], Constants::$LOGGER_MESSAGES['SUCCESSES']['ADD_MAPPING'])));
+        die(json_encode(array("href" => "?server_id=" . $_POST['server_id'])));
+        
+    }
+}
+
+
+if (isset($_POST['server_id'], $_POST['editMap'], $_POST['user_id']) && intval($_POST['server_id']) > 0 && intval($_POST['editMap']) === 1 && intval($_POST['user_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    $can_stop_server = bool2int(isset($_POST['can_stop_server']) && trim($_POST['can_stop_server']) === "on");
+    $can_see_rcon = bool2int(isset($_POST['can_see_rcon']) && trim($_POST['can_see_rcon']) === "on");
+    $can_see_ftp = bool2int(isset($_POST['can_see_ftp']) && trim($_POST['can_see_ftp']) === "on");
+    $dat = Server::editUserMapping($sql, $_POST['server_id'], $_POST['user_id'], $can_stop_server, $can_see_rcon, $can_see_ftp);
+    if ($dat === false || !isset($dat['rows_affected'])) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{user_id}", $_POST['user_id'], str_replace("{server_id}", $_POST['server_id'], Constants::$LOGGER_MESSAGES['ERRORS']['EDIT_MAPPING'])));
+        die(json_encode(array("error" => Constants::$ERRORS['EDIT_MAPPING_ERROR'], "toggleModal" => "serverMap")));
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{user_id}", $_POST['user_id'], str_replace("{server_id}", $_POST['server_id'], Constants::$LOGGER_MESSAGES['SUCCESSES']['EDIT_MAPPING'])));
+        die(json_encode(array("msg" => Constants::$MESSAGES['EDIT_MAPPING_SUCCESS'], "toggleModal" => "serverMap", "action" => "serverMapUpdate", "updateRow" => $_POST['user_id'], "can_see_rcon" => $can_see_rcon, "can_see_ftp" => $can_see_ftp, "can_stop_server" => $can_stop_server)));
+    }
+}
+
+function bool2int($input) {
+    if ($input) {
+        return 1;
+    }
+    return 0;
+}
+
+
+if (isset($_POST['deleteMap'], $_POST['server_id'], $_POST['removeMapUser']) && intval($_POST['deleteMap']) > 0 && intval($_POST['server_id']) > 0 && intval($_POST['removeMapUser']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     $dat = Server::removeUserFromMapping($sql, $_POST['server_id'], $_POST['removeMapUser']);
     if ($dat !== false && intval($dat['rows_affected']) === 1) {
         Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{server_id}", $_POST['server_id'], str_replace("{user_id}", $_POST['removeMapUser'], Constants::$LOGGER_MESSAGES['SUCCESSES']['REMOVE_USER_SERVER_MAP_SUCCESS'])));
@@ -38,62 +77,53 @@ if (isset($_POST['server_id'], $_POST['generateNewFTP']) && intval($_POST['serve
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
-            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
-            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
-            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
-            $output = $server->changeServerAccountPassword($sql, generateRandomKey(8));
-            if (isset($output['error'])) {
-                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERATE_NEW_FTP_ERROR'] . $output['error']);
-                die(json_encode($output));
-            } else {
-                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['FTP_PSW_GENERATE'] . $_POST['server_id']);
-                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'])));
-            }
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        $output = $server->changeServerAccountPassword($sql, generateRandomKey(8));
+        if (isset($output['error'])) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERATE_NEW_FTP_ERROR'] . $output['error']);
+            die(json_encode($output));
         } else {
-            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FTP_PSW_GENERATE_PRIVILEGE'] . $_POST['server_id']);
-            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['FTP_PSW_GENERATE'] . $_POST['server_id']);
+            die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'])));
         }
-
     } else {
-        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FTP_PSW_GENERATE_PRIVILEGE'] . $_POST['server_id']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
+
 }
 
 if (isset($_POST['server_id'], $_POST['resetFTPPassword'], $_POST['newFTPPassword']) && intval($_POST['server_id']) > 0 && intval($_POST['resetFTPPassword']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
-            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
-            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
-            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
-            $output = $server->changeServerAccountPassword($sql, $_POST['newFTPPassword']);
-            if (isset($output['error'])) {
-                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_SERVER_HOST_ERROR'] . " Server id: " . $_POST['server_id'] . ", Host id: " . $data['host_id'] . ". Error: " . $output['error']);
-                die(json_encode($output));
-            } else {
-                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['FTP_PSW_EDIT'] . $_POST['server_id']);
-                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'], "newFTPPasswordSet" => "1")));
-            }
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        $output = $server->changeServerAccountPassword($sql, $_POST['newFTPPassword']);
+        if (isset($output['error'])) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_SERVER_HOST_ERROR'] . " Server id: " . $_POST['server_id'] . ", Host id: " . $data['host_id'] . ". Error: " . $output['error']);
+            die(json_encode($output));
         } else {
-            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FTP_PSW_CHANGE_PRIVILEGE'] . $_POST['server_id']);
-            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['FTP_PSW_EDIT'] . $_POST['server_id']);
+            die(json_encode(array("msg" => Constants::$MESSAGES['FTP_PASSWORD_CHANGE_SUCCESS'], "newFTPPasswordSet" => "1")));
         }
-
     } else {
-        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FTP_PSW_CHANGE_PRIVILEGE'] . $_POST['server_id']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
-}
+
+} 
+
 
     
 if (isset($_POST['getFTPURIForFile'], $_POST['fileName'], $_POST['server_id']) && intval($_POST['getFTPURIForFile']) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -116,7 +146,7 @@ if (isset($_POST['server_id'], $_POST['newFileUpload'], $_POST['newcurrdir']) &&
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1  || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -147,7 +177,7 @@ if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], 
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -172,7 +202,7 @@ if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], 
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -196,7 +226,7 @@ if (isset($_POST['renameFileOrFolder'], $_POST['oldfilename'], $_POST['server_id
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -220,7 +250,7 @@ if (isset($_POST['deleteFromFTP'], $_POST['filename'], $_POST['server_id']) && i
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -245,7 +275,7 @@ if (isset($_POST['editFile'], $_POST['server_id'], $_POST['filename'], $_POST['f
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -270,7 +300,7 @@ if (isset($_POST['getFile'], $_POST['fileName'], $_POST['server_id']) && intval(
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -298,7 +328,7 @@ if (isset($_POST['ftp'], $_POST['getDirContents'], $_POST['server_id']) && intva
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_see_ftp']) === 1) {
+        if (intval($data['can_see_ftp']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -381,7 +411,7 @@ if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startSer
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_stop_server']) === 1 && intval($data['server_status']) !== Constants::$SERVER_DISABLED) {
+        if ((intval($data['can_stop_server']) === 1  || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) && intval($data['server_status']) !== Constants::$SERVER_DISABLED) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
@@ -410,7 +440,7 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
-        if (intval($data['can_stop_server']) === 1 && intval($data['server_status']) !== Constants::$SERVER_DISABLED) {
+        if ((intval($data['can_stop_server']) === 1  || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) && intval($data['server_status']) !== Constants::$SERVER_DISABLED) {
             $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
             $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);

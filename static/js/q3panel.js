@@ -46,6 +46,13 @@ function setPreferencedTheme(theme) {
     });
 }
 
+function int2boolstr(input) {
+    if (input === 1) {
+        return "Yes";
+    }
+    return "No";
+}
+
 function handleForm(id, useToaster) {
     var form = $("#" + id);
     var formMsg = $("#formMsg");
@@ -104,6 +111,19 @@ function handleForm(id, useToaster) {
                         }
                         if (typeof response.removeMapTableRow !== "undefined") {
                             $("table#mapTable tr#tr" + response.removeMapTableRow).remove();
+                        }
+                        if (typeof response.toggleModal !== "undefined") {
+                            $("#" + response.toggleModal).modal('toggle');
+                        }
+                        if (typeof response.updateRow !== "undefined" && typeof response.action !== "undefined" && response.action === "serverMapUpdate") {
+                            console.log(response);
+                            var csf = int2boolstr(response.can_see_ftp);
+                            var csr = int2boolstr(response.can_see_rcon);
+                            var css = int2boolstr(response.can_stop_server);
+                            var row = response.updateRow;
+                            $("#tdcss" + row).html(css);
+                            $("#tdcsr" + row).html(csr);
+                            $("#tdcsf" + row).html(csf);
                         }
                     } else {
                         formTitle.html("Success");
@@ -411,7 +431,7 @@ function renameFileOrFolderModal(modal_id, name) {
 function renameFileOrFolder(oldname, newname, server_id, table_id, currdir) {
     $.post(".", {
         renameFileOrFolder: 1,
-        oldfilename: name,
+        oldfilename: oldname,
         newfilename: newname,
         server_id: server_id
     }, function(data) {
@@ -443,4 +463,30 @@ function autoGenerateNewFTPPsw(server_id, modal_id) {
             toastr.success(data.msg);
         }
     })
+}
+
+function editServerMapping(modal_id, user_id, username, can_stop_server, can_see_rcon, can_see_ftp) {
+    $("#" + modal_id + "Title").html("Edit mapping for user " + username);
+    $("#editMap").val("1");
+    $("#addMap").val("0");
+    $("#editMapUserId").val(user_id);
+    $("#addUserId").prop("disabled", true);
+    $("#addUserSelect").hide();
+    $('#editMapUserId').prop('disabled', false);
+    if (can_stop_server === 1) {
+        $("#can_stop_server").prop("checked", true);
+    } else {
+        $("#can_stop_server").prop("checked", false);
+    }
+    if (can_see_rcon === 1) {
+        $("#can_see_rcon").prop("checked", true);
+    } else {
+        $("#can_see_rcon").prop("checked", false);
+    }
+    if (can_see_ftp === 1) {
+        $("#can_see_ftp").prop("checked", true);
+    } else {
+        $("#can_see_ftp").prop("checked", false);
+    }
+    $("#" + modal_id).modal();
 }
