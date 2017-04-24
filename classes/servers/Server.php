@@ -82,6 +82,13 @@ class Server extends SSH {
     function getMax_players() {
         return $this->max_players;
     }
+    function getServer_id() {
+        return $this->server_id;
+    }
+
+    function setServer_id($server_id) {
+        $this->server_id = $server_id;
+    }
 
     function getRconpassword() {
         return $this->rconpassword;

@@ -220,6 +220,9 @@ class User {
             $styleQuery = Constants::$INSERT_QUERIES['SET_STYLE_PREFERENCE'];
             $styleParams = array("1", $user_id);
             $sql->query($styleQuery, $styleParams);
+            $serverMapQuery = Constants::$INSERT_QUERIES['MAP_USER_TO_ALL_SERVERS'];
+            $serverMapParams = array($user_id);
+            $sql->query($serverMapQuery, $serverMapParams);
             return array();
         } catch (PDOException $ex) {
             return array("error" => $ex->getMessage());
@@ -321,10 +324,18 @@ class User {
         return -1;
     }
     
-    static function getAllUsers(SQL $sql) {
+    static function getAllUsers(SQL $sql, $group_id = null) {
         $extData = self::getExtData($sql);
-        $localQuery = Constants::$SELECT_QUERIES['GET_ALL_USERS'];
-        $localData = $sql->query($localQuery);
+        $localQuery = "";
+        $params = null;
+        if ($group_id !== null) {
+            $localQuery = Constants::$SELECT_QUERIES['GET_ALL_USERS_BY_GROUP_HIGHER_THAN'];
+            $params = array($group_id);
+        } else {
+            $localQuery = Constants::$SELECT_QUERIES['GET_ALL_USERS'];
+        }
+        
+        $localData = $sql->query($localQuery, $params);
         $extExists = false;
         $extSql = null;
         $extQuery = "";

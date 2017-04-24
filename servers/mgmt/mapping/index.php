@@ -79,6 +79,7 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                                             </tbody>
                                         </table>
                                     </div>
+                                    <small>The edit button appears only for accounts, which aren't in the Panel Admin group (Panel Admin can access all servers, all hosts).</small>
                                 </div>
                             </div>
                             

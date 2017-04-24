@@ -127,4 +127,37 @@ class Email {
         return $data[0];
     }
     
+    /**
+     * This function notifies the users mapped to the server based on their group.
+     * @param SQL $sql The SQL handle
+     * @param int $group_id The group the user must have (>= $group)
+     * @param string $title The title of the message
+     * @param string $msg The message to send.
+     * @param array $params Optional parameters to substitute in the message. Can be used with a template (e.g. Your server {server_name} where array is array("{server_name}", "theservername");, so it'll substitute it).
+     */
+    public static function notifyServerUsers(SQL $sql, $group_id, $title, $msg, $params = null) {
+        if ($params !== null) {
+            foreach($params as $key => $value) {
+                $msg = str_replace($key, $value, $msg);
+            }
+        }
+        //get users
+        $users = User::getAllUsers($sql, $group_id);
+        $emailPrefs = self::getEmailPreferences($sql);
+        $from = $emailPrefs['from_email'];
+        $fromName = $emailPrefs['from_name'];
+        $is_sendgrid = intval($emailPrefs['is_sendgrid']);
+        $msg = str_replace("{sender_name}", $fromName, $msg);
+        if ($is_sendgrid === 1) {
+            $is_sendgrid = true;
+        } else {
+            $is_sendgrid = false;
+        }
+        $api_key = $emailPrefs['api_key'];
+        foreach ($users as $user) {
+            $email = new static($from, $user['email'], $title, $msg, $fromName, $user['realName']);
+            $email->sendEmail($is_sendgrid, $api_key);
+        }
+    }
+    
 }

@@ -76,7 +76,7 @@ class Constants {
         , "ADD_NEW_SERVER" => "INSERT INTO q3panel_servers (host_id, game_id, server_name, server_port, server_account, server_password, server_status, server_startscript, current_players, max_players, rconpassword) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         , "ADD_NEW_SERVER_MAPPING" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT ? AS server_id, user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_users WHERE group_id = 3"
         , "GENERIC_LOG_INSERT" => "INSERT INTO q3panel_logs (user_id, user_ip, action) VALUES (?, ?, ?)"
-        , "MAP_USER_TO_ALL_SERVERS" => "INSERT IGNORE INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT server_id AS server_id, ? AS user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_servers"
+        , "MAP_USER_TO_ALL_SERVERS" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_see_rcon, can_see_ftp, can_access_config, can_access_maps, can_stop_server) SELECT server_id AS server_id, ? AS user_id, 1 AS can_see_rcon, 1 AS can_see_FTP, 1 AS can_access_config, 1 AS can_access_maps, 1 AS can_stop_servers FROM q3panel_servers ON DUPLICATE KEY UPDATE can_see_rcon = 1, can_see_ftp = 1, can_access_config = 1, can_access_maps = 1, can_stop_server = 1"
         , "FAILED_LOGIN_INSERT" => "INSERT INTO q3panel_failed_logins (failed_username, failed_ip) VALUES (?, ?)"
         , "SERVER_LOG_INSERT" => "INSERT INTO q3panel_servers_logs (server_id, user_id, user_ip, severity, action) VALUES (?, ?, ?, ?, ?)"
     );
@@ -96,6 +96,7 @@ class Constants {
         , "GET_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
         , "GET_USER_BY_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_forgottenpsw.user_id WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
         , "GET_ALL_USERS" => "SELECT * FROM q3panel_users"
+        , "GET_ALL_USERS_BY_GROUP_HIGHER_THAN" => "SELECT * FROM q3panel_users WHERE group_id >= ?"
         , "GET_EXT_USER_BY_ID" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = ?"
         , "GET_USER_BY_ID" => "SELECT * FROM q3panel_users WHERE user_id = ?"
         , "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ?"
@@ -237,6 +238,10 @@ class Constants {
         "FORGOTTEN_TITLE" => "Forgotten password | Q3Panel"
         , "FORGOTTEN_MSG" => "Hello,<br><br>Someone (hopefully you) has just requested a new password on your account. To do so, please, click on here: <a href=\"{FORGOTTEN_URL_KEY}\">{FORGOTTEN_URL_KEY}</a><br>If it wasn't you, feel free to ignore this e-mail.<br><br>Best regards,<br>{SENDER_NAME}"
         , "FPSW_CHANGED" => "Hello,<br><br>You recently requested a new password from the page and it has been changed now. You have to use that password from now on.<br><br>Best regards,<br>{SENDER_NAME}"
+        , "SERVER_REBOOT_TITLE" => "Server rebooted | Q3Panel"
+        , "SERVER_REBOOT_MSG" => "Hello,<br><br>Your server, {server_name} (id {server_id}), was rebooted due to it being down. If this is a recurring problem, maybe you should check, what causes the problem.<br><br>The server checker function returned this:<br>{out_msg}<br><br>Best regards,<br>{sender_name}"
+        , "SERVER_DOWN_ERR_TITLE" => "Server down | Q3Panel"
+        , "SERVER_DOWN_ERR_MSG" => "Hello,<br><br>Your server, {server_name} (id {server_id}), is down and it couldn't be rebooted for an unknown error.<br><br>Server checker output:<br>{out_err}<br><br>Best regards,<br>{sender_name}"
     );
     
     static $MESSAGES = array(
