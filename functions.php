@@ -9,6 +9,30 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc. Here it all gets logged as well.
  */
 
+//server_id: server_id,
+//        command: command,
+//        sendRCONCommand: 1
+if (isset($_POST['server_id'], $_POST['command'], $_POST['sendRCONCommand']) && intval($_POST['sendRCONCommand']) === 1 && intval($_POST['server_id']) > 0) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        if (intval($data['can_see_rcon']) === 1 || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+            $output = $server->sendQ3Command(Constants::$SERVER_ACTIONS['Q3_RCON_COMMAND'] . $_POST['command'], true, true);
+            $output = str_replace("\xFF\xFF\xFF\xFFprint\n", "", $output);
+            die(json_encode(array("output" => $output)));
+        } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+            die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+        }
+    }
+    Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
+    die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+}
+
+
 if (isset($_POST['updateServer'], $_POST['server_id'], $_POST['server_name'], $_POST['server_port'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['server_id']) > 0 && intval($_POST['updateServer']) === 1 && strlen($_POST['server_name']) > 0 && intval($_POST['server_port']) > 0 && intval($_POST['max_players']) > 0 && strlen($_POST['rconpassword']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {

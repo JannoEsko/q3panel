@@ -490,3 +490,24 @@ function editServerMapping(modal_id, user_id, username, can_stop_server, can_see
     }
     $("#" + modal_id).modal();
 }
+
+function initRCONModal(modal_id) {
+    $("#" + modal_id).modal();
+}
+
+function sendCommand(server_id) {
+    var command = $("#command").val();
+    $("#console").append("<i>You sent a command: " + command + "</i>\n\n");
+    $.post(".", {
+        server_id: server_id,
+        command: command,
+        sendRCONCommand: 1
+    }, function(data) {
+        data = JSON.parse(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else {
+            $("#console").append(data.output);
+        }
+    });
+}

@@ -225,6 +225,7 @@ class Constants {
         , "GET_Q3_SERVER_STATUS" => "\xFF\xFF\xFF\xFFgetstatus"
         , "SERVER_REBOOT_SUCCESS_NO_INFOMSG" => "Restarted the server, because it didn't respond to the getinfo query."
         , "SERVER_REBOOT_ERROR_NO_INFOMSG" => "The server didn't respond to the getinfo query and it couldn't be restarted"
+        , "Q3_RCON_COMMAND" => "\xFF\xFF\xFF\xFFrcon {rconpassword} "
     );
     
     static $ERRORS = array(

@@ -1,4 +1,3 @@
-
 <?php
 if (!file_exists(__DIR__ . "/../../config.php")) {
     header("Location: ../../install/");
@@ -96,8 +95,7 @@ echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
 <?php
 if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     ?> 
-                                        <div class="clearfix">
-                                            <div class="pull-left">
+                                        
 
                                                 <div <?php if (intval($server['server_status']) !== Constants::$SERVER_DISABLED) { ?> hidden <?php } ?> id="enableServerBtn">
                                                     <button class="btn btn-danger btn-block" onclick="enableServer('<?php echo $server['server_id']; ?>');">Enable server</button>
@@ -106,33 +104,30 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
                                                 <div <?php if (intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?> hidden <?php } ?> id="disableServerBtn">
                                                     <button class="btn btn-danger btn-block" onclick="disableServer('<?php echo $server['server_id']; ?>');">Disable server</button>
                                                 </div>
-                                            </div>
-                                            <div class="pull-right">
+                                   
+                                            <br>
                                                 <button class="btn btn-danger btn-block" onclick="deleteServer('<?php echo $server['server_id']; ?>');">Delete server</button>
-                                            </div></div>
-                                        <br>
+                                                <br>
+
 <?php } 
 
 if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
 ?>
                                         
-                                        <div class="clearfix">
-                                            <div class="pull-left">
+                                        
+                                           
                                                 <button class="btn btn-default btn-block" onclick="location.href='mapping/?server_id=<?php echo $_GET['server_id']; ?>';">Map users to server</button>
-                                            </div>
-                                            <div class="pull-right">
+                                            
                                                 <button class="btn btn-default btn-block" onclick="resetFtpPassword('ftppswreset');">Reset FTP password</button>
-                                            </div>
-                                        </div>
-                                        <br>
+                                       
+                                        
 
 <?php } ?>
 
 
 
 
-                                    <div class="clearfix">
-                                        <div class="pull-left">
+                                    
 <?php
 if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
     ?>
@@ -145,16 +140,16 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
     <?php
 }
 ?>
-                                        </div>
-                                        <div class="pull-right">
+                                        
                                             <?php
                                             if (intval($server['can_see_ftp']) === 1 || $is_server_admin) {
                                                 ?>
                                                 <button class="btn btn-default btn-block" onclick="location.href = 'webftp/?server_id=<?php echo $server['server_id']; ?>';">Web FTP</button>
 <?php }
 ?>
-                                        </div>
-                                    </div>
+                                        
+                                        
+                                        <button class="btn btn-default btn-block" onclick="initRCONModal('rconModal');">Web RCON</button>
                                 </div>
                             </div>
                         </div>
@@ -251,7 +246,35 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                     </div>
                 </div>
             </div>
+        </div>
+        <div id="rconModal" role="dialog" aria-labelledby="rconModalTitle" aria-hidden="true" class="modal fade">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" data-dismiss="modal" aria-label="Close" class="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 id="rconModalTitle" class="modal-title">Web RCON utility</h4>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="console"></pre>
+                        <input type="text" class="form-control" name="command" id="command" placeholder="Enter a command to the server">
+                        <br>
+                        <div class="clearfix">
+                            <div class="pull-left">
+                                <button type="button" class="btn btn-default" onclick="sendCommand(<?php echo $server['server_id']; ?>);">Send command</button>
+                            </div>
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-default" onclick="$('#console').html('');">Clear</button>
+                            </div>
+                            
+                            
+                        </div>
+                        
+                    </div>
                 </div>
+            </div>
+        </div>
 
 <?php echo Constants::getJS($HOST_URL . "/static"); ?>
         <script>handleForm("ftppswchangeform", true);handleForm("serverForm", true);</script>
