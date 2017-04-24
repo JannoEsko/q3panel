@@ -220,9 +220,11 @@ class User {
             $styleQuery = Constants::$INSERT_QUERIES['SET_STYLE_PREFERENCE'];
             $styleParams = array("1", $user_id);
             $sql->query($styleQuery, $styleParams);
-            $serverMapQuery = Constants::$INSERT_QUERIES['MAP_USER_TO_ALL_SERVERS'];
-            $serverMapParams = array($user_id);
-            $sql->query($serverMapQuery, $serverMapParams);
+            if (intval($this->group_id) === Constants::$PANEL_ADMIN) {
+                $serverMapQuery = Constants::$INSERT_QUERIES['MAP_USER_TO_ALL_SERVERS'];
+                $serverMapParams = array($user_id);
+                $sql->query($serverMapQuery, $serverMapParams);
+            }
             return array();
         } catch (PDOException $ex) {
             return array("error" => $ex->getMessage());
