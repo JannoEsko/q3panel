@@ -83,7 +83,6 @@ class FTP {
     
     function uploadNewFile($dir, $uploadedFileName, $uploadedFile) {
         $dir = rtrim($dir, "/");
-        
         return file_put_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/$dir/". $uploadedFileName, file_get_contents($uploadedFile));
     }
     

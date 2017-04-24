@@ -121,6 +121,16 @@ class Email {
         }
     }
     
+    public static function updateEmailPreferences(SQL $sql, $is_sendgrid, $from_name, $from_email, $api) {
+        $query = Constants::$UPDATE_QUERIES['UPDATE_EMAIL_SERVICE'];
+        $params = array($is_sendgrid, $from_name, $from_email, $api);
+        try {
+            return $sql->query($query, $params);
+        } catch (PDOException $ex) {
+            return array("error" => $ex->getMessage());
+        }
+    }
+    
     public static function getEmailPreferences(SQL $sql) {
         $query = Constants::$SELECT_QUERIES['GET_EMAIL_PREFERENCES'];
         $data = $sql->query($query);

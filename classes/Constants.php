@@ -72,7 +72,7 @@ class Constants {
     
     static $INSERT_QUERIES = array(
         "ADD_NEW_USER" => "INSERT INTO q3panel_users (username, password, origin, email, group_id, allow_emails) VALUES (?, ?, ?, ?, ?, ?)",
-        "ADD_EXT_DB" => "INSERT INTO q3panel_external_authentication (host, db_username, db_password, db_name, users_table_name, user_id_field, username_field, password_field, email_field) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "ADD_EXT_DB" => "INSERT INTO q3panel_external_authentication (ext_auth_id, host, db_username, db_password, db_name, users_table_name, user_id_field, username_field, password_field, email_field) VALUES (1, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         "ADD_EMAIL_SERVICE" => "INSERT INTO q3panel_email_service (is_sendgrid, from_name, from_email, api_key) VALUES (?, ?, ?, ?)"
         , "ADD_STYLES" => "INSERT INTO q3panel_styles (style_name, style_bg) VALUES ('theme-a.css', '#23b7e5'), ('theme-b.css', '#37bc9b'), ('theme-c.css', '#7266ba'), ('theme-d.css', '#f05050'), ('theme-e.css', '#1797be'), ('theme-f.css', '#2b957a'), ('theme-g.css', '#564aa3'), ('theme-h.css', '#ec2121')"
         , "SET_STYLE_PREFERENCE" => "INSERT INTO q3panel_style_preference (style_id, user_id) VALUES (?, ?)"
@@ -152,6 +152,8 @@ class Constants {
         , "SET_SERVER_PLAYERS_BY_ID" => "UPDATE q3panel_servers SET current_players = ? WHERE server_id = ?"
         , "UPDATE_SERVER_MAP_BY_SERVER_ID_USER_ID" => "UPDATE q3panel_servers_map SET can_stop_server = ?, can_see_rcon = ?, can_see_ftp = ? WHERE server_id = ? AND user_id = ?"
         , "UPDATE_SERVER_BY_ID" => "UPDATE q3panel_servers SET server_name = ?, server_port = ?, max_players = ?, rconpassword = ? WHERE server_id = ?"
+        , "UPDATE_EXTERNAL_AUTH" => "UPDATE q3panel_external_authentication SET host = ?, db_username = ?, db_password = ?, db_name = ?, users_table_name = ?, user_id_field = ?, username_field = ?, password_field = ?, email_field = ? WHERE ext_auth_id = 1"
+        , "UPDATE_EMAIL_SERVICE" => "UPDATE q3panel_email_service SET is_sendgrid = ?, from_name = ?, from_email = ?, api_key = ? WHERE email_service_id = 1"
     );
     
     static $DELETE_QUERIES = array(
@@ -162,6 +164,7 @@ class Constants {
         , "DELETE_SERVER_BY_ID" => "DELETE FROM q3panel_servers WHERE server_id = ?"
         , "DELETE_NONEXISTANT_MAPPINGS" => "DELETE FROM q3panel_servers_map WHERE server_id NOT IN (SELECT server_id FROM q3panel_servers)"
         , "REMOVE_USER_FROM_SERVER_MAP" => "DELETE FROM q3panel_servers_map WHERE server_id = ? AND user_id = ?"
+        
     );
     
     static $LOGGER_MESSAGES = array(
@@ -169,34 +172,37 @@ class Constants {
             "GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST" => "Tried to access a server which doesn't exist or isn't mapped. Server ID: "
             , "DIDNT_FIND_HOST" => "User requested a host, which couldn't be found."
             , "EDIT_ACCOUNT_ERROR" => "User tried to edit an account, but he/she was underprivileged to do so."
-            , "GENERATE_NEW_FTP_ERROR" => "User tried to generate a new FTP password for a server, but an error occured. Message: "
+            , "GENERATE_NEW_FTP_ERROR" => "User tried to generate a new FTP password for a server, but an error occurred. Message: "
             , "FTP_PSW_GENERATE_PRIVILEGE" => "User tried to generate a new FTP password for a server, but was underprivileged to do so. Server id: "
-            , "GENERIC_SERVER_HOST_ERROR" => "User tried to perform an action which was executed on the host machine, but an error occured. "
+            , "GENERIC_SERVER_HOST_ERROR" => "User tried to perform an action which was executed on the host machine, but an error occurred. "
             , "FTP_PSW_CHANGE_PRIVILEGE" => "User tried to generate a new FTP password for a server, but was underprivileged to do so. Server id: "
             , "FILE_UPLOAD_NOT_PRIVILEGED" => "User tried to upload a file to FTP, but he/she wasn't privileged enough to do so. Server id: "
-            , "GENERIC_FTP_ERROR" => "User tried to perform an action in the Web FTP interface, but an error occured. "
+            , "GENERIC_FTP_ERROR" => "User tried to perform an action in the Web FTP interface, but an error occurred. "
             , "GENERIC_FTP_PERMISSION_ERROR" => "User tried to perform an action in the Web FTP interface, but he/she is underprivileged to do so. Server id: "
-            , "DELETE_SERVER_GENERIC_ERROR" => "User tried to delete a server, but an error occured. Server id: "
-            , "DISABLE_SERVER_GENERIC_ERROR" => "User tried to disable a server, but an error occured. Server id: "
-            , "ENABLE_SERVER_GENERIC_ERROR" => "User tried to enable a server, but an error occured. Server id: "
-            , "START_SERVER_GENERIC_ERROR" => "User tried to start a server, but an error occured. Server id: "
+            , "DELETE_SERVER_GENERIC_ERROR" => "User tried to delete a server, but an error occurred. Server id: "
+            , "DISABLE_SERVER_GENERIC_ERROR" => "User tried to disable a server, but an error occurred. Server id: "
+            , "ENABLE_SERVER_GENERIC_ERROR" => "User tried to enable a server, but an error occurred. Server id: "
+            , "START_SERVER_GENERIC_ERROR" => "User tried to start a server, but an error occurred. Server id: "
             , "START_SERVER_DISABLED_OR_NO_AUTH" => "User tried to start a server, which was either disabled or he had no permission to start it. Server id: "
-            , "STOP_SERVER_GENERIC" => "User tried to stop a server, but an error occured. Server id: "
-            , "ADD_SERVER_GENERIC" => "User tried to add a server, but an error occured. Host id: "
-            , "HOST_UPDATE_GENERIC" => "User tried to update a host server, but an error occured. Host id: "
-            , "HOST_DELETE_GENERIC" => "User tried to delete a host server, but an error occured. Host id: "
-            , "NEW_HOSTSERVER_GENERIC" => "User tried to add a new host server, but an error occured. Error message: "
-            , "UPDATE_GAME_GENERIC" => "User tried to update a game, but an error occured. Game id: "
-            , "DELETE_GAME_GENERIC" => "User tried to delete a game, but an error occured. Game id: "
-            , "GENERIC_NEW_EXT_USER_ERROR" => "User tried to add a new external user, but an error occured. Ext user id: "
-            , "GENERIC_NEW_USER_ERROR" => "User tried to add a new user, but an error occured. New username: "
-            , "EMAIL_SETUP_ERROR" => "User tried to set up / edit e-mail preferences, but an error occured. Error message: "
-            , "ADD_GAME_GENERIC" => "User tried to add a new game, but an error occured."
-            , "DELETE_USER_ERROR_GENERIC" => "User tried to delete an user, but an error occured. User id: "
+            , "STOP_SERVER_GENERIC" => "User tried to stop a server, but an error occurred. Server id: "
+            , "ADD_SERVER_GENERIC" => "User tried to add a server, but an error occurred. Host id: "
+            , "HOST_UPDATE_GENERIC" => "User tried to update a host server, but an error occurred. Host id: "
+            , "HOST_DELETE_GENERIC" => "User tried to delete a host server, but an error occurred. Host id: "
+            , "NEW_HOSTSERVER_GENERIC" => "User tried to add a new host server, but an error occurred. Error message: "
+            , "UPDATE_GAME_GENERIC" => "User tried to update a game, but an error occurred. Game id: "
+            , "DELETE_GAME_GENERIC" => "User tried to delete a game, but an error occurred. Game id: "
+            , "GENERIC_NEW_EXT_USER_ERROR" => "User tried to add a new external user, but an error occurred. Ext user id: "
+            , "GENERIC_NEW_USER_ERROR" => "User tried to add a new user, but an error occurred. New username: "
+            , "EMAIL_SETUP_ERROR" => "User tried to set up / edit e-mail preferences, but an error occurred. Error message: "
+            , "ADD_GAME_GENERIC" => "User tried to add a new game, but an error occurred."
+            , "DELETE_USER_ERROR_GENERIC" => "User tried to delete an user, but an error occurred. User id: "
             , "DELETE_USER_PRIVILEGE_ERROR" => "User tried to delete an user, but he/she is not privileged enough. User id: "
             , "REMOVE_USER_SERVER_MAP" => "User tried to delete mapping for user id {user_id} on server {server_id} but something went wrong (most likely the deletable user was a panel admin)."
             , "EDIT_MAPPING" => "User tried to edit mapping for user id {user_id} on server id {server_id} but the operation failed (most likely the editable user is a panel admin)."
             , "ADD_MAPPING" => "User tried to map a server with id {server_id} to user id {user_id} but failed to do so. Most likely, the user is panel admin and is already mapped."
+            , "EXT_AUTH_UPDATE" => "User tried to edit the external authentication parameters, but an error occurred."
+            , "ADD_EXT_AUTH" => "User tried to add an external authentication to the panel, but an error occurred."
+            , "EMAIL_SERVICE_UPDATE" => "User tried to update the e-mail service preferences, but an error occurred."
         ),
         "SUCCESSES" => array(
             "FTP_PSW_GENERATE" => "User generated a new FTP password for server id "
@@ -221,6 +227,9 @@ class Constants {
             , "REMOVE_USER_SERVER_MAP_SUCCESS" => "User removed the server mapping for server id {server_id} for user {user_id}."
             , "EDIT_MAPPING" => "User edited the server mapping for user id {user_id} on server id {server_id}."
             , "ADD_MAPPING" => "User added a new user with id {user_id} to server id {server_id} map."
+            , "EXT_AUTH_UPDATE" => "User updated the external authentication parameters."
+            , "ADD_EXT_AUTH" => "User configured external authentication for the panel."
+            , "EMAIL_SERVICE_UPDATE" => "User updated the e-mail service preferences."
         ),
         "INFORMATION" => array(
             
@@ -254,6 +263,7 @@ class Constants {
         , "GENERIC_FTP_ERROR" => "Couldn't perform the action with FTP. Please check the permissions on the host server, if the file already exists on FTP or check if you're privileged enough."
         , "EDIT_MAPPING_ERROR" => "Couldn't edit the mapping for the user. Most likely the user is a panel admin."
         , "ADD_MAPPING_ERROR" => "Couldn't map the server to user. Please refresh the page and try again (most likely, the user is panel admin and thus, is already mapped)."
+        , "EMAIL_SERVICE_UPDATE_ERROR" => "Couldn't update the e-mail service preferences due to an unknown error. Please try again later."
     );
     
     static $EMAIL_TEMPLATE = array(
@@ -284,6 +294,9 @@ class Constants {
         , "EDIT_MAPPING_SUCCESS" => "Mapping edited successfully."
         , "ADD_MAPPING_SUCCESS" => "User mapped successfully."
         , "SERVER_EDIT_SUCCESS" => "Server has been edited successfully."
+        , "EXT_AUTH_UPDATE_SUCCESS" => "External authentication parameters updated successfully."
+        , "ADD_EXT_AUTH_SUCCESS" => "External authentication configured successfully!"
+        , "EMAIL_SERVICE_UPDATE_SUCCESS" => "E-mail service information updated."
     );
     
     static $SSH_COMMANDS = array(
@@ -307,7 +320,8 @@ class Constants {
         <link rel="stylesheet" href="{}/css/bootstrap.css">
         <link rel="stylesheet" href="{}/css/select2.css">
         <link rel="stylesheet" href="{}/css/toastr.min.css">
-        <link rel="stylesheet" href="{}/css/dataTables.bootstrap.min.css">
+        <link rel="stylesheet" href="{}/css/dataTables.bootstrap.css">
+        <link rel="stylesheet" href="{}/css/beautiful_checkbox.css">
         <link rel="stylesheet" href="{}/css/app.css"> 
 
 EOT;

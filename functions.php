@@ -9,6 +9,87 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc. Here it all gets logged as well.
  */
 
+
+if (isset($_POST['update_email_service'], $_POST['from_name'], $_POST['from_email']) && intval($_POST['update_email_service']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    $is_sendgrid = bool2int(isset($_POST['is_sendgrid']) && trim($_POST['is_sendgrid']) === "on");
+    try {
+        $dat = Email::updateEmailPreferences($sql, $is_sendgrid, $_POST['from_name'], $_POST['from_email'], $_POST['api_key']);
+        if (isset($dat['rows_affected'])) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['EMAIL_SERVICE_UPDATE']);
+            die(json_encode(array("msg" => Constants::$MESSAGES['EMAIL_SERVICE_UPDATE_SUCCESS'])));
+        } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['EMAIL_SERVICE_UPDATE']);
+            die(json_encode(array("error" => Constants::$ERRORS['EMAIL_SERVICE_UPDATE_ERROR'])));
+        }
+    } catch (PDOException $ex) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['EMAIL_SERVICE_UPDATE'] . "<br>Message: " . $ex->getMessage());
+        die(json_encode(array("error" => $ex->getMessage())));
+    }
+}
+
+if (isset($_POST['addExternalAuth'], $_POST['host'], $_POST['db_username'], $_POST['db_password'], $_POST['db_name'], $_POST['users_table_name'], 
+        $_POST['user_id_field'], $_POST['username_field'], $_POST['password_field'], $_POST['email_field']) && 
+        intval($_POST['addExternalAuth']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    try {
+        $testExt = User::getExternalConnection($_POST['host'], $_POST['db_username'], $_POST['db_password'], $_POST['db_name']);
+        //"EXT_GET_FIRST_USER" => "SELECT {ext_usrname}, {ext_psw}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = 1"
+        $ext_firstUserQuery = Constants::$SELECT_QUERIES['EXT_GET_FIRST_USER'];
+        $ext_firstUserQuery = str_replace("{ext_usrname}", $_POST['username_field'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_psw}", $_POST['password_field'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_email}", $_POST['email_field'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_usrtable}", $_POST['users_table_name'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_usrtable_id}", $_POST['user_id_field'], $ext_firstUserQuery);
+        $data = $testExt->query($ext_firstUserQuery);
+        if (sizeof($data) === 1) {
+            $query = Constants::$INSERT_QUERIES['ADD_EXT_DB'];
+            $params = array($_POST['host'], $_POST['db_username'], $_POST['db_password'], $_POST['db_name'], $_POST['users_table_name'], $_POST['user_id_field'], $_POST['username_field'], $_POST['password_field'], $_POST['email_field']);
+            $dat = $sql->query($query, $params);
+            if (isset($dat['last_insert_id']) && intval($dat['last_insert_id']) === 1) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['ADD_EXT_AUTH']);
+                die(json_encode(array("msg" => Constants::$MESSAGES['ADD_EXT_AUTH_SUCCESS'])));
+            } else {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['ADD_EXT_AUTH']);
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+            }
+        }
+    } catch (PDOException $ex) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['ADD_EXT_AUTH'] . " <br>Message: " . $ex->getMessage());
+        die(json_encode(array("error" => $ex->getMessage())));
+    }
+}
+
+if (isset($_POST['editExternalAuth'], $_POST['host'], $_POST['db_username'], $_POST['db_password'], $_POST['db_name'], $_POST['users_table_name'], 
+        $_POST['user_id_field'], $_POST['username_field'], $_POST['password_field'], $_POST['email_field']) && 
+        intval($_POST['editExternalAuth']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    //test it.
+    try {
+        $testExt = User::getExternalConnection($_POST['host'], $_POST['db_username'], $_POST['db_password'], $_POST['db_name']);
+        //"EXT_GET_FIRST_USER" => "SELECT {ext_usrname}, {ext_psw}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = 1"
+        $ext_firstUserQuery = Constants::$SELECT_QUERIES['EXT_GET_FIRST_USER'];
+        $ext_firstUserQuery = str_replace("{ext_usrname}", $_POST['username_field'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_psw}", $_POST['password_field'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_email}", $_POST['email_field'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_usrtable}", $_POST['users_table_name'], $ext_firstUserQuery);
+        $ext_firstUserQuery = str_replace("{ext_usrtable_id}", $_POST['user_id_field'], $ext_firstUserQuery);
+        $data = $testExt->query($ext_firstUserQuery);
+        if (sizeof($data) === 1) {
+            $query = Constants::$UPDATE_QUERIES['UPDATE_EXTERNAL_AUTH'];
+            $params = array($_POST['host'], $_POST['db_username'], $_POST['db_password'], $_POST['db_name'], $_POST['users_table_name'], $_POST['user_id_field'], $_POST['username_field'], $_POST['password_field'], $_POST['email_field']);
+            $dat = $sql->query($query, $params);
+            if (isset($dat['rows_affected'])) {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['EXT_AUTH_UPDATE']);
+                die(json_encode(array("msg" => Constants::$MESSAGES['EXT_AUTH_UPDATE_SUCCESS'])));
+            } else {
+                Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['EXT_AUTH_UPDATE']);
+                die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
+            }
+        }
+    } catch (PDOException $ex) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['EXT_AUTH_UPDATE'] . " <br>Message: " . $ex->getMessage());
+        die(json_encode(array("error" => $ex->getMessage())));
+    }
+}
+
 if (isset($_GET['getServerLogs']) && intval($_GET['getServerLogs']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     die("{\"data\":" . json_encode(Logger::getServerLogs($sql)) . "}");
 }
