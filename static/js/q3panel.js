@@ -242,6 +242,7 @@ function startServer(server_id) {
         if (typeof data.error !== "undefined") {
             toastr.error(data.error);
         } else if (typeof data.msg !== "undefined") {
+            $("#rcon").show(500);
             $("#startServer").hide(500);
             $("#stopServer").show(500);
             toastr.success(data.msg);
@@ -258,6 +259,7 @@ function stopServer(server_id) {
         if (typeof data.error !== "undefined") {
             toastr.error(data.error);
         } else if (typeof data.msg !== "undefined") {
+            $("#rcon").hide(500);
             $("#stopServer").hide(500);
             $("#startServer").show(500);
             toastr.success(data.msg);

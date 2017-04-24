@@ -22,6 +22,7 @@ if (isset($_POST['server_id'], $_POST['command'], $_POST['sendRCONCommand']) && 
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             $output = $server->sendQ3Command(Constants::$SERVER_ACTIONS['Q3_RCON_COMMAND'] . $_POST['command'], true, true);
             $output = str_replace("\xFF\xFF\xFF\xFFprint\n", "", $output);
+            $output = stripQ3Colors($output);
             die(json_encode(array("output" => $output)));
         } else {
             Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
@@ -30,6 +31,10 @@ if (isset($_POST['server_id'], $_POST['command'], $_POST['sendRCONCommand']) && 
     }
     Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST'] . $_POST['server_id']);
     die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+}
+
+function stripQ3COlors($input) {
+    return preg_replace("/(\^.)/", "", $input);
 }
 
 
