@@ -142,6 +142,7 @@ class Constants {
         , "GET_PANEL_LOGS" => "SELECT * FROM q3panel_logs INNER JOIN q3panel_users ON q3panel_logs.user_id = q3panel_users.user_id ORDER BY timestamp DESC"
         , "GET_FAILED_LOGINS" => "SELECT * FROM q3panel_failed_logins ORDER BY failed_time DESC"
         , "GET_SERVER_LOGS_LEFT_JOIN_USERS" => "SELECT * FROM q3panel_servers_logs LEFT JOIN q3panel_users ON q3panel_servers_logs.user_id = q3panel_users.user_id ORDER BY timestamp DESC"
+        , "GET_SERVER_LOGS_LEFT_JOIN_USERS_INNER_JOIN_SERVERS" => "SELECT * FROM q3panel_servers_logs LEFT JOIN q3panel_users ON q3panel_servers_logs.user_id = q3panel_users.user_id INNER JOIN q3panel_servers ON q3panel_servers_logs.server_id = q3panel_servers.server_id ORDER BY timestamp DESC"
     );
     
     static $UPDATE_QUERIES = array(

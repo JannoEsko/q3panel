@@ -342,7 +342,7 @@ function initWebFTPTable(table_id, dir, server_id) {
                    
                     var actionsButton = "";
                     if (items.content !== "../") {
-                        actionsButton = " <button class=\"btn btn-default btn-sm\" onclick='deleteFromFTP(\"\",\"" + items.content + "\", \"" + server_id + "\", \"" + table_id + "\", \"" + dir + "\");'><em class=\"fa fa-trash-o\"></em> Delete</button><button class=\"btn btn-default btn-sm\" onclick='renameFileOrFolderModal(\"fileRenameModal\", \"" + items.content + "\");'><em class=\"fa fa-pencil-square-o\"> </em>Rename</button>";
+                        actionsButton = " <button class=\"btn btn-default btn-sm\" onclick='deleteFromFTP(\"" + items.content + "\", \"" + server_id + "\", \"" + table_id + "\", \"" + dir + "\");'><em class=\"fa fa-trash-o\"></em> Delete</button><button class=\"btn btn-default btn-sm\" onclick='renameFileOrFolderModal(\"fileRenameModal\", \"" + items.content + "\");'><em class=\"fa fa-pencil-square-o\"> </em>Rename</button>";
                     }
                     
                     var dirIcon = "";

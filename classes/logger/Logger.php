@@ -32,7 +32,7 @@ class Logger {
     }
     
     static function getServerLogs($sql) {
-        $query = Constants::$SELECT_QUERIES['GET_SERVER_LOGS_LEFT_JOIN_USERS'];
+        $query = Constants::$SELECT_QUERIES['GET_SERVER_LOGS_LEFT_JOIN_USERS_INNER_JOIN_SERVERS'];
         $data = $sql->query($query);
         for ($i = 0; $i < sizeof($data); $i++) {
             if (intval($data[$i]['origin']) === 0) {

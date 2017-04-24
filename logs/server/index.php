@@ -33,7 +33,7 @@ require_once __DIR__ . "/../../login.php";
                         <div class="col-md-8">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
-                                    Panel logs
+                                    Server logs
                                 </div>
                                 <div class="panel-body">
                                     <div class="table-responsive table-bordered">
@@ -41,6 +41,7 @@ require_once __DIR__ . "/../../login.php";
                                             <thead>
                                             <th>Username</th>
                                             <th>IP</th>
+                                            <th>Server</th>
                                             <th>Action</th>
                                             <th>Timestamp</th>
                                             </thead>
@@ -117,6 +118,7 @@ require_once __DIR__ . "/../../login.php";
                     "columns": [
                         {"data": "realName"},
                         {"data": "user_ip"},
+                        {"data": "server_name"},
                         {"data": "action", "orderable": false},
                         {"data": "timestamp"}
                     ]
