@@ -47,7 +47,7 @@ class Constants {
     static $CREATE_TABLES = array(
         "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username))",
         "CREATE TABLE q3panel_hosts (host_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, servername VARCHAR(255), hostname VARCHAR(255), sshport TINYINT, host_username VARCHAR(255), host_password VARCHAR(255), status TINYINT COMMENT '1 - ok, 2 - SSH problem, 3 - FTP problem')",
-        "CREATE TABLE q3panel_servers (server_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host_id INTEGER NOT NULL, server_name VARCHAR(255), game_id INTEGER, server_port SMALLINT UNSIGNED NOT NULL, server_account VARCHAR(255), server_password VARCHAR(255), server_status TINYINT COMMENT '0 - disabled, 1 - offline, 2 - online', server_startscript TEXT, current_players TINYINT, max_players TINYINT, rconpassword VARCHAR(255), CONSTRAINT server_name_must_be_unique UNIQUE(server_name), CONSTRAINT server_account_must_be_unique UNIQUE(server_account), CONSTRAINT server_port_must_be_unique UNIQUE(server_port))",
+        "CREATE TABLE q3panel_servers (server_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host_id INTEGER NOT NULL, server_name VARCHAR(255), game_id INTEGER, server_port SMALLINT UNSIGNED NOT NULL, server_account VARCHAR(255), server_password VARCHAR(255), server_status TINYINT COMMENT '0 - disabled, 1 - offline, 2 - online', server_startscript TEXT, current_players TINYINT, max_players TINYINT, rconpassword VARCHAR(255), CONSTRAINT server_name_must_be_unique UNIQUE(server_name), CONSTRAINT server_user_must_be_unique_on_same_host UNIQUE(host_id, server_account), CONSTRAINT server_port_must_be_unique_on_same_host UNIQUE(host_id, server_port))",
         "CREATE TABLE q3panel_servers_map (servers_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, server_id INTEGER NOT NULL, user_id INTEGER NOT NULL, can_see_rcon TINYINT, can_see_ftp TINYINT, can_access_config TINYINT, can_access_maps TINYINT, can_stop_server TINYINT, CONSTRAINT cant_have_duplicates UNIQUE(server_id, user_id))",
         "CREATE TABLE q3panel_servers_logs (server_log_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, server_id INTEGER NOT NULL, user_id INTEGER NOT NULL, user_ip VARCHAR(255), severity TINYINT, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)",
         "CREATE TABLE q3panel_logs (log_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id INTEGER NOT NULL, user_ip VARCHAR(255), action TEXT, timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
@@ -142,6 +142,7 @@ class Constants {
         , "SET_NEW_SERVER_ACCOUNT_PASSWORD" => "UPDATE q3panel_servers SET server_password = ? WHERE server_id = ?"
         , "SET_SERVER_PLAYERS_BY_ID" => "UPDATE q3panel_servers SET current_players = ? WHERE server_id = ?"
         , "UPDATE_SERVER_MAP_BY_SERVER_ID_USER_ID" => "UPDATE q3panel_servers_map SET can_stop_server = ?, can_see_rcon = ?, can_see_ftp = ? WHERE server_id = ? AND user_id = ?"
+        , "UPDATE_SERVER_BY_ID" => "UPDATE q3panel_servers SET server_name = ?, server_port = ?, max_players = ?, rconpassword = ? WHERE server_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -272,6 +273,7 @@ class Constants {
         , "USER_MAPPING_REMOVED_ERROR" => "Something went wrong with deleting the map for the user (most likely the user is a panel admin). Please refresh the page and try again."
         , "EDIT_MAPPING_SUCCESS" => "Mapping edited successfully."
         , "ADD_MAPPING_SUCCESS" => "User mapped successfully."
+        , "SERVER_EDIT_SUCCESS" => "Server has been edited successfully."
     );
     
     static $SSH_COMMANDS = array(

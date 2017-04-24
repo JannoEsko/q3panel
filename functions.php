@@ -9,6 +9,33 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc. Here it all gets logged as well.
  */
 
+if (isset($_POST['updateServer'], $_POST['server_id'], $_POST['server_name'], $_POST['server_port'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['server_id']) > 0 && intval($_POST['updateServer']) === 1 && strlen($_POST['server_name']) > 0 && intval($_POST['server_port']) > 0 && intval($_POST['max_players']) > 0 && strlen($_POST['rconpassword']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        //First stop, then edit, push the edits to SQL and then start if it's started.
+        $isServerStarted = intval($data['server_status']) === Constants::$SERVER_STARTED;
+        
+        $server->setRconpassword($_POST['rconpassword']);
+        $server->setMax_players($_POST['max_players']);
+        $server->setServer_port($_POST['server_port']);
+        $server->setServer_name($_POST['server_name']);
+        $out = $server->updateServer($sql);
+        if (isset($out['rows_affected'])) {
+            if ($isServerStarted) {
+                $server->restartServer($sql);
+            }
+            die(json_encode(array("msg" => Constants::$MESSAGES['SERVER_EDIT_SUCCESS'], "toggleModal" => "serverModal")));
+        } else {
+            die(json_encode($out));
+        }
+    }
+    die(Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR']);
+}
+
 
 if (isset($_POST['server_id'], $_POST['addMap'], $_POST['user_id']) && intval($_POST['server_id']) > 0 && intval($_POST['addMap']) === 1 && intval($_POST['user_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     $can_stop_server = bool2int(isset($_POST['can_stop_server']) && trim($_POST['can_stop_server']) === "on");

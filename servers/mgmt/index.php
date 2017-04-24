@@ -16,6 +16,15 @@ if (sizeof($server) !== 1) {
 }
 $server = $server[0];
 $is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN);
+if (!intval($server['can_see_rcon']) === 1 && !$is_server_admin) {
+    $server['rconpassword'] = "<i>hidden</i>";
+}
+
+if (!intval($server['can_see_ftp']) === 1 && !$is_server_admin) {
+    $server['server_account'] = "<i>hidden</i>";
+    $server['server_password'] = "<i>hidden</i>";
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -48,10 +57,25 @@ echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
                                     Server management
                                 </div>
                                 <div class="panel-body">
-                                    This will have the mapping to the users (who can do what), adding server owners (who can do everything with this server).
-                                    Server editing will happen here, web FTP will be accessed from here, starting/stopping server will happen here etc
-
-                                </div>
+                                    <h4>Server: <?php echo $server['server_name']; ?></h4>
+                                    This server has currently <?php echo $server['current_players']; ?> players online, out of a total of <?php echo $server['max_players']; ?>.
+                                    <br>
+                                    It is currently <b><?php echo Constants::$MESSAGES['SERVER_STATUSES'][$server['server_status']]; ?></b>
+                                    <br>
+                                    The server's located at <?php echo $server['hostname'] . ":" . $server['server_port']; ?>
+                                    <br>
+                                    Its RCON password is <?php echo $server['rconpassword']; ?>, FTP account is <?php echo $server['server_account']; ?> and password is <?php echo $server['server_password']; ?>.
+                                    <br>
+                                    The startscript of the server is the following:
+                                    <br>
+                                    <code>
+                                        <?php echo $server['server_startscript']; ?>
+                                    </code>
+                                    <?php if ($is_server_admin) { ?>
+                                    <br>
+                                    <br>
+                                    <button type="button" class="btn btn-default btn-block" onclick="$('#serverModal').modal();">Edit this server</button>
+                                    <?php } ?></div>
                             </div>
 
                             <div class="panel janno-panel">
@@ -65,7 +89,7 @@ echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
                         <div class="col-md-4">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
-                                    <div class="panel-title">Quick actions</div>
+                                    <div class="panel-title">Actions</div>
                                 </div>
                                 <div class="panel-body">
 
@@ -145,7 +169,7 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h4 id="serverModalTitle" class="modal-title">Add a new game</h4>
+                        <h4 id="serverModalTitle" class="modal-title">Edit server <?php echo $server['server_name']; ?></h4>
                     </div>
                     <div class="modal-body" id="serverModalBody">
                         <div class="panel janno-panel" id="formMsgPanel" hidden>
@@ -157,54 +181,28 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                             </div>
 
                         </div>
-                        <form id="serverForm" role="form" method="post" action="../functions.php">
-                            <input id='addServer' type="hidden" name="addServer" value="1">
-                            <input id='deleteServer' type="hidden" name="deleteServer" value="0">
-                            <input id='server_id' type="hidden" name="server_id" value="0">
+                        <form id="serverForm" role="form" method="post" action="../../functions.php">
+                            <input id='server_id' type="hidden" name="server_id" value="<?php echo $server['server_id']; ?>">
                             <input id='updateServer' type="hidden" name="updateServer" value="1">
                             <div class="form-group">
-                                <label>Host server</label>
-                                <select class="form-control" name="host_id" required>
-<?php echo Host::getHostsSelect($sql); ?>
-                                </select>
-                                <small>If it's empty, click <a href="<?php echo "$HOST_URL/hosts/"; ?>">here</a> to add it.</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Game</label>
-                                <select class="form-control" name="game_id" required>
-                                    <?php echo Game::getGamesSelect($sql); ?>
-                                </select>
-                                <small>If it's empty, click <a href="<?php echo "$HOST_URL/hosts/"; ?>">here</a> to add it.</small>
-                            </div>
-                            <div class="form-group">
                                 <label>Server name</label>
-                                <input id='server_name' type="text" name="server_name" class="form-control" required placeholder="Friendly name for the server">
+                                <input id='server_name' type="text" name="server_name" class="form-control" value="<?php echo $server['server_name']; ?>" required placeholder="Friendly name for the server">
                             </div>
                             <div class="form-group">
                                 <label>Server port</label>
-                                <input type="number" class="form-control" name="server_port" id="server_port" placeholder="Port for the server">
-                                <small>This is not a requirement. If specified, the server will use that port. If not, then if there are no servers deployed, it will default to port 20100, otherwise it will pick the server with the largest port value and increment that.</small>
-                            </div>
-                            <div class="form-group">
-                                <label>FTP Account</label>
-                                <input type="name" class="form-control" name="server_account" id="server_account" placeholder="Server account (for FTP usage)">
-                                <small>This value is not required. If set, the server will use the account specified. If not, then if there are no servers deployed, it will default it to srv1, otherwise it'll pick the server with the largest srv ID and increment that.<br>NB! The panel will create the account itself, so no such account can exist on the panel.</small>
-                            </div>
-                            <div class="form-group">
-                                <label>FTP Password</label>
-                                <input type="password" class="form-control" name="server_password" id="server_password" placeholder="Server password (for FTP usage)">
-                                <small>Not required, it'll automatically generate a 8-character password for the account if not entered.</small>
+                                <input type="number" class="form-control" name="server_port" id="server_port" value="<?php echo $server['server_port']; ?>" placeholder="Port for the server" required>
                             </div>
                             <div class="form-group">
                                 <label>Max clients</label>
-                                <input type="number" class="form-control" name="max_players" id="max_players" required placeholder="Maximum amount of players the server can have.">
+                                <input type="number" class="form-control" name="max_players" id="max_players" value="<?php echo $server['max_players']; ?>" required placeholder="Maximum amount of players the server can have.">
                             </div>
                             <div class="form-group">
                                 <label>RCONPassword</label>
-                                <input type="text" class="form-control" name="rconpassword" id="rconpassword" required placeholder="The RCON password for the server">
+                                <input type="text" class="form-control" name="rconpassword" id="rconpassword" value="<?php echo $server['rconpassword']; ?>" required placeholder="The RCON password for the server">
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-default btn-block">Submit</button>
+                                <small>Do note that this will restart the server.</small>
                             </div>
                         </form>
 
@@ -214,9 +212,7 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                         <div class="clearfix">
 
                             <div class="pull-right">
-                                <div id="deleteGameBtn" hidden class="pull-left">
-                                    <button  type="button" class="btn btn-danger" onclick="$('#addHost').val(0);$('#deleteHost').val(1);$('#updateHost').val(0);$('#hostForm').submit();" >Delete</button>
-                                </div>&nbsp;<button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
+                                <button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
                             </div>
                         </div>
                     </div>
@@ -258,6 +254,6 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                 </div>
 
 <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("ftppswchangeform", true);</script>
+        <script>handleForm("ftppswchangeform", true);handleForm("serverForm", true);</script>
     </body>
 </html>
