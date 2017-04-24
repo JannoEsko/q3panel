@@ -43,6 +43,12 @@ class Constants {
         , "success" => array("level" => 0, "fa-icon" => "fa-check")
     );
     
+    static $SERVER_LOG_FAICONS = array(
+        0 => "fa-check text-success",
+        1 => "fa-info text-info",
+        2 => "fa-times text-danger"
+    );
+    
     
     static $CREATE_TABLES = array(
         "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username))",
@@ -133,6 +139,9 @@ class Constants {
         , "GET_MAP_WITH_SERVERS_WITH_USERS" => "SELECT * FROM q3panel_servers_map INNER JOIN q3panel_servers ON q3panel_servers_map.server_id = q3panel_servers_map.server_id INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_servers_map.user_id"
         , "GET_MAP_WITH_SERVER_WITH_USERS_BY_SERVER_ID" => "SELECT * FROM q3panel_servers_map INNER JOIN q3panel_servers ON q3panel_servers_map.server_id = q3panel_servers.server_id INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_servers_map.user_id WHERE q3panel_servers_map.server_id = ?"
         , "GET_SERVERS_WITH_HOST_AND_GAME_BY_STATUS" => "SELECT * FROM q3panel_servers INNER JOIN q3panel_hosts ON q3panel_servers.host_id = q3panel_hosts.host_id INNER JOIN q3panel_games ON q3panel_servers.game_id = q3panel_games.game_id WHERE q3panel_servers.server_status = ?"
+        , "GET_PANEL_LOGS" => "SELECT * FROM q3panel_logs INNER JOIN q3panel_users ON q3panel_logs.user_id = q3panel_users.user_id ORDER BY timestamp DESC"
+        , "GET_FAILED_LOGINS" => "SELECT * FROM q3panel_failed_logins ORDER BY failed_time DESC"
+        , "GET_SERVER_LOGS_LEFT_JOIN_USERS" => "SELECT * FROM q3panel_servers_logs LEFT JOIN q3panel_users ON q3panel_servers_logs.user_id = q3panel_users.user_id ORDER BY timestamp DESC"
     );
     
     static $UPDATE_QUERIES = array(
@@ -298,6 +307,7 @@ class Constants {
         <link rel="stylesheet" href="{}/css/bootstrap.css">
         <link rel="stylesheet" href="{}/css/select2.css">
         <link rel="stylesheet" href="{}/css/toastr.min.css">
+        <link rel="stylesheet" href="{}/css/dataTables.bootstrap.min.css">
         <link rel="stylesheet" href="{}/css/app.css"> 
 
 EOT;
@@ -317,6 +327,9 @@ EOT;
         <script src="{}/js/app.js"></script>
         <script src="{}/js/select2.js"></script>
         <script src="{}/js/toastr.min.js"></script>
+        <script src="{}/js/jquery.dataTables.min.js"></script>
+        <script src="{}/js/dataTables.bootstrap.js"></script>
+        <script src="{}/js/dataTables.bootstrapPagination.js"></script>
         <script src="{}/js/q3panel.js"></script>
 
 EOT;

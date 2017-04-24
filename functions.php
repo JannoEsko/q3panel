@@ -9,9 +9,19 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc. Here it all gets logged as well.
  */
 
-//server_id: server_id,
-//        command: command,
-//        sendRCONCommand: 1
+if (isset($_GET['getServerLogs']) && intval($_GET['getServerLogs']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    die("{\"data\":" . json_encode(Logger::getServerLogs($sql)) . "}");
+}
+
+if (isset($_GET['getFailedLogins']) && intval($_GET['getFailedLogins']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    die("{\"data\":" . json_encode(Logger::getFailedLogins($sql)) . "}");
+}
+
+if (isset($_GET['getPanelLogs']) && intval($_GET['getPanelLogs']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    die("{\"data\":" . json_encode(Logger::getLogs($sql)) . "}");
+}
+
+
 if (isset($_POST['server_id'], $_POST['command'], $_POST['sendRCONCommand']) && intval($_POST['sendRCONCommand']) === 1 && intval($_POST['server_id']) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {

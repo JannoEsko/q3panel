@@ -33,10 +33,11 @@ require_once __DIR__ . "/../login.php";
                     <div class="row">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
-                                    Tickets
+                                    Panel preferences
                                 </div>
                                 <div class="panel-body">
                                     
+                                    <br>
                                 </div>
                             </div>
                             

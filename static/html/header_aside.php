@@ -66,6 +66,12 @@
                                 </a>
                             </li>
                             <?php } ?>
+                            <li>
+                                <a href="<?php echo "$HOST_URL/tickets/"; ?>" title="Tickets">
+                                    <em class="fa fa-ticket"></em>
+                                    <span>Tickets</span>
+                                </a>
+                            </li>
                             <li class="nav-heading">
                                 <span>Management</span>
                             </li>
@@ -80,20 +86,47 @@
                                     <em class="icon-settings"></em>
                                     <span>Game setup</span>
                                 </a>
-                                </li><?php } ?>
+                                </li>
+                                <li>
+                                <a href="<?php echo "$HOST_URL/preferences/"; ?>" title="Panel preferences">
+                                    <em class="fa fa-cog"></em>
+                                    <span>Panel preferences</span>
+                                </a>
+                                </li>    
+                                <?php } if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) { ?>
+                                <li><a href="#logs" title="Logs" data-toggle="collapse">
+                                        <em class="fa fa-history"></em>
+                                        <span>Logs</span>
+                                </a>
+                                
+                                <ul id="logs" class="nav sidebar-subnav collapse">
+                                    <li>
+                                        <a href="<?php echo "$HOST_URL/logs/panel/"; ?>" title="Panel logs">
+                                            <em class="fa fa-columns"></em>
+                                            <span>Panel logs</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="<?php echo "$HOST_URL/logs/server/"; ?>" title="Server logs">
+                                            <em class="fa fa-server"></em>
+                                            <span>Server logs</span>
+                                        </a>
+                                    </li>
+                                    
+                                    <li>
+                                        <a href="<?php echo "$HOST_URL/logs/login/"; ?>" title="Failed logins">
+                                            <em class="fa fa-times"></em>
+                                            <span>Failed logins</span>
+                                        </a>
+                                    </li>
+                                </ul></li><?php } ?>
                             <li class="nav-heading">
                                 <span>Links</span>
                             </li>
                             <li>
-                                <a href="https://forums.3d-sof2.com" target="_blank" title="3D# Forums">
-                                    <em class="fa fa-link"></em>
-                                    <span>3D# Forums</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="http://abuse.3d-sof2.com" target="_blank" title="Report Abuse">
-                                    <em class="fa fa-link"></em>
-                                    <span>Report Abuse</span>
+                                <a href="https://www.github.com/JannoEsko/q3panel/" target="_blank" title="GitHub Repository">
+                                    <em class="fa fa-github"></em>
+                                    <span>GitHub Repository</span>
                                 </a>
                             </li>
 
