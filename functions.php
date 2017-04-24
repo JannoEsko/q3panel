@@ -10,6 +10,18 @@ require_once __DIR__ . "/classes/loader.php";
  */
 
 
+if (isset($_POST['deleteMap'], $_POST['server_id'], $_POST['removeMapUser']) && intval($_POST['deleteMap']) > 0 && intval($_POST['server_id']) > 0 && intval($_POST['removeMapUser']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+    $dat = Server::removeUserFromMapping($sql, $_POST['server_id'], $_POST['removeMapUser']);
+    if ($dat !== false && intval($dat['rows_affected']) === 1) {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{server_id}", $_POST['server_id'], str_replace("{user_id}", $_POST['removeMapUser'], Constants::$LOGGER_MESSAGES['SUCCESSES']['REMOVE_USER_SERVER_MAP_SUCCESS'])));
+        die(json_encode(array("msg" => Constants::$MESSAGES['USER_MAPPING_REMOVED'], "removeMapTableRow" => $_POST['removeMapUser'])));
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{server_id}", $_POST['server_id'], str_replace("{user_id}", $_POST['removeMapUser'], Constants::$LOGGER_MESSAGES['ERRORS']['REMOVE_USER_SERVER_MAP'])));
+        die(json_encode(array("error" => Constants::$MESSAGES['USER_MAPPING_REMOVED_ERROR'])));
+    }
+    
+}
+
 if (isset($_GET['server_id']) && isset($_GET['dev'])) {
     $_POST['server_id'] = $_GET['server_id'];
     $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);

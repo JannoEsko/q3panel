@@ -149,6 +149,7 @@ class Constants {
         , "DELETE_HOST_BY_ID" => "DELETE FROM q3panel_hosts WHERE host_id = ?"
         , "DELETE_SERVER_BY_ID" => "DELETE FROM q3panel_servers WHERE server_id = ?"
         , "DELETE_NONEXISTANT_MAPPINGS" => "DELETE FROM q3panel_servers_map WHERE server_id NOT IN (SELECT server_id FROM q3panel_servers)"
+        , "REMOVE_USER_FROM_SERVER_MAP" => "DELETE FROM q3panel_servers_map WHERE server_id = ? AND user_id = ?"
     );
     
     static $LOGGER_MESSAGES = array(
@@ -181,6 +182,7 @@ class Constants {
             , "ADD_GAME_GENERIC" => "User tried to add a new game, but an error occured."
             , "DELETE_USER_ERROR_GENERIC" => "User tried to delete an user, but an error occured. User id: "
             , "DELETE_USER_PRIVILEGE_ERROR" => "User tried to delete an user, but he/she is not privileged enough. User id: "
+            , "REMOVE_USER_SERVER_MAP" => "User tried to delete mapping for user id {user_id} on server {server_id} but something went wrong (most likely the deletable user was a panel admin)."
         ),
         "SUCCESSES" => array(
             "FTP_PSW_GENERATE" => "User generated a new FTP password for server id "
@@ -202,6 +204,7 @@ class Constants {
             , "ADD_GAME" => "User added a new game with id "
             , "DELETE_USER" => "User deleted an user with id "
             , "EDIT_USER" => "User edited an user with id "
+            , "REMOVE_USER_SERVER_MAP_SUCCESS" => "User removed the server mapping for server id {server_id} for user {user_id}."
         ),
         "INFORMATION" => array(
             
@@ -239,7 +242,7 @@ class Constants {
         , "FORGOTTEN_MSG" => "Hello,<br><br>Someone (hopefully you) has just requested a new password on your account. To do so, please, click on here: <a href=\"{FORGOTTEN_URL_KEY}\">{FORGOTTEN_URL_KEY}</a><br>If it wasn't you, feel free to ignore this e-mail.<br><br>Best regards,<br>{SENDER_NAME}"
         , "FPSW_CHANGED" => "Hello,<br><br>You recently requested a new password from the page and it has been changed now. You have to use that password from now on.<br><br>Best regards,<br>{SENDER_NAME}"
         , "SERVER_REBOOT_TITLE" => "Server rebooted | Q3Panel"
-        , "SERVER_REBOOT_MSG" => "Hello,<br><br>Your server, {server_name} (id {server_id}), was rebooted due to it being down. If this is a recurring problem, maybe you should check, what causes the problem.<br><br>The server checker function returned this:<br>{out_msg}<br><br>Best regards,<br>{sender_name}"
+        , "SERVER_REBOOT_MSG" => "Hello,<br><br>Your server, {server_name} (id {server_id}), was rebooted due to it being down. If this is a recurring problem, maybe you should check what causes the problem.<br><br>The server checker function returned this:<br>{out_msg}<br><br>Best regards,<br>{sender_name}"
         , "SERVER_DOWN_ERR_TITLE" => "Server down | Q3Panel"
         , "SERVER_DOWN_ERR_MSG" => "Hello,<br><br>Your server, {server_name} (id {server_id}), is down and it couldn't be rebooted for an unknown error.<br><br>Server checker output:<br>{out_err}<br><br>Best regards,<br>{sender_name}"
     );
@@ -257,6 +260,8 @@ class Constants {
         , "FTP_FILE_UPLOAD_SUCCESS" => "New file has been successfully uploaded."
         , "FTP_PASSWORD_CHANGE_SUCCESS" => "The server account password has been successfully changed."
         , "EMAIL_SETUP" => "The new e-mail preferences have been saved successfully."
+        , "USER_MAPPING_REMOVED" => "The user has been successfully removed from the server map"
+        , "USER_MAPPING_REMOVED_ERROR" => "Something went wrong with deleting the map for the user (most likely the user is a panel admin). Please refresh the page and try again."
     );
     
     static $SSH_COMMANDS = array(

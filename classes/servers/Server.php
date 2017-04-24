@@ -408,6 +408,18 @@ class Server extends SSH {
         return $sql->query($query, $params);
     }
     
+    static function removeUserFromMapping(SQL $sql, $server_id, $user_id) {
+        //first check if the user is a panel admin (so they can't be removed).
+        if (User::checkUser($sql, $user_id, Constants::$PANEL_ADMIN) === false) {
+            $query = Constants::$DELETE_QUERIES['REMOVE_USER_FROM_SERVER_MAP'];
+            $params = array($server_id, $user_id);
+            return $sql->query($query, $params);
+        } else {
+            return false;
+        }
+        
+    }
+    
     static function getServersWithHost(SQL $sql, $server_id = null, $host_id = null) {
         $query = "";
         $params = null;

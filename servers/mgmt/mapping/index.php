@@ -52,7 +52,7 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                                     <?php
                                     $serverMapping = Server::getServersWithUserMapping($sql, $_GET['server_id']);
                                     foreach($serverMapping as $serverMap) {
-                                        ?><tr><?php
+                                        ?><tr id="tr<?php echo $serverMap['user_id']; ?>"><?php
                                         if (intval($serverMap['origin']) === Constants::$EXTERNAL_ACCOUNT) {
                                             $extQry = User::getExternalAccount($sql, $serverMap['username'], true);
                                             $tableSpec = $extQry['extTable_spec'];
@@ -64,13 +64,13 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                                             <td><?php echo intbool2str($serverMap['can_stop_server']); ?></td>
                                             <td><?php echo intbool2str($serverMap['can_see_rcon']); ?></td>
                                             <td><?php echo intbool2str($serverMap['can_see_ftp']); ?></td>
-                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default">Edit</button><button type="button" class="btn btn-block btn-default">Remove</button><?php } ?></td>
+                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default" onclick="editServerMapping('<?php echo $serverMap['user_id']; ?>', 'modalId');">Edit</button><button type="button" class="btn btn-block btn-default" onclick="$('#removeMapUser').val('<?php echo $serverMap['user_id']; ?>');$('#submitRemoveMap').click();">Remove</button><?php } ?></td>
                                         <?php } else { ?>
                                             <td><?php echo $serverMap['username']; ?></td>
                                             <td><?php echo intbool2str($serverMap['can_stop_server']); ?></td>
                                             <td><?php echo intbool2str($serverMap['can_see_rcon']); ?></td>
                                             <td><?php echo intbool2str($serverMap['can_see_ftp']); ?></td>
-                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default">Edit</button><button type="button" class="btn btn-block btn-default">Remove</button><?php } ?></td>
+                                            <td><?php if (intval($serverMap['group_id']) !== Constants::$PANEL_ADMIN) { ?><button type="button" class="btn btn-block btn-default" onclick="editServerMapping('<?php echo $serverMap['user_id']; ?>', 'modalId');">Edit</button><button type="button" class="btn btn-block btn-default" onclick="$('#removeMapUser').val('<?php echo $serverMap['user_id']; ?>');$('#submitRemoveMap').click();">Remove</button><?php } ?></td>
                                         <?php }
                                         ?></tr><?php 
                                     }
@@ -140,6 +140,13 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
             </section>
 
         </div>
+        <form id="removeMapping" hidden method="post" action="../../../functions.php">
+            <input type="hidden" name="server_id" value="<?php echo $_GET['server_id']; ?>">
+            <input type="hidden" name="deleteMap" value="1">
+            <input type="hidden" id="removeMapUser" name="removeMapUser">
+            <button id="submitRemoveMap" type="submit" hidden></button>
+        </form>
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
+        <script>handleForm("removeMapping", true);</script>
     </body>
 </html>

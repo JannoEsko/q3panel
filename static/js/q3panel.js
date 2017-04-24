@@ -102,6 +102,9 @@ function handleForm(id, useToaster) {
                         if (typeof response.newFTPPasswordSet !== "undefined") {
                             $("#ftppswreset").modal('toggle');
                         }
+                        if (typeof response.removeMapTableRow !== "undefined") {
+                            $("table#mapTable tr#tr" + response.removeMapTableRow).remove();
+                        }
                     } else {
                         formTitle.html("Success");
                         formMsg.html(response.msg);
