@@ -245,7 +245,7 @@ function stripQ3Colors($input) {
 }
 
 
-if (isset($_POST['updateServer'], $_POST['server_id'], $_POST['server_name'], $_POST['server_port'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['server_id']) > 0 && intval($_POST['updateServer']) === 1 && strlen($_POST['server_name']) > 0 && intval($_POST['server_port']) > 0 && intval($_POST['max_players']) > 0 && strlen($_POST['rconpassword']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+if (isset($_POST['updateServer'], $_POST['server_startscript'], $_POST['server_id'], $_POST['server_name'], $_POST['server_port'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['server_id']) > 0 && intval($_POST['updateServer']) === 1 && strlen($_POST['server_name']) > 0 && intval($_POST['server_port']) > 0 && intval($_POST['max_players']) > 0 && strlen($_POST['rconpassword']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
@@ -259,6 +259,7 @@ if (isset($_POST['updateServer'], $_POST['server_id'], $_POST['server_name'], $_
         $server->setMax_players($_POST['max_players']);
         $server->setServer_port($_POST['server_port']);
         $server->setServer_name($_POST['server_name']);
+        $server->setServer_startscript($_POST['server_startscript']);
         $out = $server->updateServer($sql);
         if (isset($out['rows_affected'])) {
             if ($isServerStarted) {

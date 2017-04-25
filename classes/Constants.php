@@ -181,7 +181,7 @@ class Constants {
         , "SET_NEW_SERVER_ACCOUNT_PASSWORD" => "UPDATE q3panel_servers SET server_password = ? WHERE server_id = ?"
         , "SET_SERVER_PLAYERS_BY_ID" => "UPDATE q3panel_servers SET current_players = ? WHERE server_id = ?"
         , "UPDATE_SERVER_MAP_BY_SERVER_ID_USER_ID" => "UPDATE q3panel_servers_map SET can_stop_server = ?, can_see_rcon = ?, can_see_ftp = ? WHERE server_id = ? AND user_id = ?"
-        , "UPDATE_SERVER_BY_ID" => "UPDATE q3panel_servers SET server_name = ?, server_port = ?, max_players = ?, rconpassword = ? WHERE server_id = ?"
+        , "UPDATE_SERVER_BY_ID" => "UPDATE q3panel_servers SET server_name = ?, server_port = ?, max_players = ?, rconpassword = ?, server_startscript = ? WHERE server_id = ?"
         , "UPDATE_EXTERNAL_AUTH" => "UPDATE q3panel_external_authentication SET host = ?, db_username = ?, db_password = ?, db_name = ?, users_table_name = ?, user_id_field = ?, username_field = ?, password_field = ?, email_field = ? WHERE ext_auth_id = 1"
         , "UPDATE_EMAIL_SERVICE" => "UPDATE q3panel_email_service SET is_sendgrid = ?, from_name = ?, from_email = ?, api_key = ? WHERE email_service_id = 1"
         , "UPDATE_TICKET_STATUS" => "UPDATE q3panel_support_ticket SET ticket_status = ? WHERE support_ticket_id = ?"

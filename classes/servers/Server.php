@@ -241,7 +241,7 @@ class Server extends SSH {
      */
     function updateServer(SQL $sql) {
         $query = Constants::$UPDATE_QUERIES['UPDATE_SERVER_BY_ID'];
-        $params = array($this->server_name, $this->server_port, $this->max_players, $this->rconpassword, $this->server_id);
+        $params = array($this->server_name, $this->server_port, $this->max_players, $this->rconpassword, $this->server_startscript, $this->server_id);
         try {
             return $sql->query($query, $params);
         } catch (PDOException $ex) {

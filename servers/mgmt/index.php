@@ -189,6 +189,10 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                                 <input type="text" class="form-control" name="rconpassword" id="rconpassword" value="<?php echo $server['rconpassword']; ?>" required placeholder="The RCON password for the server">
                             </div>
                             <div class="form-group">
+                                <label>Startscript</label>
+                                <textarea class="textarea form-control" rows="8" name="server_startscript" id="startscript" required><?php echo $server['server_startscript']; ?></textarea> 
+                            </div>
+                            <div class="form-group">
                                 <button type="submit" class="btn btn-default btn-block">Submit</button>
                                 <small>Do note that this will restart the server.</small>
                             </div>
