@@ -137,14 +137,14 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN
                                     ?>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label><input type="checkbox" id="can_stop_server" name="can_stop_server">Stopping server</label>
+                            <div class="form-group checkbox">
+                                <input class="styled" type="checkbox" id="can_stop_server" name="can_stop_server"><label for="can_stop_server">Stopping server</label>
                             </div>
-                            <div class="form-group">
-                                <label><input type="checkbox" id="can_see_rcon" name="can_see_rcon">Seeing RCON</label>
+                            <div class="form-group checkbox">
+                                <input class="styled" type="checkbox" id="can_see_rcon" name="can_see_rcon"><label for="can_see_rcon">Seeing RCON</label>
                             </div>
-                            <div class="form-group">
-                                <label><input type="checkbox" id="can_see_ftp" name="can_see_ftp">Using FTP</label>
+                            <div class="form-group checkbox">
+                                <input class="styled" type="checkbox" id="can_see_ftp" name="can_see_ftp"><label for="can_see_ftp">Using FTP</label>
                             </div>
                             <div class="form-group">
                                 <button type="submit" class="btn btn-default btn-block">Submit</button>
