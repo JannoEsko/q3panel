@@ -9,7 +9,6 @@ session_start();
  * Most of the user permission control happens in this file as well.
  */
 
-require_once __DIR__ . "/local_SQL.php";
 require_once __DIR__ . "/classes/loader.php";
 
 /**
