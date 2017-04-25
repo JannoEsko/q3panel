@@ -43,7 +43,27 @@ require_once __DIR__ . "/../login.php";
                                         <div class="panel-body">
                                             <div class="table table-bordered">
                                                 <table class="table table-hover">
-                                                    aa
+                                                    <thead>
+                                                    <th>Ticket title (id)</th>
+                                                    <th>Status</th>
+                                                    <th>Created at</th>
+                                                    <th></th>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $data = Ticket::getTickets($sql, null, $_SESSION['user_id'], Constants::$TICKET_OPEN);
+                                                        foreach ($data as $ticket) {
+                                                            ?>
+                                                        <tr>
+                                                            <td><?php echo $ticket['title'] . " (" . $ticket['support_ticket_id'] . ")"; ?></td>
+                                                            <td><?php echo Constants::$TICKETS_STATUSES[$ticket['ticket_status']]; ?></td>
+                                                            <td><?php echo $ticket['creation_date']; ?></td>
+                                                            <td><button type="button" class="btn btn-default btn-block" onclick="initTicketDetails('ticketModal', '<?php echo $ticket['support_ticket_id']; ?>', true);">Details</button></td>
+                                                        </tr>
+                                                        <?php }
+                                                        
+                                                        ?>
+                                                    </tbody>
                                                 </table>
                                             </div>
                                         </div>
@@ -53,10 +73,34 @@ require_once __DIR__ . "/../login.php";
                                     <br>
                                     <div class="panel janno-panel">
                                         <div class="panel-heading">
-                                            Closed tickets
+                                            Other tickets
                                         </div>
                                         <div class="panel-body">
-                                            bb
+                                            <div class="table table-bordered">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                    <th>Ticket title (id)</th>
+                                                    <th>Status</th>
+                                                    <th>Created at</th>
+                                                    <th></th>
+                                                    </thead>
+                                                    <tbody>
+                                                        <?php
+                                                        $data = Ticket::getTickets($sql, null, $_SESSION['user_id'], Constants::$TICKET_OPEN, true);
+                                                        foreach ($data as $ticket) {
+                                                            ?>
+                                                        <tr>
+                                                            <td><?php echo $ticket['title'] . " (" . $ticket['support_ticket_id'] . ")"; ?></td>
+                                                            <td><?php echo Constants::$TICKETS_STATUSES[$ticket['ticket_status']]; ?></td>
+                                                            <td><?php echo $ticket['creation_date']; ?></td>
+                                                            <td><button type="button" class="btn btn-default btn-block" onclick="initTicketDetails('ticketModal', '<?php echo $ticket['support_ticket_id']; ?>', false);">Details</button></td>
+                                                        </tr>
+                                                        <?php }
+                                                        
+                                                        ?>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -116,12 +160,36 @@ require_once __DIR__ . "/../login.php";
                         <h4 id="ticketModalTitle" class="modal-title" id="ticketTitle"></h4>
                     </div>
                     <div class="modal-body">
-                        
+                        <div id="messages" class="list-group"></div>
+                        <br>
+                        <form method="post" action="../functions.php" id="newTicketMessage">
+                            <input type="hidden" name="newTicketMessage" value="1">
+                            <input type="hidden" name="support_ticket_id" id="support_ticket_id">
+                            <div class="form-group">
+                                <label>New message to the ticket</label>
+                                <textarea name="message" class="textarea form-control" required rows="8"></textarea>
+                            </div>
+                            <?php if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) { ?>
+                            <div class="form-group">
+                                <label>Set status</label>
+                                <select class="form-control" name="ticket_status" required>
+                                    <?php
+                                    foreach (Constants::$TICKETS_STATUSES as $key => $value) {
+                                        ?><option value="<?php echo $key; ?>"><?php echo $value; ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                            <?php } ?>
+                            <div class="form-group">
+                                <button class="form-control btn btn-default btn-block" type="submit">Submit</button>
+                            </div>
+                        </form>
                     </div>
                     <div class="modal-footer">
                         <div class="clearfix">
                             
                             <div class="pull-right">
+                                
                                 <button type="button" class="btn btn-default" data-dismiss="modal" >Close</button>
                             </div>
                         </div>
@@ -131,6 +199,6 @@ require_once __DIR__ . "/../login.php";
             
         </div>
         <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("ticketForm", true);</script>
+        <script>handleForm("ticketForm", true);handleForm("newTicketMessage", true);</script>
     </body>
 </html>

@@ -513,3 +513,29 @@ function sendCommand(server_id) {
         }
     });
 }
+
+function initTicketDetails(modal_id, ticket_id, showReplyForm) {
+    $.post(".", {
+        getAllTicketData: 1,
+        ticket_id: ticket_id
+    }, function(data) {
+        data = JSON.parse(data);
+        console.log(data);
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else {
+            $("#messages").html("");
+            if (showReplyForm) {
+                $("#newTicketMessage").show();
+            } else {
+                $("#newTicketMessage").hide();
+            }
+            $.each(data, function(item_id, row) {
+                $("#" + modal_id + "Title").html(row.title);
+                $("#support_ticket_id").val(row.support_ticket_id);
+                $("#messages").prepend('<a class="list-group-item"><div class="media-box"><div class="media-box-body clearfix"><small class="pull-right">' + row.message_date + '</small><strong class="media-box-heading text-primary"><span class="text-left"></span>' + row.realName + ' (' + row.group_text + ')</strong><p class="mb-sm"><br><small>' + row.message + '</small></p><small class="pull-right">IP: ' + row.user_ip + '</small></div></div></a>');
+            });
+            $("#" + modal_id).modal();
+        }
+    });
+}

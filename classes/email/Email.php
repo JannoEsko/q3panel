@@ -81,6 +81,7 @@ class Email {
      * Function for sending e-mail. Uses either SendGrid or PHPMailer
      * @param boolean $useSendgrid Boolean value whether to use SendGrid or not (default false).
      * @param String $sendgrid_apikey The API key if you wish to send it with SendGrid.
+     * @param SQL $sql The SQL handle, required only if the email preferences aren't set in the object itself.
      * @return Array Returns array, if it contains error key, there was a problem, if not, then the e-mail was sent successfully.
      */
     public function sendEmail($useSendgrid = false, $sendgrid_apikey = "") {

@@ -37,13 +37,13 @@ class Constants {
     static $HOST_RESOURCE_TIMEOUT = 2;
     static $TICKET_OPEN = 0;
     static $TICKET_CLOSED = 1;
-    static $TICKET_ON_HOLD = 2;
+    static $TICKET_UNABLE_TO_REPRODUCE = 2;
     static $TICKET_RESOLVED = 3;
     
     static $TICKETS_STATUSES = array(
         0 => "Open",
         1 => "Closed",
-        2 => "On hold",
+        2 => "Unable to reproduce",
         3 => "Resolved"
     );
     
@@ -72,7 +72,7 @@ class Constants {
         "CREATE TABLE q3panel_games (game_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, game_name VARCHAR(255), game_location TEXT, startscript TEXT)",
         "CREATE TABLE q3panel_forgottenpsw (forgottenpsw_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id INTEGER NOT NULL, request_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, request_key VARCHAR(255) NOT NULL)",
         "CREATE TABLE q3panel_failed_logins (failed_login_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, failed_username VARCHAR(255), failed_ip VARCHAR(255), failed_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
-        "CREATE TABLE q3panel_support_ticket (support_ticket_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, title TEXT, ticket_status TINYINT COMMENT '0 - open, 1 - closed, 2 - on hold, 3 - resolved', creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
+        "CREATE TABLE q3panel_support_ticket (support_ticket_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, title TEXT, ticket_status TINYINT COMMENT '0 - open, 1 - closed, 2 - unable to reproduce, 3 - resolved', creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
         "CREATE TABLE q3panel_support_ticket_map (support_ticket_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, mapped_user_id INTEGER NOT NULL, CONSTRAINT ticket_id_and_mapped_user_id_must_be_unique UNIQUE(ticket_id, mapped_user_id))",
         "CREATE TABLE q3panel_support_ticket_messages (support_ticket_message_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, user_id INTEGER NOT NULL, user_ip VARCHAR(255), message_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, message TEXT)",
         "CREATE TABLE q3panel_external_authentication (ext_auth_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host VARCHAR(255), db_username VARCHAR(255), db_password VARCHAR(255), db_name VARCHAR(255), users_table_name VARCHAR(255), user_id_field VARCHAR(255), username_field VARCHAR(255), password_field VARCHAR(255), email_field VARCHAR(255))",
@@ -161,6 +161,12 @@ class Constants {
         , "GET_SERVER_LOGS_LEFT_JOIN_USERS_INNER_JOIN_SERVERS" => "SELECT * FROM q3panel_servers_logs LEFT JOIN q3panel_users ON q3panel_servers_logs.user_id = q3panel_users.user_id INNER JOIN q3panel_servers ON q3panel_servers_logs.server_id = q3panel_servers.server_id ORDER BY timestamp DESC"
         , "GET_TICKET_WITH_MAP_BY_ID_AND_USER_ID" => "SELECT * FROM q3panel_support_ticket INNER JOIN q3panel_support_ticket_map ON q3panel_support_ticket.ticket_id = q3panel_support_ticket_map.ticket_id WHERE ticket_id = ? AND user_id = ?"
         , "GET_TICKET_MESSAGES_WITH_USERS_WITH_MAP_WITH_TICKET_BY_TICKET_ID_USER_ID" => "SELECT * FROM q3panel_support_ticket_messages INNER JOIN q3panel_support_ticket_map ON q3panel_support_ticket_messages.ticket_id = q3panel_support_ticket_map.ticket_id INNER JOIN q3panel_support_ticket ON q3panel_support_ticket.support_ticket_id = q3panel_support_ticket_messages.ticket_id INNER JOIN q3panel_users ON q3panel_support_ticket_messages.user_id = q3panel_users.user_id WHERE q3panel_support_ticket_messages.ticket_id = ? AND q3panel_support_ticket_map.mapped_user_id = ?"
+        , "GET_MAPPED_TICKETS_BY_STATUS" => "SELECT * FROM q3panel_support_ticket_map INNER JOIN q3panel_support_ticket ON q3panel_support_ticket_map.ticket_id = q3panel_support_ticket.support_ticket_id WHERE q3panel_support_ticket.ticket_status = ? AND q3panel_support_ticket_map.mapped_user_id = ? ORDER BY creation_date DESC"
+        , "GET_MAPPED_TICKETS_BY_STATUS_SMALLER_THAN" => "SELECT * FROM q3panel_support_ticket_map INNER JOIN q3panel_support_ticket ON q3panel_support_ticket_map.ticket_id = q3panel_support_ticket.support_ticket_id WHERE q3panel_support_ticket.ticket_status <= ? AND q3panel_support_ticket_map.mapped_user_id = ? ORDER BY creation_date DESC"
+        , "GET_TICKET_MAP_BY_TICKET_ID_USER_ID" => "SELECT * FROM q3panel_support_ticket_map WHERE ticket_id = ? AND mapped_user_id = ?"
+        , "GET_TICKET_MAP_BY_TICKET_ID" => "SELECT * FROM q3panel_support_ticket_map WHERE ticket_id = ?"
+        , "GET_TICKET_DATA_BY_TICKET_ID" => "SELECT * FROM q3panel_support_ticket WHERE support_ticket_id = ?"
+        , "GET_MAPPED_TICKETS_BY_STATUS_LARGER_THAN" => "SELECT * FROM q3panel_support_ticket_map INNER JOIN q3panel_support_ticket ON q3panel_support_ticket_map.ticket_id = q3panel_support_ticket.support_ticket_id WHERE q3panel_support_ticket.ticket_status > ? AND q3panel_support_ticket_map.mapped_user_id = ? ORDER BY creation_date DESC"
     );
     
     static $UPDATE_QUERIES = array(
@@ -173,6 +179,7 @@ class Constants {
         , "UPDATE_SERVER_BY_ID" => "UPDATE q3panel_servers SET server_name = ?, server_port = ?, max_players = ?, rconpassword = ? WHERE server_id = ?"
         , "UPDATE_EXTERNAL_AUTH" => "UPDATE q3panel_external_authentication SET host = ?, db_username = ?, db_password = ?, db_name = ?, users_table_name = ?, user_id_field = ?, username_field = ?, password_field = ?, email_field = ? WHERE ext_auth_id = 1"
         , "UPDATE_EMAIL_SERVICE" => "UPDATE q3panel_email_service SET is_sendgrid = ?, from_name = ?, from_email = ?, api_key = ? WHERE email_service_id = 1"
+        , "UPDATE_TICKET_STATUS" => "UPDATE q3panel_support_ticket SET ticket_status = ? WHERE support_ticket_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -222,6 +229,9 @@ class Constants {
             , "EXT_AUTH_UPDATE" => "User tried to edit the external authentication parameters, but an error occurred."
             , "ADD_EXT_AUTH" => "User tried to add an external authentication to the panel, but an error occurred."
             , "EMAIL_SERVICE_UPDATE" => "User tried to update the e-mail service preferences, but an error occurred."
+            , "GET_TICKET_MSGS_ERR_GENERIC" => "User tried to access a ticket, but no data was found. "
+            , "TICKET_NOT_MAPPED" => "User tried to access a ticket which wasn't mapped to his account. "
+            , "TICKET_NEW_MESSAGE_TICKET_CLOSED" => "User tried to update a ticket, which has been closed. "
         ),
         "SUCCESSES" => array(
             "FTP_PSW_GENERATE" => "User generated a new FTP password for server id "
@@ -283,6 +293,9 @@ class Constants {
         , "EDIT_MAPPING_ERROR" => "Couldn't edit the mapping for the user. Most likely the user is a panel admin."
         , "ADD_MAPPING_ERROR" => "Couldn't map the server to user. Please refresh the page and try again (most likely, the user is panel admin and thus, is already mapped)."
         , "EMAIL_SERVICE_UPDATE_ERROR" => "Couldn't update the e-mail service preferences due to an unknown error. Please try again later."
+        , "GET_TICKET_MSGS_ERR_GENERIC" => "Couldn't get the ticket details. Please refresh the page and try again."
+        , "TICKET_NOT_MAPPED" => "The ticket is not mapped to your account!"
+        , "TICKET_NEW_MESSAGE_TICKET_CLOSED" => "This ticket is not open. You cannot reply to it."
     );
     
     static $EMAIL_TEMPLATE = array(
@@ -293,6 +306,10 @@ class Constants {
         , "SERVER_REBOOT_MSG" => "Hello,<br><br>Your server, {server_name} (id {server_id}), was rebooted due to it being down. If this is a recurring problem, maybe you should check what causes the problem.<br><br>The server checker function returned this:<br>{out_msg}<br><br>Best regards,<br>{sender_name}"
         , "SERVER_DOWN_ERR_TITLE" => "Server down | Q3Panel"
         , "SERVER_DOWN_ERR_MSG" => "Hello,<br><br>Your server, {server_name} (id {server_id}), is down and it couldn't be rebooted for an unknown error.<br><br>Server checker output:<br>{out_err}<br><br>Best regards,<br>{sender_name}"
+        , "NEW_TICKET_TEMPLATE_TITLE" => "New ticket registered | Q3Panel"
+        , "NEW_TICKET_TEMPLATE" => "Hello,<br><br>A new ticket has been registered on the panel with the title {ticket_name}. You can check it out over <a href=\"{HOST_URL}/tickets/\">here</a>.<br><br>Best regards,<br>{sender_name}"
+        , "TICKET_NEW_MESSAGE_TITLE" => "Ticket has been updated | Q3Panel"
+        , "TICKET_NEW_MESSAGE" => "Hello,<br><br>The ticket, named {ticket_name} has been updated. You can check it out over <a href=\"{HOST_URL}/tickets/\">here</a>.<br><br>Best regards,<br>{sender_name}"
     );
     
     static $MESSAGES = array(
@@ -317,6 +334,7 @@ class Constants {
         , "ADD_EXT_AUTH_SUCCESS" => "External authentication configured successfully!"
         , "EMAIL_SERVICE_UPDATE_SUCCESS" => "E-mail service information updated."
         , "TICKET_SAVE_SUCCESS" => "The ticket has been saved successfully."
+        , "TICKET_NEW_MESSAGE" => "The ticket has been updated successfully."
     );
     
     static $SSH_COMMANDS = array(

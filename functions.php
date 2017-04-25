@@ -9,14 +9,58 @@ require_once __DIR__ . "/classes/loader.php";
  * function callouts, POST/GET requests etc. Here it all gets logged as well.
  */
 
+if (isset($_POST['newTicketMessage'], $_POST['support_ticket_id'], $_POST['message']) && intval($_POST['newTicketMessage']) === 1 && intval($_POST['support_ticket_id']) > 0) {
+    //First check if we are mapped to it, otherwise we shouldn't be able to perform this action.
+    if (Ticket::isUserMappedToTicket($sql, $_POST['support_ticket_id'], $_SESSION['user_id'])) {
+        $ticket = Ticket::getTicket($sql, $_POST['support_ticket_id']);
+        if (intval($ticket->getTicket_status()) !== Constants::$TICKET_OPEN) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['TICKET_NEW_MESSAGE_TICKET_CLOSED'] . "Ticket id: " . $_POST['support_ticket_id']);
+            die(json_encode(array("error" => Constants::$ERRORS['TICKET_NEW_MESSAGE_TICKET_CLOSED'])));
+        }
+        $ticket->saveMessageToTicket($sql, $_SESSION['user_id'], getUserIP(), $_POST['message']);
+        $ticket->notifyMappedUsers($sql, Constants::$EMAIL_TEMPLATE['TICKET_NEW_MESSAGE_TITLE'], str_replace("{HOST_URL}", $HOST_URL, Constants::$EMAIL_TEMPLATE['TICKET_NEW_MESSAGE']));
+        if (isset($_POST['ticket_status']) && intval($_POST['ticket_status']) >= 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+            $ticket->setStatus($sql, $_POST['ticket_status']);
+        }
+        die(json_encode(array("msg" => Constants::$MESSAGES['TICKET_NEW_MESSAGE'], "toggleModal" => "ticketModal")));
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['TICKET_NOT_MAPPED'] . "Ticket id: " . $_POST['support_ticket_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['TICKET_NOT_MAPPED'])));
+    }
+}
+
+if (isset($_POST['getAllTicketData'], $_POST['ticket_id'])) {
+    $ticket = Ticket::getTickets($sql, $_POST['ticket_id'], $_SESSION['user_id'], null, false, true);
+    if (sizeof($ticket) > 0) {
+        for ($i = 0; $i < sizeof($ticket); $i++) {
+            if (intval($ticket[$i]['origin']) === Constants::$EXTERNAL_ACCOUNT) {
+                $extData = User::getExternalAccount($sql, $ticket[$i]['username'], true);
+                $ticket[$i]['realName'] = $extData['data'][0][$extData['extTable_spec']['username_field']];
+            } else {
+                $ticket[$i]['realName'] = $extData['username'];
+            }
+            $ticket[$i]['message'] = nl2br($ticket[$i]['message']);
+            $ticket[$i]['password'] = "";
+            $ticket[$i]['group_text'] = Constants::$MESSAGES['GROUP'][$ticket[$i]['group_id']];
+            if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
+                $ticket[$i]['user_ip'] = "<i>hidden</i>";
+            }
+        }
+        die(json_encode($ticket));
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GET_TICKET_MSGS_ERR_GENERIC'] . " Ticket id: " . $_POST['ticket_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GET_TICKET_MSGS_ERR_GENERIC'])));
+    }
+}
+
 
 if (isset($_POST['newTicket'], $_POST['title'], $_POST['message']) && intval($_POST['newTicket']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$NORMAL_USER)) {
     //Tickets should be mapped to every panel admin only.
     //The mapping will stay as it is even when the rights are removed.
     $ticket = new Ticket(null, $_POST['title'], Constants::$TICKET_OPEN, null);
     $ticket->setSupport_ticket_id($ticket->saveTicket($sql)['last_insert_id']);
-    $ticket->mapTicketToUsers($sql, Constants::$PANEL_ADMIN);
-    $ticket->mapTicketToUsers($sql, null, $_SESSION['user_id']);
+    $ticket->mapTicketToUsers($sql, Constants::$PANEL_ADMIN, null, $HOST_URL);
+    $ticket->mapTicketToUsers($sql, null, $_SESSION['user_id'], $HOST_URL);
     $ticket->saveMessageToTicket($sql, $_SESSION['user_id'], getUserIP(), $_POST['message']);
     die(json_encode(array("msg" => Constants::$MESSAGES['TICKET_SAVE_SUCCESS'], "toggleModal" => "newTicket")));
 }

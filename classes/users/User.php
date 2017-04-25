@@ -279,6 +279,24 @@ class User {
         return sizeof($sql->query($query, $params)) === 1;
     }
     
+    static function getUserById(SQL $sql, $user_id) {
+        $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID'];
+        $params = array($user_id);
+        $data = $sql->query($query, $params);
+        if (sizeof($data) === 1) {
+            $data = $data[0];
+            if (intval($data['origin']) === 1) {
+                $extdata = self::getExternalAccount($sql, $data['username'], true);
+                $data['email'] = $extdata['data'][0][$extdata['extTable_spec']['email_field']];
+                $data['realName'] = $extdata['data'][0][$extdata['extTable_spec']['username_field']];
+            } else {
+                $data['realName'] = $data['username'];
+            }
+            return $data;
+        }
+        return false;
+    }
+    
     //User::canEditUser($sql, $_SESSION['user_id'])
     
     /**
