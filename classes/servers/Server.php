@@ -1,14 +1,8 @@
 <?php
 require_once __DIR__ . "/../ssh/SSH.php";
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of Server
- *
+ * Handles everything related to the gameservers.
  * @author Janno
  */
 class Server extends SSH {
@@ -27,6 +21,21 @@ class Server extends SSH {
     private $ssh;
     private $server_id;
     
+    /**
+     * Constructs a new server object.
+     * @param int $server_id The server ID
+     * @param Host $host The Host of the server.
+     * @param string $server_name The server name.
+     * @param Game $game The game of the server.
+     * @param int $server_port The gameserver port.
+     * @param string $server_account The gameserver account.
+     * @param string $server_password The gameserver password.
+     * @param int $server_status The gameserver status.
+     * @param string $server_startscript The gameserver's startscript.
+     * @param int $current_players The current players of the gameserver.
+     * @param int $max_players The maximum players of the gameserver.
+     * @param string $rconpassword The RCON password of the gameserver.
+     */
     function __construct($server_id, Host $host, $server_name, Game $game, $server_port, $server_account, $server_password, $server_status, $server_startscript, $current_players, $max_players, $rconpassword) {
         $this->server_id = $server_id;
         $this->host = $host;
@@ -135,6 +144,11 @@ class Server extends SSH {
     }
 
 
+    /**
+     * Starts the server.
+     * @param SQL $sql The SQL handle.
+     * @return boolean Returns true always.
+     */
     function startServer(SQL $sql) {
         $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
         $params = array(Constants::$SERVER_STARTED, $this->server_id);
@@ -150,6 +164,11 @@ class Server extends SSH {
         return true;
     }
     
+    /**
+     * Stops the server.
+     * @param SQL $sql The SQL handle.
+     * @return mixed Returns true if the server was successfully stopped, otherwise returns an array.
+     */
     function stopServer(SQL $sql) {
         $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
         $params = array(Constants::$SERVER_STOPPED, $this->server_id);
@@ -168,10 +187,20 @@ class Server extends SSH {
         return true;
     }
     
+    /**
+     * Restarts a server
+     * @param SQL $sql The SQL handle.
+     * @return boolean Returns true, if the server got restarted successfully.
+     */
     function restartServer($sql) {
         return $this->stopServer($sql) && $this->startServer($sql);
     }
     
+    /**
+     * Deletes a server.
+     * @param SQL $sql The SQL handle.
+     * @return boolean Returns true always.
+     */
     function deleteServer(SQL $sql) {
         $this->stopServer($sql);
         $removeServerQuery = Constants::$DELETE_QUERIES['DELETE_SERVER_BY_ID'];
@@ -185,6 +214,12 @@ class Server extends SSH {
         return true;
     }
     
+    /**
+     * Changes server account password.
+     * @param SQL $sql The SQL handle.
+     * @param string $newPass The new password.
+     * @return mixed Returns true, if the new password got successfully set. otherwise returns an array with the key error.
+     */
     function changeServerAccountPassword(SQL $sql, $newPass) {
         $change_password = Constants::$SSH_COMMANDS['CHANGE_PASSWORD'];
         $change_password = str_replace("{server_account}", $this->server_account, $change_password);
@@ -198,6 +233,11 @@ class Server extends SSH {
         }
     }
     
+    /**
+     * Updates the server.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns the SQL output, array with the key error otherwise.
+     */
     function updateServer(SQL $sql) {
         $query = Constants::$UPDATE_QUERIES['UPDATE_SERVER_BY_ID'];
         $params = array($this->server_name, $this->server_port, $this->max_players, $this->rconpassword, $this->server_id);
@@ -209,6 +249,11 @@ class Server extends SSH {
         
     }
     
+    /**
+     * Disables the server.
+     * @param SQL $sql The SQL handle.
+     * @return boolean Returns true, if the server got disabled successfully, false otherwise.
+     */
     function disableServer(SQL $sql) {
         if ($this->stopServer($sql)) {
             $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
@@ -220,6 +265,11 @@ class Server extends SSH {
         }
     }
     
+    /**
+     * Enables the server.
+     * @param SQL $sql The SQL handle.
+     * @return boolean Returns true always.
+     */
     function enableServer(SQL $sql) {
         $query = Constants::$UPDATE_QUERIES['SET_SERVER_STATUS'];
         $params = array(Constants::$SERVER_STOPPED, $this->server_id);
@@ -227,6 +277,11 @@ class Server extends SSH {
         return true;
     }
     
+    /**
+     * Adds a new server.
+     * @param SQL $sql The SQL handle.
+     * @return mixed Returns the STDIO/STDERR data of the functions or an array with the key error if an error occurred.
+     */
     function addServer(SQL $sql) {
         //start off by checking if we need to autofill port and username.
         $getServers = self::getServers($sql);
@@ -332,6 +387,13 @@ class Server extends SSH {
         
     }
     
+    /**
+     * Sends a Quake 3 command to the server.
+     * @param string $command The command to send.
+     * @param bool $output Whether you want output or not.
+     * @param bool $use_rcon Whether to use the RCONPassword or not.
+     * @return mixed Returns nothing, if output was false, returns the output of the command, if output was true.
+     */
     function sendQ3Command($command, $output = false, $use_rcon = false) {
         if ($use_rcon) {
             $command = str_replace("{rconpassword}", $this->rconpassword, $command);
@@ -350,6 +412,11 @@ class Server extends SSH {
         }
     }
     
+    /**
+     * Checks if the server is working correctly.
+     * @param SQL $sql The SQL handle.
+     * @return mixed Returns either the player count, a message of what was done, an error message or a STDERR message.
+     */
     function checkServer(SQL $sql) {
         //first, check if screen is up.
         $getScreenPID = Constants::$SSH_COMMANDS['GET_SCREEN_PID'];
@@ -397,6 +464,12 @@ class Server extends SSH {
         
     }
     
+    /**
+     * Gets servers.
+     * @param SQL $sql The SQL handle.
+     * @param int $server_id [optional] If specified, gets the server with the specified ID, gets all servers otherwise.
+     * @return array Returns the SQL output.
+     */
     static function getServers(SQL $sql, $server_id = null) {
         $query = "";
         $params = null;
@@ -409,12 +482,24 @@ class Server extends SSH {
         return $sql->query($query, $params);
     }
     
+    /**
+     * Gets currently running servers.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns the SQL output.
+     */
     static function getRunningServers(SQL $sql) {
         $query = Constants::$SELECT_QUERIES['GET_SERVERS_WITH_HOST_AND_GAME_BY_STATUS'];
         $params = array(Constants::$SERVER_STARTED);
         return $sql->query($query, $params);
     }
     
+    /**
+     * Removes user from a server map.
+     * @param SQL $sql The SQL handle.
+     * @param int $server_id The server ID
+     * @param int $user_id The user ID which to remove.
+     * @return mixed Returns the SQL output, returns false, if the user is not allowed to perform this action.
+     */
     static function removeUserFromMapping(SQL $sql, $server_id, $user_id) {
         //first check if the user is a panel admin (so they can't be removed).
         if (User::checkUser($sql, $user_id, Constants::$PANEL_ADMIN) === false) {
@@ -427,6 +512,16 @@ class Server extends SSH {
         
     }
     
+    /**
+     * Adds an user to the server map.
+     * @param SQL $sql The SQL handle.
+     * @param int $server_id The server ID
+     * @param int $user_id The user which to add.
+     * @param int $can_stop_server Whether the user can stop the server.
+     * @param int $can_see_rcon Whether the user can see the RCON password.
+     * @param int $can_see_ftp Whether the user can see the FTP details.
+     * @return mixed Returns the SQL output, false when the user is not allowed to perform this action.
+     */
     static function addUserMapping(SQL $sql, $server_id, $user_id, $can_stop_server, $can_see_rcon, $can_see_ftp) {
         if (User::checkUser($sql, $user_id, Constants::$PANEL_ADMIN) === false) {
             $query = Constants::$INSERT_QUERIES['ADD_USER_TO_SERVER_MAP'];
@@ -437,6 +532,16 @@ class Server extends SSH {
         }
     }
     
+    /**
+     * Edits the server map for the specific user.
+     * @param SQL $sql The SQL handle.
+     * @param int $server_id The server ID
+     * @param int $user_id The user which to add.
+     * @param int $can_stop_server Whether the user can stop the server.
+     * @param int $can_see_rcon Whether the user can see the RCON password.
+     * @param int $can_see_ftp Whether the user can see the FTP details.
+     * @return mixed Returns the SQL output, false when the user is not allowed to perform this action.
+     */
     static function editUserMapping(SQL $sql, $server_id, $user_id, $can_stop_server, $can_see_rcon, $can_see_ftp) {
         //first check if the user is a panel admin (so they can't be removed).
         if (User::checkUser($sql, $user_id, Constants::$PANEL_ADMIN) === false) {
@@ -449,6 +554,13 @@ class Server extends SSH {
         
     }
     
+    /**
+     * Gets the server with hosts.
+     * @param SQL $sql The SQL handle.
+     * @param type $server_id [optional] If specified with host_id, will get the servers with this server id and this host id, otherwise will get the server with this server ID.
+     * @param type $host_id [optional] If specified with server_id, will get the servers with this server id and this host id, otherwise gets all servers with this host id.
+     * @return array Returns the SQL output.
+     */
     static function getServersWithHost(SQL $sql, $server_id = null, $host_id = null) {
         $query = "";
         $params = null;
@@ -467,6 +579,15 @@ class Server extends SSH {
         return $sql->query($query, $params);
     }
     
+    /**
+     * Gets the servers with host and game.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id [optional] The user ID
+     * @param int $server_id [optional] The server ID
+     * @param int $host_id [optional] The host ID
+     * @param int $game_id [optional] The game ID
+     * @return array Returns the SQL output.
+     */
     static function getServersWithHostAndGame(SQL $sql, $user_id = null, $server_id = null, $host_id = null, $game_id = null) {
         $query = "";
         $params = null;
@@ -504,12 +625,23 @@ class Server extends SSH {
         return $sql->query($query, $params);
     }
     
+    /**
+     * Maps a specific user to all servers.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user ID whom to map to all servers.
+     */
     static function mapUserToAllServers(SQL $sql, $user_id) {
         $query = Constants::$INSERT_QUERIES['MAP_USER_TO_ALL_SERVERS'];
         $params = array($user_id);
         $sql->query($query, $params);
     }
     
+    /**
+     * Gets the servers with the user mapping.
+     * @param SQL $sql The SQL handle.
+     * @param int $server_id The server ID.
+     * @return array Returns the SQL output.
+     */
     static function getServersWithUserMapping(SQL $sql, $server_id) {
         $query = Constants::$SELECT_QUERIES['GET_MAP_WITH_SERVER_WITH_USERS_BY_SERVER_ID'];
         $params = array($server_id);

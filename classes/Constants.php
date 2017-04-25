@@ -1,23 +1,19 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Constants
+ * Holds all the constant values of the panel, the SQL queries and so on.
  *
  * @author Janno
  */
 class Constants {
-    //put your code here
     
-    /**
-     * Holds all the table definitions which can be run on the database engine.
+    /*
+     * Holds specific values for specific functions. Edit them only if you know what you're doing.
+     * 
+     * Feel free to edit the *_RESOURCE_TIMEOUT values, if your servers are getting rebooted without a reason,
+     * because it could be related to the timeout reaching before the server can actually act.
+     * You can also edit the panel name, which will edit it across the site (apart from installation pages and login page).
      */
-    
     static $PANEL_ADMIN = 3;
     static $SERVER_ADMIN = 2;
     static $NORMAL_USER = 1;
@@ -39,6 +35,8 @@ class Constants {
     static $TICKET_CLOSED = 1;
     static $TICKET_UNABLE_TO_REPRODUCE = 2;
     static $TICKET_RESOLVED = 3;
+    static $PANEL_NAME = "Q3Panel";
+    
     
     static $TICKETS_STATUSES = array(
         0 => "Open",
@@ -46,8 +44,6 @@ class Constants {
         2 => "Unable to reproduce",
         3 => "Resolved"
     );
-    
-    
     
     static $SERVER_LOG_SEVERITIES = array(
         "error" => array("level" => 2, "fa-icon" => "fa-times")
@@ -61,9 +57,11 @@ class Constants {
         2 => "fa-times text-danger"
     );
     
-    
+    /**
+     * @var array Holds all of the table definitions.
+     */
     static $CREATE_TABLES = array(
-        "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username))",
+        "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username), CONSTRAINT email_must_be_unique UNIQUE(email))",
         "CREATE TABLE q3panel_hosts (host_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, servername VARCHAR(255), hostname VARCHAR(255), sshport TINYINT, host_username VARCHAR(255), host_password VARCHAR(255), status TINYINT COMMENT '1 - ok, 2 - SSH problem, 3 - FTP problem')",
         "CREATE TABLE q3panel_servers (server_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host_id INTEGER NOT NULL, server_name VARCHAR(255), game_id INTEGER, server_port SMALLINT UNSIGNED NOT NULL, server_account VARCHAR(255), server_password VARCHAR(255), server_status TINYINT COMMENT '0 - disabled, 1 - offline, 2 - online', server_startscript TEXT, current_players TINYINT, max_players TINYINT, rconpassword VARCHAR(255), CONSTRAINT server_name_must_be_unique UNIQUE(server_name), CONSTRAINT server_user_must_be_unique_on_same_host UNIQUE(host_id, server_account), CONSTRAINT server_port_must_be_unique_on_same_host UNIQUE(host_id, server_port))",
         "CREATE TABLE q3panel_servers_map (servers_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, server_id INTEGER NOT NULL, user_id INTEGER NOT NULL, can_see_rcon TINYINT, can_see_ftp TINYINT, can_access_config TINYINT, can_access_maps TINYINT, can_stop_server TINYINT, CONSTRAINT cant_have_duplicates UNIQUE(server_id, user_id))",
@@ -167,6 +165,11 @@ class Constants {
         , "GET_TICKET_MAP_BY_TICKET_ID" => "SELECT * FROM q3panel_support_ticket_map WHERE ticket_id = ?"
         , "GET_TICKET_DATA_BY_TICKET_ID" => "SELECT * FROM q3panel_support_ticket WHERE support_ticket_id = ?"
         , "GET_MAPPED_TICKETS_BY_STATUS_LARGER_THAN" => "SELECT * FROM q3panel_support_ticket_map INNER JOIN q3panel_support_ticket ON q3panel_support_ticket_map.ticket_id = q3panel_support_ticket.support_ticket_id WHERE q3panel_support_ticket.ticket_status > ? AND q3panel_support_ticket_map.mapped_user_id = ? ORDER BY creation_date DESC"
+        , "GET_COUNT_OF_USERS" => "SELECT Count(user_id) AS count FROM q3panel_users"
+        , "GET_COUNT_OF_EXT_USERS" => "SELECT Count(user_id) AS count FROM q3panel_users WHERE origin = 1"
+        , "GET_COUNT_OF_RUNNING_SERVERS" => "SELECT Count(server_id) AS count FROM q3panel_servers WHERE server_status = ?"
+        , "GET_COUNT_OF_TOTAL_SERVERS" => "SELECT Count(server_id) AS count FROM q3panel_servers"
+        , "GET_EMAIL_SERVICE_IS_SENDGRID" => "SELECT is_sendgrid FROM q3panel_email_service"
     );
     
     static $UPDATE_QUERIES = array(
@@ -193,6 +196,10 @@ class Constants {
         
     );
     
+    /**
+     *
+     * @var array Holds all of the logger messages, is 2-D array.
+     */
     static $LOGGER_MESSAGES = array(
         "ERRORS" => array(
             "GET_SERVER_DATA_NOT_MAPPED_OR_DOESNT_EXIST" => "Tried to access a server which doesn't exist or isn't mapped. Server ID: "
@@ -259,12 +266,13 @@ class Constants {
             , "EXT_AUTH_UPDATE" => "User updated the external authentication parameters."
             , "ADD_EXT_AUTH" => "User configured external authentication for the panel."
             , "EMAIL_SERVICE_UPDATE" => "User updated the e-mail service preferences."
-        ),
-        "INFORMATION" => array(
-            
         )
     );
     
+    /**
+     *
+     * @var array Holds the server actions (messages, Q3 queries).
+     */
     static $SERVER_ACTIONS = array(
         "SERVER_PID_DOWN_REBOOT_SUCCESSFUL" => "The server has been rebooted due to the screen being down."
         , "SERVER_PID_DOWN_REBOOT_ERROR" => "The server couldn't be rebooted due to an unknown error. Screen PID was down."
@@ -298,6 +306,11 @@ class Constants {
         , "TICKET_NEW_MESSAGE_TICKET_CLOSED" => "This ticket is not open. You cannot reply to it."
     );
     
+    /**
+     *
+     * @var array Holds the e-mail templates. Feel free to edit these as you see fit. If you want to add new tags,
+     * please do note that you need to programmatically add them to their respective functions as well.
+     */
     static $EMAIL_TEMPLATE = array(
         "FORGOTTEN_TITLE" => "Forgotten password | Q3Panel"
         , "FORGOTTEN_MSG" => "Hello,<br><br>Someone (hopefully you) has just requested a new password on your account. To do so, please, click on here: <a href=\"{FORGOTTEN_URL_KEY}\">{FORGOTTEN_URL_KEY}</a><br>If it wasn't you, feel free to ignore this e-mail.<br><br>Best regards,<br>{SENDER_NAME}"
@@ -337,6 +350,11 @@ class Constants {
         , "TICKET_NEW_MESSAGE" => "The ticket has been updated successfully."
     );
     
+    /**
+     *
+     * @var array Holds the commands sent to the SSH connection. You can change them as you see fit.
+     * But do note that it might break functionality.
+     */
     static $SSH_COMMANDS = array(
         "WHOAMI" => "whoami"
         , "ADD_USER" => "useradd -m {server_account}"
@@ -399,19 +417,37 @@ EOT;
     );
     
     
-    
+    /**
+     * Gets the CSS links, so you don't need to copy them from page to page, changing the URL's all the time.
+     * @param string $url The page URL.
+     * @return string Returns the CSS lines.
+     */
     public static function getCSS($url) {
         return str_replace("{}", $url, self::$CSS);
     }
     
+    /**
+     * Gets the JS links, so you don't need to copy them from page to page, changing the URL's all the time.
+     * @param string $url The page URL.
+     * @return string Returns the JS lines.
+     */
     public static function getJS($url) {
         return str_replace("{}", $url, self::$JS);
     }
     
+    /**
+     * Gets the preferenced CSS links, so you don't need to copy them from page to page, changing the URL's all the time.
+     * @param string $url The page URL.
+     * @return string Returns the preferenced CSS lines.
+     */
     public static function getPreferencedCSS($url, $css) {
         return str_replace("{}", $url, self::$PREFERENCED_STYLES[$css]);
     }
     
+    /**
+     * Gets the user groups select-options.
+     * @return array Returns array of the select-option values.
+     */
     public static function getSelectGroups() {
         foreach(self::$MESSAGES['GROUP'] as $group_id => $group_name) {
             $data[] = "<option value=\"$group_id\">$group_name</option>";

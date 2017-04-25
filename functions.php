@@ -1,13 +1,66 @@
 <?php
+session_start();
 
-    session_start();
-
-require_once __DIR__ . "/local_SQL.php";
-require_once __DIR__ . "/classes/loader.php";
 /**
  * This file holds all the generic functions and is also the starting point for all of the class 
  * function callouts, POST/GET requests etc. Here it all gets logged as well.
+ * 
+ * Most of the IF clauses aren't commented because they're pretty self-explanatory.
+ * Most of the user permission control happens in this file as well.
  */
+
+require_once __DIR__ . "/local_SQL.php";
+require_once __DIR__ . "/classes/loader.php";
+
+/**
+ * This function will just output some fast statistics of the panel (as in a fun/neat way to show off some of the stuff currently going on).
+ * @param SQL $sql The SQL handle.
+ * @return array Returns array of the statistical parameters.
+ */
+function getStats(SQL $sql) {
+    //Get total count of registered users.
+    $data = array();
+    $query = Constants::$SELECT_QUERIES['GET_COUNT_OF_USERS'];
+    $out = $sql->query($query);
+    if (sizeof($out) === 1) {
+        $out = $out[0];
+        $data['totalUsers'] = $out['count'];
+    }
+    $query = Constants::$SELECT_QUERIES['GET_COUNT_OF_EXT_USERS'];
+    $out = $sql->query($query);
+    if (sizeof($out) === 1) {
+        $out = $out[0];
+        $data['extUsers'] = $out['count'];
+        $data['localUsers'] = intval($data['totalUsers']) - intval($data['extUsers']);
+    }
+    $query = Constants::$SELECT_QUERIES['GET_COUNT_OF_RUNNING_SERVERS'];
+    $out = $sql->query($query, array(Constants::$SERVER_STARTED));
+    if (sizeof($out) === 1) {
+        $out = $out[0];
+        $data['runningServers'] = $out['count'];
+    }
+    $query = Constants::$SELECT_QUERIES['GET_COUNT_OF_TOTAL_SERVERS'];
+    $out = $sql->query($query);
+    if (sizeof($out) === 1) {
+        $out = $out[0];
+        $data['totalServers'] = $out['count'];
+    }
+    $data['extAuth'] = "External authentication is currently disabled.";
+    if (isExternalAuthEnabled($sql)) {
+        $data['extAuth'] = "External authentication is currently enabled.";
+    } 
+    $query = Constants::$SELECT_QUERIES['GET_EMAIL_SERVICE_IS_SENDGRID'];
+    $out = $sql->query($query);
+    if (sizeof($out) === 1) {
+        $out = $out[0];
+        $data['mailer'] = "The current setup uses PHPMailer to send out e-mails.";
+        if (intval($out['is_sendgrid']) === 1) {
+            $data['mailer'] = "The current setup uses SendGrid to send out e-mails.";
+        }
+    }
+    return $data;
+}
+
 
 if (isset($_POST['newTicketMessage'], $_POST['support_ticket_id'], $_POST['message']) && intval($_POST['newTicketMessage']) === 1 && intval($_POST['support_ticket_id']) > 0) {
     //First check if we are mapped to it, otherwise we shouldn't be able to perform this action.
@@ -37,7 +90,7 @@ if (isset($_POST['getAllTicketData'], $_POST['ticket_id'])) {
                 $extData = User::getExternalAccount($sql, $ticket[$i]['username'], true);
                 $ticket[$i]['realName'] = $extData['data'][0][$extData['extTable_spec']['username_field']];
             } else {
-                $ticket[$i]['realName'] = $extData['username'];
+                $ticket[$i]['realName'] = $ticket[$i]['username'];
             }
             $ticket[$i]['message'] = nl2br($ticket[$i]['message']);
             $ticket[$i]['password'] = "";
@@ -88,7 +141,6 @@ if (isset($_POST['addExternalAuth'], $_POST['host'], $_POST['db_username'], $_PO
         intval($_POST['addExternalAuth']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     try {
         $testExt = User::getExternalConnection($_POST['host'], $_POST['db_username'], $_POST['db_password'], $_POST['db_name']);
-        //"EXT_GET_FIRST_USER" => "SELECT {ext_usrname}, {ext_psw}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = 1"
         $ext_firstUserQuery = Constants::$SELECT_QUERIES['EXT_GET_FIRST_USER'];
         $ext_firstUserQuery = str_replace("{ext_usrname}", $_POST['username_field'], $ext_firstUserQuery);
         $ext_firstUserQuery = str_replace("{ext_psw}", $_POST['password_field'], $ext_firstUserQuery);
@@ -180,6 +232,11 @@ if (isset($_POST['server_id'], $_POST['command'], $_POST['sendRCONCommand']) && 
     die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
 }
 
+/**
+ * Strips the Quake 3 color codes from the given string.
+ * @param string $input The string, from which you want to remove the Quake 3 colors.
+ * @return string Returns the same string without the Quake 3 colors.
+ */
 function stripQ3Colors($input) {
     return preg_replace("/(\^.)/", "", $input);
 }
@@ -244,6 +301,11 @@ if (isset($_POST['server_id'], $_POST['editMap'], $_POST['user_id']) && intval($
     }
 }
 
+/**
+ * Turns a boolean into an integer.
+ * @param bool $input The input, which to turn into a 1-0 integer.
+ * @return int Returns 1, if input is true, 0 otherwise.
+ */
 function bool2int($input) {
     if ($input) {
         return 1;
@@ -262,18 +324,6 @@ if (isset($_POST['deleteMap'], $_POST['server_id'], $_POST['removeMapUser']) && 
         die(json_encode(array("error" => Constants::$MESSAGES['USER_MAPPING_REMOVED_ERROR'])));
     }
     
-}
-
-if (isset($_GET['server_id']) && isset($_GET['dev'])) {
-    $_POST['server_id'] = $_GET['server_id'];
-    $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);
-    if (sizeof($data) === 1) {
-        $data = $data[0];
-            $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
-            $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
-            $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
-            die(print_r($server->checkServer($sql)));
-    }
 }
 
 if (isset($_POST['server_id'], $_POST['generateNewFTP']) && intval($_POST['server_id']) > 0 && intval($_POST['generateNewFTP']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
@@ -319,9 +369,7 @@ if (isset($_POST['server_id'], $_POST['resetFTPPassword'], $_POST['newFTPPasswor
     }
 
 } 
-
-
-    
+ 
 if (isset($_POST['getFTPURIForFile'], $_POST['fileName'], $_POST['server_id']) && intval($_POST['getFTPURIForFile']) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
@@ -373,7 +421,6 @@ if (isset($_POST['server_id'], $_POST['newFileUpload'], $_POST['newcurrdir']) &&
     }
 }
 
-
 if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], $_POST['creatableFileName'], $_POST['newfilecontents']) && 
         intval($_POST['server_id']) > 0 && intval($_POST['newFileOrFolder']) === 1 && strlen(trim($_POST['newcurrdir'])) > 0
         && strlen(trim($_POST['creatableFileName'])) > 0) {
@@ -400,7 +447,6 @@ if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], 
     }
 }
 
-  
 if (isset($_POST['server_id'], $_POST['newFileOrFolder'], $_POST['newcurrdir'], $_POST['newfoldername']) && intval($_POST['newFileOrFolder']) === 1 && strlen(trim($_POST['newcurrdir'])) > 0 && strlen(trim($_POST['newfoldername'])) > 0 && intval($_POST['server_id']) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
@@ -473,7 +519,6 @@ if (isset($_POST['deleteFromFTP'], $_POST['filename'], $_POST['server_id']) && i
     }
 }
 
-
 if (isset($_POST['editFile'], $_POST['server_id'], $_POST['filename'], $_POST['fileContents']) && intval($_POST['editFile']) === 1 && intval($_POST['server_id']) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
@@ -497,7 +542,6 @@ if (isset($_POST['editFile'], $_POST['server_id'], $_POST['filename'], $_POST['f
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     } 
 }
-
 
 if (isset($_POST['getFile'], $_POST['fileName'], $_POST['server_id']) && intval($_POST['getFile']) === 1 && intval($_POST['server_id']) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
@@ -568,7 +612,6 @@ if (isset($_POST['deleteServer'], $_POST['server_id']) && intval($_POST['deleteS
     }
 }
 
-
 if (isset($_POST['disableServer'], $_POST['server_id']) && intval($_POST['disableServer']) === 1 && intval($_POST['server_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, null, $_POST['server_id']);
     if (sizeof($data) === 1) {
@@ -610,7 +653,6 @@ if (isset($_POST['enableServer'], $_POST['server_id']) && intval($_POST['enableS
 }
 
 if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startServer']) === 1 && intval($_POST['server_id']) > 0) {
-    //$data = Server::getServersWithHost($sql, $_POST['server_id']);
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
         $data = $data[0];
@@ -638,7 +680,6 @@ if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startSer
     
 }
 
-
 if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServer']) === 1 && intval($_POST['server_id']) > 0) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
@@ -665,7 +706,6 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
     }
     
 }
-
 
 if (isset($_POST['addServer'], $_POST['server_name'], $_POST['server_port'], $_POST['server_account'], $_POST['server_password'], $_POST['max_players'], $_POST['rconpassword']) && intval($_POST['addServer']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $getHost = Host::getHosts($sql, $_POST['host_id'], Constants::$INCLUDE_PASSWORD);
@@ -737,7 +777,6 @@ if (isset($_POST['addHost'], $_POST['servername'], $_POST['hostname'], $_POST['s
     }
 }
 
-
 if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['updateGame']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $dat = Game::updateGame($sql, $_POST['gameId'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
     if (intval($dat['rows_affected']) === 1) {
@@ -748,7 +787,6 @@ if (isset($_POST['updateGame'], $_POST['gameId'], $_POST['game_name'], $_POST['g
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_ERROR'])));
     }
 }
-
 
 if (isset($_POST['deleteGame'], $_POST['gameId']) && intval($_POST['deleteGame']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $dat = Game::deleteGame($sql, $_POST['gameId']);
@@ -829,16 +867,20 @@ if (isset($_GET['testphpmailer'])) {
     die();
 }
 
+/**
+ * Turns an integer into a boolean.
+ * @param int $input An integer, 0 or 1.
+ * @return bool Returns true, if the number is 1, false otherwise.
+ */
 function int2bool($input) {
     return intval($input) === 1;
 }
 
-if (isset($_GET['getExternalUser'], $_GET['extUserName'])) {
+if (isset($_GET['getExternalUser'], $_GET['extUserName']) && (isset($_SESSION['installer']) || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))) {
     echo json_encode(User::getExternalAccountSelect2($sql, $_GET['extUserName']));
 }
 
 if (isset($_POST['extAccount'], $_POST['extUser'], $_POST['extUserGroup']) && (isset($_SESSION['installer']) || User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))) {
-    
     $user = new User($_POST['extUser'], null, "1", null, $_POST['extUserGroup'], 1);
     $dat = $user->register($sql);
     if (isset($dat['error'])) {
@@ -866,12 +908,6 @@ if (isset($_POST['register'], $_POST['userGroup'], $_POST['username'], $_POST['p
     }
 }
 
-if (isset($_GET['setuptables'])) {
-    require_once __DIR__ . "/classes/installation/Installation.php";
-    Installation::initializeTables($sql);
-    print_r("Tables setup done");
-}
-
 if (isset($_POST['host']) && isset($_POST['username']) && isset($_POST['password']) && isset($_POST['db']) && isset($_POST['url']) && !file_exists(__DIR__ . "/config.php")) {
     require_once __DIR__ . "/classes/installation/Installation.php";
     $db_host = $_POST['host'];
@@ -879,7 +915,6 @@ if (isset($_POST['host']) && isset($_POST['username']) && isset($_POST['password
     $db_password = $_POST['password'];
     $db = $_POST['db'];
     $url = $_POST['url'];
-    
     $r = Installation::initializeConfig($db_host, $db_username, $db_password, $db, $url);
     if (!isset($r['error'])) {
         $_SESSION['installer'] = "1";
@@ -905,7 +940,6 @@ if (isset($_POST['exthost'], $_POST['extusername'], $_POST['password'], $_POST['
     $ext_usrtableusrname = $_POST['usrtablename'];
     $ext_usrtablepsw = $_POST['usrtablepsw'];
     $ext_usrtableemail = $_POST['usrtableemail'];
-    
     echo json_encode(Installation::initializeExternalConnection($sql, $ext_host, $ext_user, $ext_pass, $ext_db, $ext_usrtable, $ext_usrtableid, $ext_usrtableusrname, $ext_usrtablepsw, $ext_usrtableemail));
 }
 
@@ -932,9 +966,10 @@ if (isset($_POST['isSendgrid'], $_POST['fromName'], $_POST['fromEmail']) && (iss
 
 
 /**
+ * Generates a random key.
  * Taken from http://stackoverflow.com/questions/1846202/php-how-to-generate-a-random-unique-alphanumeric-string/13733588#13733588.
- * @param type $length
- * @return string
+ * @param int $length [optional] If not specified, generates a random key with the length 50, otherwise generates a random key with your specified length.
+ * @return string Returns the randomized key.
  */
 function generateRandomKey($length = 50) {
     $key = "";
@@ -946,10 +981,11 @@ function generateRandomKey($length = 50) {
 }
 
 /**
+ * Helper function for the generate random key.
  * Taken from http://stackoverflow.com/questions/1846202/php-how-to-generate-a-random-unique-alphanumeric-string/13733588#13733588
- * @param type $min
- * @param type $max
- * @return type
+ * @param int $min The min-bound.
+ * @param int $max The max-bound.
+ * @return int Returns a random integer.
  */
 function keyRandomizer($min, $max) {
     $range = $max - $min;
@@ -965,8 +1001,12 @@ function keyRandomizer($min, $max) {
     return $min + $rnd;
 }
 
-
-function isExternalAuthEnabled($sql) {
+/**
+ * Checks whether the external authentication is enabled on the panel.
+ * @param SQL $sql The SQL handle.
+ * @return boolean Returns true, if external authentication is enabled, false otherwise.
+ */
+function isExternalAuthEnabled(SQL $sql) {
     $query = Constants::$SELECT_QUERIES['EXT_AUTH_EXISTS'];
     $ret = $sql->query($query);
     if (intval($ret[0]['count']) === 1) {
@@ -974,7 +1014,6 @@ function isExternalAuthEnabled($sql) {
     }
     return false;
 }
-
 
 if (isset($_POST['addGame'], $_POST['game_name'], $_POST['game_location'], $_POST['startscript']) && intval($_POST['addGame']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $data = Game::saveGame($sql, $_POST['game_name'], $_POST['game_location'], $_POST['startscript']);
@@ -1031,6 +1070,7 @@ if (isset($_POST['user_id'], $_POST['origin'], $_POST['editUser']) && intval($_P
 }
 
 /**
+ * Gets the current user IP address.
  * Taken from http://stackoverflow.com/questions/15699101/get-the-client-ip-address-using-php
  * @return string Returns the requestor IP
  */
@@ -1054,6 +1094,11 @@ function getUserIP() {
     return $ipaddress;
 }
 
+/**
+ * Turns integer into a boolean-string (yes-no).
+ * @param int $input The integer, which to turn into a yes-no string boolean.
+ * @return string Returns yes, if the integer value is 1, no otherwise.
+ */
 function intbool2str($input) {
     $input = int2bool($input);
     if ($input) {

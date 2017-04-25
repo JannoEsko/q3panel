@@ -1,14 +1,7 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Ticket
- *
+ * Generic class for tickets management.
  * @author Janno
  */
 class Ticket {
@@ -18,6 +11,13 @@ class Ticket {
     private $ticket_status;
     private $creation_date;
     
+    /**
+     * Constructs a new ticket.
+     * @param int $support_ticket_id The ticket ID
+     * @param string $title The title of the ticket.
+     * @param int $ticket_status The current status of the ticket.
+     * @param string $creation_date The creation date of the ticket.
+     */
     function __construct($support_ticket_id, $title, $ticket_status, $creation_date) {
         $this->support_ticket_id = $support_ticket_id;
         $this->title = $title;
@@ -57,12 +57,25 @@ class Ticket {
         $this->creation_date = $creation_date;
     }
     
+    /**
+     * Writes a new ticket into the database.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns the SQL output.
+     */
     function saveTicket(SQL $sql) {
         $query = Constants::$INSERT_QUERIES['INSERT_NEW_TICKET'];
         $params = array($this->title, $this->ticket_status);
         return $sql->query($query, $params);
     }
     
+    /**
+     * Maps the ticket to specific users.
+     * @param SQL $sql The SQL handle.
+     * @param int $by_group_id [optional] If specified, it maps the ticket to all users who are in a group equal or larger than the given group.
+     * @param int $by_user_id [optional] If specified, it maps the ticket to the user ID specified.
+     * @param string $host_url [optional] If specified, it tries to edit the email template to add the host URL into it.
+     * @return array Returns the SQL output.
+     */
     function mapTicketToUsers(SQL $sql, $by_group_id = null, $by_user_id = null, $host_url = null) {
         $query = "";
         $params = null;
@@ -86,12 +99,26 @@ class Ticket {
         return $sql->query($query, $params);
     }
     
+    /**
+     * Saves a new message to the ticket.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user ID
+     * @param string $user_ip The IP of the user.
+     * @param string $message The message which to add.
+     * @return array Returns the SQL output of the query.
+     */
     function saveMessageToTicket(SQL $sql, $user_id, $user_ip, $message) {
         $query = Constants::$INSERT_QUERIES['ADD_TICKET_MESSAGE'];
         $params = array($this->support_ticket_id, $user_id, $user_ip, $message);
         return $sql->query($query, $params);
     }
     
+    /**
+     * Updates a ticket status.
+     * @param SQL $sql The SQL handle.
+     * @param int $ticket_status The ticket status.
+     * @return array Returns the SQL output of the query.
+     */
     function setStatus(SQL $sql, $ticket_status) {
         $this->ticket_status = intval($ticket_status);
         $query = Constants::$UPDATE_QUERIES['UPDATE_TICKET_STATUS'];
@@ -99,6 +126,12 @@ class Ticket {
         return $sql->query($query, $params);
     }
     
+    /**
+     * Notifies all mapped users.
+     * @param SQL $sql The SQL handle.
+     * @param string $title The title of the e-mail message.
+     * @param string $message The message of the e-mail.
+     */
     function notifyMappedUsers(SQL $sql, $title, $message) {
         $mappedUsers = Constants::$SELECT_QUERIES['GET_TICKET_MAP_BY_TICKET_ID'];
         $params = array($this->support_ticket_id);
@@ -112,12 +145,25 @@ class Ticket {
         }
     }
     
+    /**
+     * Checks whether the user is mapped to the ticket.
+     * @param SQL $sql The SQL handle.
+     * @param int $ticket_id The ticket ID which to check.
+     * @param int $user_id The user ID which to check.
+     * @return bool Returns true, if the user is mapped to the ticket, false otherwise.
+     */
     static function isUserMappedToTicket(SQL $sql, $ticket_id, $user_id) {
         $query = Constants::$SELECT_QUERIES['GET_TICKET_MAP_BY_TICKET_ID_USER_ID'];
         $params = array($ticket_id, $user_id);
         return sizeof($sql->query($query, $params) === 1);
     }
     
+    /**
+     * Gets a ticket from the database.
+     * @param SQL $sql The SQL handle.
+     * @param int $ticket_id The ticket ID which to get.
+     * @return \Ticket Returns new Ticket object.
+     */
     static function getTicket(SQL $sql, $ticket_id) {
         $query = Constants::$SELECT_QUERIES['GET_TICKET_DATA_BY_TICKET_ID'];
         $params = array($ticket_id);

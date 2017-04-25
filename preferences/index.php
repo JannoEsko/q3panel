@@ -17,7 +17,7 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta id="themecolor" name="theme-color" content="<?php echo $_SESSION['style_bg']; ?>">
-        <title>tt</title>
+        <title>Panel preferences | <?php echo Constants::$PANEL_NAME; ?></title>
         <?php echo Constants::getCSS($HOST_URL . "/static"); 
         echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
         ?>
@@ -29,8 +29,8 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
             <section>
                 <div class="content-wrapper">
                     <div class="content-heading">
-                        Homepage
-                        <small>Welcome to Q3Panel</small>
+                        Panel preferences
+                        <small>Here you can edit the e-mail service settings and also the external authentication settings.</small>
                     </div>
                     <div class="row">
                             <div class="panel janno-panel">

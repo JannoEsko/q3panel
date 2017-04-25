@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Generic User class, handles authentication, registration etc.
+ * @author Janno
+ */
 class User {
     
     private $username;
@@ -9,6 +13,15 @@ class User {
     private $preferEmail;
     private $group_id;
     
+    /**
+     * Constructs a new user object.
+     * @param string $username The username.
+     * @param string $password The password.
+     * @param int $origin Origin of the account. 
+     * @param string $email The e-mail address.
+     * @param int $group_id The group ID.
+     * @param int $preferEmail Whether the user prefers e-mails or not.
+     */
     function __construct($username, $password, $origin = null, $email = null, $group_id = null, $preferEmail = null) {
         $this->username = $username;
         $this->password = $password;
@@ -67,6 +80,11 @@ class User {
         $this->preferEmail = $preferEmail;
     }
 
+    /**
+     * Authenticates the user account.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns the error or the SQL output.
+     */
     function authenticate(SQL $sql) {
         $query = Constants::$SELECT_QUERIES['GET_LOCAL_USER_BY_NAME'];
         $params = array($this->getUsername());
@@ -131,6 +149,16 @@ class User {
         return array("error" => Constants::$ERRORS['AUTH_NO_DATA_ERROR']);
     }
     
+    /**
+     * Replaces the missing parts in an external query.
+     * @param string $query The initial query with the {ext_ tags.
+     * @param string $ext_usrtable The external usertable.
+     * @param string $ext_usrtable_id The external usertable primary key (id field)
+     * @param string $ext_usrname The external usertable username field.
+     * @param string $ext_psw The external usertable password field.
+     * @param string $ext_email The external usertable email field.
+     * @return string The query with the parts changed.
+     */
     static function getExternalQuery($query, $ext_usrtable, $ext_usrtable_id = null, $ext_usrname = null, $ext_psw = null, $ext_email = null) {
         return str_replace("{ext_usrtable}", $ext_usrtable, 
             str_replace("{ext_usrtable_id}", $ext_usrtable_id,
@@ -144,10 +172,26 @@ class User {
         
     }
     
+    /**
+     * Generates a new SQL object for the external connection.
+     * @param string $db_host The database hostname.
+     * @param string $db_name The database username.
+     * @param string $db_pass The database password.
+     * @param string $db The database.
+     * @return \SQL Returns the SQL object.
+     */
     static function getExternalConnection($db_host, $db_name, $db_pass, $db) {
         return new SQL($db_host, $db_name, $db_pass, $db);
     }
     
+    /**
+     * Deals with the forgotten password (generates a new key, sends the e-mail out etc).
+     * @param SQL $sql The SQL handle.
+     * @param string $email The e-mail of the user.
+     * @param string $request_key The forgotten password request key.
+     * @param string $HOST_URL The host URL.
+     * @return array Returns the array with the information (msg or error keys).
+     */
     static function forgotPassword(SQL $sql, $email, $request_key, $HOST_URL) {
         require_once __DIR__ . "/../email/Email.php";
         $query = Constants::$SELECT_QUERIES['GET_USER_BY_EMAIL'];
@@ -171,6 +215,12 @@ class User {
         }
     }
     
+    /**
+     * Checks the recovery data.
+     * @param SQL $sql The SQL handle.
+     * @param string $request_key The recovery request key.
+     * @return array Returns the error message or the command to show the form.
+     */
     static function recovery(SQL $sql, $request_key) {
         $query = Constants::$SELECT_QUERIES['GET_RECOVERY_DATA'];
         $params = array($request_key);
@@ -182,6 +232,13 @@ class User {
         }
     }
     
+    /**
+     * Changes the forgotten password.
+     * @param SQL $sql The SQL handle.
+     * @param type $newPass New password.
+     * @param type $requestKey The forgotten password request key.
+     * @return array Returns the SQL output, error if an error was thrown.
+     */
     static function changeForgottenPassword(SQL $sql, $newPass, $requestKey) {
         $query = Constants::$SELECT_QUERIES['GET_USER_BY_RECOVERY_DATA'];
         $params = array($requestKey);
@@ -203,6 +260,11 @@ class User {
         return array("error" => Constants::$ERRORS['CHANGE_FORGOTTEN_ERROR']);
     }
     
+    /**
+     * Registeres a new account.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns empty array, if all went well, array with an error key if an error occurred.
+     */
     function register(SQL $sql) {
         $query = Constants::$INSERT_QUERIES['ADD_NEW_USER'];
         $password = password_hash($this->password, PASSWORD_BCRYPT);
@@ -231,6 +293,18 @@ class User {
         }
     }
     
+    /**
+     * Edits an user account.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user ID field.
+     * @param string $username [optional] The username (if you wish to change)
+     * @param string $password [optional] The password (if you wish to change)
+     * @param int $origin [optional] The origin (if you wish to change)
+     * @param string $email [optional] The email (if you wish to change)
+     * @param int $group_id [optional] The group_id (if you wish to change)
+     * @param int $preferEmail [optional] Prefer emails (whether you wish to change).
+     * @return array Returns the SQL output.
+     */
     static function editAccount(SQL $sql, $user_id, $username = null, $password = null, $origin = null, $email = null, $group_id = null, $preferEmail = null) {
         //requires a bit more complex query, can't use constant query.
         $query = "UPDATE q3panel_users SET ";
@@ -267,18 +341,37 @@ class User {
         return $sql->query($query, $params);
     }
     
+    /**
+     * Deletes an user account.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user ID to delete.
+     * @return array Returns the SQL output.
+     */
     static function deleteAccount(SQL $sql, $user_id) {
         $query = Constants::$DELETE_QUERIES['DELETE_USER_BY_ID'];
         $params = array($user_id);
         return $sql->query($query, $params);
     }
     
+    /**
+     * Checks the user by id and group.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user ID to search for.
+     * @param int $group_id The group ID, the user must match.
+     * @return bool Returns true, if data was found, false otherwise.
+     */
     static function checkUser(SQL $sql, $user_id, $group_id) {
         $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID_AND_GROUP'];
         $params = array($user_id, $group_id);
         return sizeof($sql->query($query, $params)) === 1;
     }
     
+    /**
+     * Gets user by the ID.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user ID
+     * @return mixed Returns array, if it found the data. False otherwise.
+     */
     static function getUserById(SQL $sql, $user_id) {
         $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID'];
         $params = array($user_id);
@@ -297,10 +390,8 @@ class User {
         return false;
     }
     
-    //User::canEditUser($sql, $_SESSION['user_id'])
-    
     /**
-     * @todo Server-based account modifications.
+     * Check whether the given user can edit the user it wants to edit.
      * @param SQL $sql The SQL handle.
      * @param int $user_id The user id of the requestor.
      * @param int $editable_user_id The user id, which you want to edit.
@@ -344,6 +435,12 @@ class User {
         return -1;
     }
     
+    /**
+     * Gets all users.
+     * @param SQL $sql The SQL handle.
+     * @param type $group_id [optional] If specified, it'll search all user accounts with the group id higher than or equal to the input.
+     * @return array Returns the user ID's.
+     */
     static function getAllUsers(SQL $sql, $group_id = null) {
         $extData = self::getExtData($sql);
         $localQuery = "";
@@ -393,6 +490,13 @@ class User {
         return $localData;
     }
     
+    /**
+     * Gets the external account information.
+     * @param SQL $sql The SQL handle.
+     * @param int $ext_user_id The external user ID.
+     * @param bool $extTable_spec [optional] If true, it will return the data with the external table specification (so you can use it to get the data out from the array).
+     * @return array Returns the external account.
+     */
     static function getExternalAccount(SQL $sql, $ext_user_id, $extTable_spec = false) {
         $extData = self::getExtData($sql);
         $extExists = false;
@@ -422,6 +526,12 @@ class User {
         return array();
     }
     
+    /**
+     * Gets the Select2 output for external accounts.
+     * @param SQL $sql The SQL handle
+     * @param string $username The searchable username.
+     * @return array Returns an array which can be parsed by Select2.
+     */
     static function getExternalAccountSelect2(SQL $sql, $username) {
         $query = Constants::$SELECT_QUERIES['FIND_EXT_USER_SELECT2'];
         $data = self::getExtData($sql);
@@ -449,6 +559,11 @@ class User {
         return array();
     }
     
+    /**
+     * Gets the external database data.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns array with the external data, empty array if an unknown error occurred.
+     */
     static function getExtData(SQL $sql) {
         $query = Constants::$SELECT_QUERIES['GET_EXT_DATA'];
         $data = $sql->query($query);
@@ -459,6 +574,10 @@ class User {
         return array();
     }
     
+    /**
+     * Sets the session variables.
+     * @param array $data The data, which to set to session variables.
+     */
     static function setSessionVariables($data) {
         session_start();
         $_SESSION['user_id'] = $data['user_id'];
@@ -468,6 +587,13 @@ class User {
         $_SESSION['style_bg'] = $data['style_bg'];
     }
     
+    /**
+     * Saves the user style preference into the database.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user id, for which to change it.
+     * @param string $style The new style.
+     * @return array Returns the SQL output, an array with the error key if an error occurred.
+     */
     static function changeUserStylePreference(SQL $sql, $user_id, $style) {
         session_start();
         $getStyleId = Constants::$SELECT_QUERIES['GET_STYLE_BY_NAME'];
@@ -487,6 +613,14 @@ class User {
         
     }
     
+    /**
+     * A generic function to check whether the given user can perform an action with the given group id.
+     * Basically, it's just a group check, does the given user id have a higher or equal group level as the given action level.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user id, who wants to perform an action.
+     * @param int $action_level The level of the action (see user levels in Constants).
+     * @return boolean Returns true, if the user's group is >= than $action_level, false otherwise.
+     */
     static function canPerformAction(SQL $sql, $user_id, $action_level) {
         $query = Constants::$SELECT_QUERIES['GET_USER_BY_ID_AND_GROUP_LARGER_THAN'];
         $params = array($user_id, $action_level);
@@ -494,4 +628,3 @@ class User {
         return sizeof($data) === 1;        
     }
 }
-

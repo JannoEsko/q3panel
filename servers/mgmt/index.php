@@ -32,7 +32,7 @@ if (!intval($server['can_see_ftp']) === 1 && !$is_server_admin) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta id="themecolor" name="theme-color" content="<?php echo $_SESSION['style_bg']; ?>">
-        <title>tt</title>
+        <title>Server management | <?php echo Constants::$PANEL_NAME; ?></title>
 <?php
 echo Constants::getCSS($HOST_URL . "/static");
 echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
@@ -45,8 +45,8 @@ echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
             <section>
                 <div class="content-wrapper">
                     <div class="content-heading">
-                        Homepage
-                        <small>Welcome to Q3Panel</small>
+                        Server management
+                        <small>Here you have the possibility to map users to server, disable, delete servers, resetting their FTP password, editing them and also accessing the web RCON and web FTP utility.</small>
                     </div>
                     <div id="toast"></div>
                     <div class="row">
@@ -77,12 +77,7 @@ echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
                                     <?php } ?></div>
                             </div>
 
-                            <div class="panel janno-panel">
-                                <div class="panel-heading">
-                                    Required files
-                                </div>
-                                <div class="panel-body"><?php echo nl2br(print_r(get_required_files(), true)); ?></div>
-                            </div>
+                            
 
                         </div>
                         <div class="col-md-4">

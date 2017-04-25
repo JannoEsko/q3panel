@@ -1,9 +1,7 @@
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
+/**
+ * Initializes some of the toastr options.
+ */
 toastr.options = {
     "debug": false,
     "progressBar": false,
@@ -16,7 +14,7 @@ toastr.options = {
     "hideEasing": "linear",
     "showMethod": "fadeIn",
     "hideMethod": "fadeOut"
-}
+};
 
 $(document).ready(function() {
     
@@ -30,10 +28,20 @@ $(document).ready(function() {
     }).parent().addClass('active');
 });
 
+/**
+ * Generic function to handle forms.
+ * @param {int} id The ID of the form.
+ * @returns {void} Returns nothing.
+ */
 function handleForm(id) {
     handleForm(id, false);
 }
 
+/**
+ * Sends the theme you chose to the server so it would save it into the database.
+ * @param {string} theme The theme name.
+ * @returns {void} Returns nothing.
+ */
 function setPreferencedTheme(theme) {
     $.post(window.location.href, {
         theme: "1",
@@ -46,6 +54,11 @@ function setPreferencedTheme(theme) {
     });
 }
 
+/**
+ * Turns an integer into a boolean-string (Yes/No).
+ * @param {int} input The integer which will be checked.
+ * @returns {String} Returns Yes, if the integer is 1, No if it's not.
+ */
 function int2boolstr(input) {
     if (input === 1) {
         return "Yes";
@@ -53,6 +66,12 @@ function int2boolstr(input) {
     return "No";
 }
 
+/**
+ * Generic function to handle forms.
+ * @param {int} id The ID of the form.
+ * @param {boolean} useToaster Tells the form whether to use toaster or not.
+ * @returns {void} Returns nothing.
+ */
 function handleForm(id, useToaster) {
     var form = $("#" + id);
     var formMsg = $("#formMsg");
@@ -137,18 +156,17 @@ function handleForm(id, useToaster) {
     });
 }
 
-function setPreferencedTheme(theme) {
-    $.post(window.location.href, {
-        theme: "1",
-        themename: theme
-    }, function(data) {
-        data = JSON.parse(data);
-        if (typeof data !== "undefined" && typeof data.style_bg !== "undefined") {
-            $("#themecolor").attr("content", data.style_bg);
-        }
-    });
-}
-
+/**
+ * Initializes the edit-user modal. Page-specific.
+ * @param {String} id The modal ID
+ * @param {int} user_id The user ID which to edit.
+ * @param {String} username The username.
+ * @param {String} email The e-mail.
+ * @param {int} origin 1 if external, 0 if local.
+ * @param {int} group The group ID
+ * @param {boolean} canChangeGroup Whether he can change his own group or not.
+ * @returns {void} Returns nothing.
+ */
 function initEditUserModal(id, user_id, username, email, origin, group, canChangeGroup) {
     $("#group").val(group).change();
     $("#userModalTitle").html("Edit user " + username);
@@ -186,6 +204,11 @@ function initEditUserModal(id, user_id, username, email, origin, group, canChang
     $("#" + id).modal();
 }
 
+/**
+ * Initializes the registration modal.
+ * @param {String} id The modal ID
+ * @returns {void} Returns nothing.
+ */
 function initRegisterModal(id) {
     $("#deleteSubmit").hide();
     $("#editSubmit").hide();
@@ -195,6 +218,12 @@ function initRegisterModal(id) {
     $("#" + id).modal();
 }
 
+/**
+ * Initializes edit game modal (page-specific).
+ * @param {String} modal_id The modal ID.
+ * @param {int} game_id The game ID
+ * @returns {void} Returns nothing.
+ */
 function initEditGameModal(modal_id, game_id) {
     $.post(".", {
         getGame: 1,
@@ -213,6 +242,12 @@ function initEditGameModal(modal_id, game_id) {
     });
 }
 
+/**
+ * Initializes edit host modal (page-specific).
+ * @param {String} modal_id The modal ID
+ * @param {int} host_id The host ID
+ * @returns {void} Returns nothing.
+ */
 function initEditHostModal(modal_id, host_id) {
     $.post(".", {
         getHostData: 1,
@@ -233,6 +268,11 @@ function initEditHostModal(modal_id, host_id) {
     });
 }
 
+/**
+ * Starts a server.
+ * @param {int} server_id The server ID.
+ * @returns {void} Returns nothing.
+ */
 function startServer(server_id) {
     $.post(".", {
         startServer: 1,
@@ -250,6 +290,11 @@ function startServer(server_id) {
     });
 }
 
+/**
+ * Stops a server.
+ * @param {int} server_id The server ID.
+ * @returns {void} Returns nothing.
+ */
 function stopServer(server_id) {
     $.post(".", {
         stopServer: 1,
@@ -267,6 +312,11 @@ function stopServer(server_id) {
     });
 }
 
+/**
+ * Disables a server.
+ * @param {int} server_id The server ID.
+ * @returns {void} Returns nothing.
+ */
 function disableServer(server_id) {
     $.post(".", {
         disableServer: 1,
@@ -285,6 +335,11 @@ function disableServer(server_id) {
     });
 }
 
+/**
+ * Deletes a server.
+ * @param {int} server_id The server ID.
+ * @returns {void} Returns nothing.
+ */
 function deleteServer(server_id) {
     $.post(".", {
         deleteServer: 1,
@@ -299,6 +354,11 @@ function deleteServer(server_id) {
     });
 }
 
+/**
+ * Enables a server.
+ * @param {int} server_id The server ID.
+ * @returns {void} Returns nothing.
+ */
 function enableServer(server_id) {
     $.post(".", {
         enableServer: 1,
@@ -318,6 +378,13 @@ function enableServer(server_id) {
     });
 }
 
+/**
+ * Initializes the web FTP table (page-specific). Can be called over and over again.
+ * @param {String} table_id The table id where the FTP contents are being shown.
+ * @param {String} dir The directory contents you wish to see.
+ * @param {int} server_id The server ID.
+ * @returns {void} Returns nothing.
+ */
 function initWebFTPTable(table_id, dir, server_id) {
     var table = $("#" + table_id);
     var tableItems = $("#" + table_id + "body");
@@ -363,6 +430,13 @@ function initWebFTPTable(table_id, dir, server_id) {
 });
 }
 
+/**
+ * Initializes file edit modal (page-specific).
+ * @param {String} modal_id The modal ID
+ * @param {String} filename The file name which to edit.
+ * @param {int} server_id The server ID
+ * @returns {void} Returns nothing.
+ */
 function initFileEditModal(modal_id, filename, server_id) {
     $.post(".", {
         getFile: 1,
@@ -406,6 +480,14 @@ function initFileEditModal(modal_id, filename, server_id) {
     });
 }
 
+/**
+ * Deletes a file/folder from FTP (page-specific).
+ * @param {String} name The name of the file/folder to delete.
+ * @param {int} server_id The server ID
+ * @param {String} table_id The table id of the FTP contents.
+ * @param {String} currdir The current directory.
+ * @returns {void} Returns nothing.
+ */
 function deleteFromFTP(name, server_id, table_id, currdir) {
     $.post(".", {
         deleteFromFTP: 1,
@@ -423,6 +505,12 @@ function deleteFromFTP(name, server_id, table_id, currdir) {
     });
 }
 
+/**
+ * Initializes rename file/folder modal.
+ * @param {String} modal_id The modal ID.
+ * @param {String} name The current file name.
+ * @returns {void} Returns nothing.
+ */
 function renameFileOrFolderModal(modal_id, name) {
     $("#oldfilename").val(name);
     $("#newfilename").val(name);
@@ -430,6 +518,15 @@ function renameFileOrFolderModal(modal_id, name) {
     $("#" + modal_id).modal();
 }
 
+/**
+ * Renames a file/folder.
+ * @param {String} oldname The old name of the file/folder.
+ * @param {String} newname The new name of the file/folder.
+ * @param {int} server_id The server ID
+ * @param {String} table_id The table ID, where the FTP contents are being shown.
+ * @param {String} currdir The current directory.
+ * @returns {void} Returns nothing.
+ */
 function renameFileOrFolder(oldname, newname, server_id, table_id, currdir) {
     $.post(".", {
         renameFileOrFolder: 1,
@@ -448,10 +545,21 @@ function renameFileOrFolder(oldname, newname, server_id, table_id, currdir) {
     });
 }
 
+/**
+ * Initializes FTP Password reset modal.
+ * @param {String} modal_id The modal ID.
+ * @returns {void} Returns nothing.
+ */
 function resetFtpPassword(modal_id) {
     $("#" + modal_id).modal();
 }
 
+/**
+ * Automatically generates a new FTP password.
+ * @param {int} server_id The server ID.
+ * @param {String} modal_id The modal ID.
+ * @returns {void} Returns nothing.
+ */
 function autoGenerateNewFTPPsw(server_id, modal_id) {
     $.post(".", {
         generateNewFTP: 1,
@@ -464,9 +572,19 @@ function autoGenerateNewFTPPsw(server_id, modal_id) {
         } else if (typeof data.msg !== "undefined") {
             toastr.success(data.msg);
         }
-    })
+    });
 }
 
+/**
+ * Edits the server mapping for a specific user (page-specific).
+ * @param {String} modal_id The modal ID.
+ * @param {int} user_id The user ID.
+ * @param {String} username The username.
+ * @param {String} can_stop_server
+ * @param {String} can_see_rcon
+ * @param {String} can_see_ftp
+ * @returns {void} Returns nothing.
+ */
 function editServerMapping(modal_id, user_id, username, can_stop_server, can_see_rcon, can_see_ftp) {
     $("#" + modal_id + "Title").html("Edit mapping for user " + username);
     $("#editMap").val("1");
@@ -493,10 +611,20 @@ function editServerMapping(modal_id, user_id, username, can_stop_server, can_see
     $("#" + modal_id).modal();
 }
 
+/**
+ * Initializes web RCON tool.
+ * @param {String} modal_id The modal which to initialize.
+ * @returns {void} Returns nothing.
+ */
 function initRCONModal(modal_id) {
     $("#" + modal_id).modal();
 }
 
+/**
+ * Sends a command to the Q3 server.
+ * @param {int} server_id The server, to which to send the command.
+ * @returns {void} Returns nothing.
+ */
 function sendCommand(server_id) {
     var command = $("#command").val();
     $("#console").append("<i>You sent a command: " + command + "</i>\n\n");
@@ -514,6 +642,13 @@ function sendCommand(server_id) {
     });
 }
 
+/**
+ * Initializes ticket details modal (with all the messages etc). Page-specific.
+ * @param {String} modal_id The modal ID
+ * @param {int} ticket_id The ticket ID
+ * @param {boolean} showReplyForm If true, shows the reply form (checked on backend as well).
+ * @returns {void} Returns nothing.
+ */
 function initTicketDetails(modal_id, ticket_id, showReplyForm) {
     $.post(".", {
         getAllTicketData: 1,

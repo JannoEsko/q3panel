@@ -1,14 +1,8 @@
 <?php
 require_once __DIR__ . "/../../ssh/SSH.php";
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of Host
- *
+ * Generic host class, handles everything related to host servers.
  * @author Janno
  */
 class Host extends SSH {
@@ -21,6 +15,15 @@ class Host extends SSH {
     private $host_password;
     private $ssh;
     
+    /**
+     * Constructs the host object.
+     * @param int $host_id The host ID
+     * @param string $servername The host server's name.
+     * @param string $hostname The hostname
+     * @param int $sshport The SSH port, to which we can send commands.
+     * @param string $host_username The SSH username (easiest way is to set it up with the root account).
+     * @param string $host_password The SSH password
+     */
     function __construct($host_id, $servername, $hostname, $sshport, $host_username, $host_password) {
         $this->host_id = $host_id;
         $this->servername = $servername;
@@ -83,6 +86,11 @@ class Host extends SSH {
         $this->host_password = $host_password;
     }
     
+    /**
+     * Updates the host.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns an array with the error key or the SQL rows_affected key.
+     */
     function updateHost(SQL $sql) {
         $outArr = parent::sendCommand("whoami", true);
         if (strlen(trim($outArr['stderr'])) > 0) {
@@ -99,6 +107,12 @@ class Host extends SSH {
         }
     }
     
+    /**
+     * Deletes a host from the panel.
+     * @param SQL $sql The SQL handle.
+     * @param int $host_id The host id which you want to delete.
+     * @return array Returns array with the key rows_affected if no errors occurred, or array with the key error.
+     */
     static function deleteHost(SQL $sql, $host_id) {
         //first check for servers. We cannot delete a host which has servers deployed to it.
         $chksrv = Constants::$SELECT_QUERIES['GET_SERVER_BY_HOSTID'];
@@ -115,6 +129,13 @@ class Host extends SSH {
         }
     }
     
+    /**
+     * Gets all hosts.
+     * @param SQL $sql The SQL handle
+     * @param int $host_id [optional] If specified, it will get host by the given ID.
+     * @param bool $includePassword [optional] If true, it will return the host server's password with the data.  
+     * @return array Returns the hosts.
+     */
     static function getHosts(SQL $sql, $host_id = null, $includePassword = false) {
         $query = "";
         $params = null;
@@ -137,6 +158,11 @@ class Host extends SSH {
         return $sql->query($query, $params);
     }
     
+    /**
+     * Adds host to the database, tests the connection.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns a SQL response array, or an array with the error key.
+     */
     function addHost(SQL $sql) {
         //first check that can we actually send a command.
         //lets do it by sending a whoami command to the VPS and checking the output.
@@ -154,6 +180,11 @@ class Host extends SSH {
         }
     }
 
+    /**
+     * Gets the host select-option fields.
+     * @param SQL $sql The SQL handle.
+     * @return string Returns the option-values of the hosts.
+     */
     static function getHostsSelect(SQL $sql) {
         $hosts = self::getHosts($sql);
         $str = "";

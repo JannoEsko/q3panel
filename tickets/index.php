@@ -15,7 +15,7 @@ require_once __DIR__ . "/../login.php";
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta id="themecolor" name="theme-color" content="<?php echo $_SESSION['style_bg']; ?>">
-        <title>tt</title>
+        <title>Tickets | <?php echo Constants::$PANEL_NAME; ?></title>
         <?php echo Constants::getCSS($HOST_URL . "/static"); 
         echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
         ?>
@@ -27,8 +27,8 @@ require_once __DIR__ . "/../login.php";
             <section>
                 <div class="content-wrapper">
                     <div class="content-heading">
-                        Homepage
-                        <small>Welcome to Q3Panel</small>
+                        Tickets
+                        <small>Here, you can submit a new ticket, read tickets, reply to them.</small>
                     </div>
                     <div class="row">
                             <div class="panel janno-panel">

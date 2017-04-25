@@ -1,14 +1,7 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Email
- *
+ * Generic class for sending e-mails. Also handles some of the notifications.
  * @author Janno
  */
 class Email {
@@ -20,6 +13,15 @@ class Email {
     private $fromName;
     private $toName;
     
+    /**
+     * Constructs new Email object.
+     * @param string $from The e-mail address from who to send the e-mail
+     * @param string $to The e-mail address to whom to send the e-mail
+     * @param string $title The title of the e-mail.
+     * @param string $body The body of the e-mail.
+     * @param string $fromName The name, from which the e-mail will be sent from (e.g. Q3Panel)
+     * @param string $toName The username, to which the e-mail will be sent to. (just as e-mail to-name parameter).
+     */
     function __construct($from, $to, $title, $body, $fromName, $toName) {
         $this->from = $from;
         $this->to = $to;
@@ -80,9 +82,9 @@ class Email {
     /**
      * Function for sending e-mail. Uses either SendGrid or PHPMailer
      * @param boolean $useSendgrid Boolean value whether to use SendGrid or not (default false).
-     * @param String $sendgrid_apikey The API key if you wish to send it with SendGrid.
+     * @param string $sendgrid_apikey The API key if you wish to send it with SendGrid.
      * @param SQL $sql The SQL handle, required only if the email preferences aren't set in the object itself.
-     * @return Array Returns array, if it contains error key, there was a problem, if not, then the e-mail was sent successfully.
+     * @return array Returns array, if it contains error key, there was a problem, if not, then the e-mail was sent successfully.
      */
     public function sendEmail($useSendgrid = false, $sendgrid_apikey = "") {
         if ($useSendgrid) {
@@ -112,6 +114,15 @@ class Email {
     }
 
 
+    /**
+     * Saves the e-mail preferences to the database.
+     * @param SQL $sql The SQL handle.
+     * @param int $is_sendgrid 1 if it's SendGrid, 0 otherwise.
+     * @param string $from_name The name, from which the e-mails will be sent from.
+     * @param string $from_email The e-mail, from which the e-mails will be sent from.
+     * @param string $api [optional] Sendgrid's API key.
+     * @return array Returns array from the SQL query or an error otherwise.
+     */
     public static function saveEmailPreferences(SQL $sql, $is_sendgrid, $from_name, $from_email, $api) {
         $query = Constants::$INSERT_QUERIES['ADD_EMAIL_SERVICE'];
         $params = array($is_sendgrid, $from_name, $from_email, $api);
@@ -122,6 +133,15 @@ class Email {
         }
     }
     
+    /**
+     * Updates the e-mail preferences in the SQL database.
+     * @param SQL $sql The SQL handle.
+     * @param int $is_sendgrid 1 if it's SendGrid, 0 otherwise.
+     * @param string $from_name The name, from which the e-mails will be sent from.
+     * @param string $from_email The e-mail, from which the e-mails will be sent from.
+     * @param string $api [optional] Sendgrid's API key.
+     * @return array Returns array from the SQL query or an error otherwise.
+     */
     public static function updateEmailPreferences(SQL $sql, $is_sendgrid, $from_name, $from_email, $api) {
         $query = Constants::$UPDATE_QUERIES['UPDATE_EMAIL_SERVICE'];
         $params = array($is_sendgrid, $from_name, $from_email, $api);
@@ -132,6 +152,11 @@ class Email {
         }
     }
     
+    /**
+     * Gets the e-mail preferences from the SQL database.
+     * @param SQL $sql The SQL handle.
+     * @return array Returns the e-mail preferences.
+     */
     public static function getEmailPreferences(SQL $sql) {
         $query = Constants::$SELECT_QUERIES['GET_EMAIL_PREFERENCES'];
         $data = $sql->query($query);

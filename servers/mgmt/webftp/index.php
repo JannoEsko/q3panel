@@ -33,7 +33,7 @@ $ftp = new FTP($server);
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta id="themecolor" name="theme-color" content="<?php echo $_SESSION['style_bg']; ?>">
-        <title>tt</title>
+        <title>Web FTP Interface | <?php echo Constants::$PANEL_NAME; ?></title>
         <?php echo Constants::getCSS($HOST_URL . "/static"); 
         echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
         ?>
@@ -45,8 +45,8 @@ $ftp = new FTP($server);
             <section>
                 <div class="content-wrapper">
                     <div class="content-heading">
-                        Homepage
-                        <small>Welcome to Q3Panel</small>
+                        Web FTP
+                        <small>This is a small web interface for the FTP connection. You can upload new files, create new files, create new folders, edit existing files and download existing files over here.</small>
                     </div>
                     <div class="row">
                             <div class="panel janno-panel">
@@ -70,12 +70,7 @@ $ftp = new FTP($server);
                                 </div>
                             </div>
                             
-                            <div class="panel janno-panel">
-                                <div class="panel-heading">
-                                    Required files
-                                </div>
-                                <div class="panel-body"><?php echo nl2br(print_r(get_required_files(), true)); ?></div>
-                            </div>
+                            
                         
                     </div>
                 </div>

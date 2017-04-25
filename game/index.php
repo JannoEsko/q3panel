@@ -18,7 +18,7 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta id="themecolor" name="theme-color" content="<?php echo $_SESSION['style_bg']; ?>">
-        <title>tt</title>
+        <title>Game setup | <?php echo Constants::$PANEL_NAME; ?></title>
         <?php echo Constants::getCSS($HOST_URL . "/static"); 
         echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
         ?>
@@ -30,8 +30,8 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
             <section>
                 <div class="content-wrapper">
                     <div class="content-heading">
-                        Homepage
-                        <small>Welcome to Q3Panel</small>
+                        Game setup
+                        <small>Here you can add different specifications regarding the games. The server-side setup must be done by you, you kind-of have to "teach" the panel to use the files.</small>
                     </div>
                     <div class="row">
                         <div class="col-md-8">
@@ -70,55 +70,20 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                                 </div>
                             </div>
                             
-                            <div class="panel janno-panel">
-                                <div class="panel-heading">
-                                    Required files
-                                </div>
-                                <div class="panel-body"><?php echo nl2br(print_r(get_required_files(), true)); ?></div>
-                            </div>
                         </div>
                         <div class="col-md-4">
                             <div class="panel janno-panel">
                                 <div class="panel-heading">
-                                    <div class="panel-title">Latest news</div>
+                                    Information
                                 </div>
-                                <div class="panel-body list-group">
-                                    <div class="list-group-item">
-                                        <div class="media-box">
-                                            <div class="pull-left">
-                                                <span class="fa-stack">
-
-                                                    <em class="fa text-success fa-check fa-stack-2x"></em>
-                                                </span>
-                                            </div>
-                                            <div class="media-box-body clearfix">
-                                                <div class="media-box-heading text-success m0">some logs</div>
-                                                <p class="m0">
-                                                    <small>xxx<br>xxxxx</small>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                                <div class="panel-body list-group">
-                                    <div class="list-group-item">
-                                        <div class="media-box">
-                                            <div class="pull-left">
-                                                <span class="fa-stack">
-
-                                                    <em class="fa text-success fa-check fa-stack-2x"></em>
-                                                </span>
-                                            </div>
-                                            <div class="media-box-body clearfix">
-                                                <div class="media-box-heading text-success m0">some other stuff</div>
-                                                <p class="m0">
-                                                    <small>text<br>text</small>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
+                                <div class="panel-body">
+                                    <?php
+                                    $dat = getStats($sql);
+                                    ?>
+                                    The panel hosts a total of <?php echo $dat['totalServers']; ?> server(s), from which, <?php echo $dat['runningServers']; ?> is/are currently running. <br>It has <?php echo $dat['totalUsers']; ?> user accounts, out of which <?php echo $dat['extUsers']; ?> of them derive from an external system and <?php echo $dat['localUsers']; ?> of them is registered locally.<br><?php echo $dat['extAuth']; ?><br><?php echo $dat['mailer']; ?>
+                                    <br>
+                                    <br>
+                                    Did you know that by clicking <b><em class="icon-wrench"></em>Themes</b> from the upper bar, you can change the color theme of the panel?
                                 </div>
                             </div>
                         </div>

@@ -2,15 +2,9 @@
 require_once __DIR__ . "/../sql/SQL.php";
 require_once __DIR__ . "/../writer/Writer.php";
 require_once __DIR__ . "/../Constants.php";
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
- * Description of Installation
- *
+ * Handles some of the functionality coming from the installation.
  * @author Janno
  */
 class Installation {
@@ -57,6 +51,20 @@ class Installation {
         
     }
     
+    /**
+     * Initializes the external DB connection and saves it to the database.
+     * @param SQL $sql The local SQL handle.
+     * @param string $db_host The hostname of the external database.
+     * @param string $db_name The database username of the external database.
+     * @param string $db_password The database password of the external database.
+     * @param string $db The database name of the external database.
+     * @param string $table The table name where the user data relies.
+     * @param string $id The table's primary key (id) field.
+     * @param string $usrname The username field.
+     * @param string $psw The password field.
+     * @param string $email The e-mail field.
+     * @return array Returns array with the href where to forward the user, error otherwise.
+     */
     static function initializeExternalConnection(SQL $sql, $db_host, $db_name, $db_password, $db, $table, $id, $usrname, $psw, $email) {
         try {
             $ext_sql = new SQL($db_host, $db_name, $db_password, $db);

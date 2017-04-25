@@ -2,6 +2,8 @@
 /**
  * Holds all the required classes, so instead of requiring files separately where they are needed,
  * we can use this file to load everything through a single file.
+ * 
+ * This isn't included by the installer scripts because we don't have a config file during installation.
  */
 
 $d = __DIR__;

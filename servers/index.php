@@ -15,7 +15,7 @@ $is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants:
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
         <meta id="themecolor" name="theme-color" content="<?php echo $_SESSION['style_bg']; ?>">
-        <title>tt</title>
+        <title>Servers | <?php echo Constants::$PANEL_NAME; ?></title>
         <?php echo Constants::getCSS($HOST_URL . "/static"); 
         echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
         ?>
@@ -27,8 +27,8 @@ $is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants:
             <section>
                 <div class="content-wrapper">
                     <div class="content-heading">
-                        Homepage
-                        <small>Welcome to Q3Panel</small>
+                        Servers
+                        <small>Here you have a small overview of the servers. After clicking manage, you can dive into the specifics.</small>
                     </div>
                     <div class="row">
                             <div class="panel janno-panel">
@@ -87,12 +87,7 @@ $is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants:
                                     <?php } ?></div>
                             </div>
                             
-                            <div class="panel janno-panel">
-                                <div class="panel-heading">
-                                    Required files
-                                </div>
-                                <div class="panel-body"><?php echo nl2br(print_r(get_required_files(), true)); ?></div>
-                            </div>
+                            
                         
                     </div>
                 </div>

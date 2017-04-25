@@ -1,14 +1,7 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of SSH
- *
+ * Generic SSH class, handles all the I/O actions with the host/gameservers.
  * @author Janno
  */
 class SSH {
@@ -19,6 +12,13 @@ class SSH {
     private $host_password;
     private $ssh = null;
     
+    /**
+     * Constructs a new SSH object.
+     * @param string $hostname The hostname.
+     * @param int $sshport The SSH port.
+     * @param string $host_username The SSH username.
+     * @param string $host_password The SSH password.
+     */
     function __construct($hostname, $sshport, $host_username, $host_password) {
         $this->hostname = $hostname;
         $this->sshport = $sshport;
@@ -30,8 +30,8 @@ class SSH {
     /**
      * Function for sending commands through SSH.
      * @param string $command The command which to send through SSH
-     * @param boolean $output If true, returns the output of the command, if not, returns nothing.
-     * @return string Returns the output of the command, if output is requested.
+     * @param bool $output If true, returns the output of the command, if not, returns nothing.
+     * @return array Returns an array with the stdio/stderr keys if the command was successful, error key if it wasn't.
      */
     function sendCommand($command, $output = false) {
         if ($this->ssh === null) {
@@ -67,7 +67,4 @@ class SSH {
     function getHost_password() {
         return $this->host_password;
     }
-
-
-
 }

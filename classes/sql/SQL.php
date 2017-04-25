@@ -1,11 +1,5 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
  * Generic SQL class, uses PDO.
  *
@@ -32,7 +26,7 @@ class SQL extends PDO {
      * Generic query function to insert/fetch data.
      * @param string $statement The SQL statement which should be runned.
      * @param array $params Optional parameters for binding values to the statement (values only).
-     * @return Array Array with SELECT statement, returns all the objects, with other statement, returns the rows affected.
+     * @return array Array with SELECT statement, returns all the objects, with other statement, returns the rows affected with the last_insert_id.
      */
     public function query($statement, $params = null) {
         $stmt = parent::prepare($statement);

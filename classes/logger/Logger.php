@@ -1,36 +1,56 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
 /**
- * Description of Logger
- *
+ * Handles all of the logging events.
  * @author Janno
  */
 class Logger {
     
+    /**
+     * Logs into the panel log.
+     * @param SQL $sql The SQL handle.
+     * @param int $user_id The user ID of the action initiator.
+     * @param string $user_ip The user IP of the action initiator.
+     * @param string $action The action performed.
+     */
     static function log(SQL $sql, $user_id, $user_ip, $action) {
         $query = Constants::$INSERT_QUERIES['GENERIC_LOG_INSERT'];
         $params = array($user_id, $user_ip, $action);
         $sql->query($query, $params);
     }
     
-    static function logFailedLogin($sql, $username, $ip) {
+    /**
+     * Logs a failed login.
+     * @param SQL $sql The SQL handle.
+     * @param string $username The username, which was used to log in.
+     * @param string $ip The IP of the user, who tried to log in.
+     */
+    static function logFailedLogin(SQL $sql, $username, $ip) {
         $query = Constants::$INSERT_QUERIES['FAILED_LOGIN_INSERT'];
         $params = array($username, $ip);
         $sql->query($query, $params);
     }
     
-    static function logServer($sql, $server_id, $user_id, $user_ip, $severity, $action) {
+    /**
+     * Logs into the server log.
+     * @param SQL $sql The SQL handle
+     * @param int $server_id The server ID
+     * @param int $user_id The user ID of the action initiator.
+     * @param string $user_ip The IP of the initiator.
+     * @param int $severity The severity of the action.
+     * @param string $action The action definition.
+     */
+    static function logServer(SQL $sql, $server_id, $user_id, $user_ip, $severity, $action) {
         $query = Constants::$INSERT_QUERIES['SERVER_LOG_INSERT'];
         $params = array($server_id, $user_id, $user_ip, $severity, $action);
         $sql->query($query, $params);
     }
     
+    /**
+     * Gets the server logs.
+     * @param SQL $sql The SQL handle
+     * @return array Returns array of the server logs.
+     */
     static function getServerLogs($sql) {
         $query = Constants::$SELECT_QUERIES['GET_SERVER_LOGS_LEFT_JOIN_USERS_INNER_JOIN_SERVERS'];
         $data = $sql->query($query);
@@ -51,11 +71,21 @@ class Logger {
         return $data;
     }
     
+    /**
+     * Gets failed logins.
+     * @param SQL $sql The SQL handle
+     * @return array Returns array of the failed logins.
+     */
     static function getFailedLogins($sql) {
         $query = Constants::$SELECT_QUERIES['GET_FAILED_LOGINS'];
         return $sql->query($query);
     }
     
+    /**
+     * Gets the panel logs.
+     * @param SQL $sql The SQL handle
+     * @return array Returns array with all of the panel logs.
+     */
     static function getLogs($sql) {
         $query = Constants::$SELECT_QUERIES['GET_PANEL_LOGS'];
         $data = $sql->query($query);
