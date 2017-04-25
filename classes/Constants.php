@@ -35,6 +35,18 @@ class Constants {
     static $EXCLUDE_PASSWORD = false;
     static $Q3_RESOURCE_TIMEOUT = 1;
     static $HOST_RESOURCE_TIMEOUT = 2;
+    static $TICKET_OPEN = 0;
+    static $TICKET_CLOSED = 1;
+    static $TICKET_ON_HOLD = 2;
+    static $TICKET_RESOLVED = 3;
+    
+    static $TICKETS_STATUSES = array(
+        0 => "Open",
+        1 => "Closed",
+        2 => "On hold",
+        3 => "Resolved"
+    );
+    
     
     
     static $SERVER_LOG_SEVERITIES = array(
@@ -61,7 +73,7 @@ class Constants {
         "CREATE TABLE q3panel_forgottenpsw (forgottenpsw_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, user_id INTEGER NOT NULL, request_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, request_key VARCHAR(255) NOT NULL)",
         "CREATE TABLE q3panel_failed_logins (failed_login_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, failed_username VARCHAR(255), failed_ip VARCHAR(255), failed_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
         "CREATE TABLE q3panel_support_ticket (support_ticket_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, title TEXT, ticket_status TINYINT COMMENT '0 - open, 1 - closed, 2 - on hold, 3 - resolved', creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP)",
-        "CREATE TABLE q3panel_support_ticket_map (support_ticket_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, user_id INTEGER NOT NULL)",
+        "CREATE TABLE q3panel_support_ticket_map (support_ticket_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, mapped_user_id INTEGER NOT NULL, CONSTRAINT ticket_id_and_mapped_user_id_must_be_unique UNIQUE(ticket_id, mapped_user_id))",
         "CREATE TABLE q3panel_support_ticket_messages (support_ticket_message_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, ticket_id INTEGER NOT NULL, user_id INTEGER NOT NULL, user_ip VARCHAR(255), message_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, message TEXT)",
         "CREATE TABLE q3panel_external_authentication (ext_auth_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host VARCHAR(255), db_username VARCHAR(255), db_password VARCHAR(255), db_name VARCHAR(255), users_table_name VARCHAR(255), user_id_field VARCHAR(255), username_field VARCHAR(255), password_field VARCHAR(255), email_field VARCHAR(255))",
         "CREATE TABLE q3panel_email_service (email_service_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, is_sendgrid TINYINT, from_name VARCHAR(255), from_email VARCHAR(255), api_key TEXT COMMENT 'empty if PHPMailer, key if SendGrid')",
@@ -86,6 +98,10 @@ class Constants {
         , "FAILED_LOGIN_INSERT" => "INSERT INTO q3panel_failed_logins (failed_username, failed_ip) VALUES (?, ?)"
         , "SERVER_LOG_INSERT" => "INSERT INTO q3panel_servers_logs (server_id, user_id, user_ip, severity, action) VALUES (?, ?, ?, ?, ?)"
         , "ADD_USER_TO_SERVER_MAP" => "INSERT INTO q3panel_servers_map (server_id, user_id, can_stop_server, can_see_rcon, can_see_ftp) VALUES (?, ?, ?, ?, ?)"
+        , "INSERT_NEW_TICKET" => "INSERT INTO q3panel_support_ticket (title, ticket_status) VALUES (?, ?)"
+        , "MAP_TICKET_TO_USERS_BY_GROUP_LARGER_THAN" => "INSERT IGNORE INTO q3panel_support_ticket_map (ticket_id, mapped_user_id) SELECT ? AS ticket_id, user_id FROM q3panel_users WHERE group_id >= ?"
+        , "MAP_TICKET_TO_USER_BY_USER_ID" => "INSERT IGNORE INTO q3panel_support_ticket_map (ticket_id, mapped_user_id) VALUES (?, ?)"
+        , "ADD_TICKET_MESSAGE" => "INSERT INTO q3panel_support_ticket_messages (ticket_id, user_id, user_ip, message) VALUES (?, ?, ?, ?)"
     );
     
     static $SELECT_QUERIES = array(
@@ -143,6 +159,8 @@ class Constants {
         , "GET_FAILED_LOGINS" => "SELECT * FROM q3panel_failed_logins ORDER BY failed_time DESC"
         , "GET_SERVER_LOGS_LEFT_JOIN_USERS" => "SELECT * FROM q3panel_servers_logs LEFT JOIN q3panel_users ON q3panel_servers_logs.user_id = q3panel_users.user_id ORDER BY timestamp DESC"
         , "GET_SERVER_LOGS_LEFT_JOIN_USERS_INNER_JOIN_SERVERS" => "SELECT * FROM q3panel_servers_logs LEFT JOIN q3panel_users ON q3panel_servers_logs.user_id = q3panel_users.user_id INNER JOIN q3panel_servers ON q3panel_servers_logs.server_id = q3panel_servers.server_id ORDER BY timestamp DESC"
+        , "GET_TICKET_WITH_MAP_BY_ID_AND_USER_ID" => "SELECT * FROM q3panel_support_ticket INNER JOIN q3panel_support_ticket_map ON q3panel_support_ticket.ticket_id = q3panel_support_ticket_map.ticket_id WHERE ticket_id = ? AND user_id = ?"
+        , "GET_TICKET_MESSAGES_WITH_USERS_WITH_MAP_WITH_TICKET_BY_TICKET_ID_USER_ID" => "SELECT * FROM q3panel_support_ticket_messages INNER JOIN q3panel_support_ticket_map ON q3panel_support_ticket_messages.ticket_id = q3panel_support_ticket_map.ticket_id INNER JOIN q3panel_support_ticket ON q3panel_support_ticket.support_ticket_id = q3panel_support_ticket_messages.ticket_id INNER JOIN q3panel_users ON q3panel_support_ticket_messages.user_id = q3panel_users.user_id WHERE q3panel_support_ticket_messages.ticket_id = ? AND q3panel_support_ticket_map.mapped_user_id = ?"
     );
     
     static $UPDATE_QUERIES = array(
@@ -298,6 +316,7 @@ class Constants {
         , "EXT_AUTH_UPDATE_SUCCESS" => "External authentication parameters updated successfully."
         , "ADD_EXT_AUTH_SUCCESS" => "External authentication configured successfully!"
         , "EMAIL_SERVICE_UPDATE_SUCCESS" => "E-mail service information updated."
+        , "TICKET_SAVE_SUCCESS" => "The ticket has been saved successfully."
     );
     
     static $SSH_COMMANDS = array(

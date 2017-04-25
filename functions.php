@@ -10,6 +10,18 @@ require_once __DIR__ . "/classes/loader.php";
  */
 
 
+if (isset($_POST['newTicket'], $_POST['title'], $_POST['message']) && intval($_POST['newTicket']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$NORMAL_USER)) {
+    //Tickets should be mapped to every panel admin only.
+    //The mapping will stay as it is even when the rights are removed.
+    $ticket = new Ticket(null, $_POST['title'], Constants::$TICKET_OPEN, null);
+    $ticket->setSupport_ticket_id($ticket->saveTicket($sql)['last_insert_id']);
+    $ticket->mapTicketToUsers($sql, Constants::$PANEL_ADMIN);
+    $ticket->mapTicketToUsers($sql, null, $_SESSION['user_id']);
+    $ticket->saveMessageToTicket($sql, $_SESSION['user_id'], getUserIP(), $_POST['message']);
+    die(json_encode(array("msg" => Constants::$MESSAGES['TICKET_SAVE_SUCCESS'], "toggleModal" => "newTicket")));
+}
+
+
 if (isset($_POST['update_email_service'], $_POST['from_name'], $_POST['from_email']) && intval($_POST['update_email_service']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) {
     $is_sendgrid = bool2int(isset($_POST['is_sendgrid']) && trim($_POST['is_sendgrid']) === "on");
     try {
@@ -124,7 +136,7 @@ if (isset($_POST['server_id'], $_POST['command'], $_POST['sendRCONCommand']) && 
     die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
 }
 
-function stripQ3COlors($input) {
+function stripQ3Colors($input) {
     return preg_replace("/(\^.)/", "", $input);
 }
 
