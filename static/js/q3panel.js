@@ -83,7 +83,6 @@ function handleForm(id, useToaster) {
         formMsgPanel.addClass("janno-panel");
         formMsgPanel.hide(500);
         var data = form.serialize();
-        console.log(data);
         var url = $(form).attr('action');
         var type = $(form).attr('method');
         $.ajax({
@@ -91,7 +90,6 @@ function handleForm(id, useToaster) {
             url: url,
             data: data
         }).done(function(response) {
-            console.log(response);
             response = JSON.parse(response);
             if (typeof response.error !== "undefined") {
                 if (useToaster) {
@@ -135,7 +133,6 @@ function handleForm(id, useToaster) {
                             $("#" + response.toggleModal).modal('toggle');
                         }
                         if (typeof response.updateRow !== "undefined" && typeof response.action !== "undefined" && response.action === "serverMapUpdate") {
-                            console.log(response);
                             var csf = int2boolstr(response.can_see_ftp);
                             var csr = int2boolstr(response.can_see_rcon);
                             var css = int2boolstr(response.can_stop_server);
@@ -254,7 +251,6 @@ function initEditHostModal(modal_id, host_id) {
         host_id: host_id
     }, function(data) {
         data = JSON.parse(data);
-        console.log(data);
         $("#updateHost").val(1);
         $("#addHost").val(0);
         $("#hostId").val(data.host_id);
@@ -395,7 +391,6 @@ function initWebFTPTable(table_id, dir, server_id) {
         getDirContents: dir,
         server_id: server_id
     }, function(data) {
-        console.log(data);
         data = JSON.parse(data);
         if (data === null) {
             table.append("<tr><td><em class='fa fa-folder'></em> <a href='#' onclick='initWebFTPTable(\"" + table_id + "\", \"../\", \"" + server_id + "\");'>../</a></td></tr>");
@@ -499,7 +494,6 @@ function deleteFromFTP(name, server_id, table_id, currdir) {
             toastr.error(data.error);
         } else {
             toastr.success(data.msg);
-            console.log(data.msg);
             initWebFTPTable(table_id, currdir, server_id);
         }
     });
@@ -539,7 +533,6 @@ function renameFileOrFolder(oldname, newname, server_id, table_id, currdir) {
             toastr.error(data.error);
         } else {
             toastr.success(data.msg);
-            console.log(data.msg);
             initWebFTPTable(table_id, currdir, server_id);
         }
     });
@@ -655,7 +648,6 @@ function initTicketDetails(modal_id, ticket_id, showReplyForm) {
         ticket_id: ticket_id
     }, function(data) {
         data = JSON.parse(data);
-        console.log(data);
         if (typeof data.error !== "undefined") {
             toastr.error(data.error);
         } else {
