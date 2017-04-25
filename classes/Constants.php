@@ -36,6 +36,8 @@ class Constants {
     static $TICKET_UNABLE_TO_REPRODUCE = 2;
     static $TICKET_RESOLVED = 3;
     static $PANEL_NAME = "Q3Panel";
+    static $RESTART_SERVER_SLEEP = 2;
+    static $SLEEP_BETWEEN_SERVERQUERY = 3;
     
     
     static $TICKETS_STATUSES = array(

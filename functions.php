@@ -1,5 +1,8 @@
 <?php
-session_start();
+
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 /**
  * This file holds all the generic functions and is also the starting point for all of the class 

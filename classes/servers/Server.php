@@ -179,7 +179,7 @@ class Server extends SSH {
             $pid = trim($output['stdio']);
             $killServer = Constants::$SSH_COMMANDS['STOP_SERVER'];
             $killServer = str_replace("{screen_pid}", $pid, $killServer);
-            $this->sendCommand($killServer);
+            $out = $this->sendCommand($killServer, true);
         } else if (strlen($output['stderr']) !== 0) {
             return $output;
         }
@@ -190,10 +190,11 @@ class Server extends SSH {
     /**
      * Restarts a server
      * @param SQL $sql The SQL handle.
-     * @return boolean Returns true, if the server got restarted successfully.
      */
     function restartServer($sql) {
-        return $this->stopServer($sql) && $this->startServer($sql);
+        $this->stopServer($sql);
+        sleep(Constants::$RESTART_SERVER_SLEEP);
+        $this->startServer($sql);
     }
     
     /**
@@ -442,15 +443,33 @@ class Server extends SSH {
                 if ($serverStatusGot) {
                     return array("players" => $currentPlayers);
                 } else {
-                    //most likely we didnt get any output from the server.
-                    $reboot = $this->restartServer($sql);
-                    if ($reboot) {
-                        return array("msg" => Constants::$SERVER_ACTIONS['SERVER_REBOOT_SUCCESS_NO_INFOMSG']);
+                    sleep(Constants::$SLEEP_BETWEEN_SERVERQUERY);
+                    $out = $this->sendQ3Command($q3command, true);
+                    $outArr = explode("\\", $out);
+                    $serverStatusGot = false;
+                    $currentPlayers = 0;
+
+                    for ($i = 0; $i < sizeof($outArr); $i++) {
+                        if (trim($outArr[$i]) === "clients") {
+                            $i++;
+                            $currentPlayers = intval(trim($outArr[$i]));
+                            $serverStatusGot = true;
+                        }
+                    }
+                    if ($serverStatusGot) {
+                        return array("players" => $currentPlayers);
                     } else {
-                        return array("error" => Constants::$SERVER_ACTIONS['SERVER_REBOOT_ERROR_NO_INFOMSG']);
+                        //most likely we didnt get any output from the server.
+                        $reboot = $this->restartServer($sql);
+                        if ($reboot) {
+                            return array("msg" => Constants::$SERVER_ACTIONS['SERVER_REBOOT_SUCCESS_NO_INFOMSG']);
+                        } else {
+                            return array("error" => Constants::$SERVER_ACTIONS['SERVER_REBOOT_ERROR_NO_INFOMSG']);
+                        }
                     }
                 }
             } else {
+                
                 $reboot = $this->restartServer($sql);
                 if ($reboot) {
                     return array("msg" => Constants::$SERVER_ACTIONS['SERVER_PID_DOWN_REBOOT_SUCCESSFUL']);

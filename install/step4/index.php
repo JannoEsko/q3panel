@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <?php
-error_reporting(E_ALL);
 session_start();
 if (!isset($_SESSION['installer'])) { 
     header("Location: ../../");
