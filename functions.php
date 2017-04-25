@@ -8,8 +8,9 @@ session_start();
  * Most of the IF clauses aren't commented because they're pretty self-explanatory.
  * Most of the user permission control happens in this file as well.
  */
-
-require_once __DIR__ . "/classes/loader.php";
+if (file_exists(__DIR__ . "/config.php")) {
+    require_once __DIR__ . "/classes/loader.php";
+}
 
 /**
  * This function will just output some fast statistics of the panel (as in a fun/neat way to show off some of the stuff currently going on).
