@@ -96,7 +96,7 @@ if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)
                         <button type="button" data-dismiss="modal" aria-label="Close" class="close">
                             <span aria-hidden="true">&times;</span>
                         </button>
-                        <h4 id="hostModalTitle" class="modal-title">Add a new game</h4>
+                        <h4 id="hostModalTitle" class="modal-title">Add a new host</h4>
                     </div>
                     <div class="modal-body" id="hostModalBody">
                          <div class="panel janno-panel" id="formMsgPanel" hidden>
