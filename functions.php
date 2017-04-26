@@ -202,7 +202,7 @@ if (isset($_POST['editExternalAuth'], $_POST['host'], $_POST['db_username'], $_P
 }
 
 if (isset($_GET['getServerLogs']) && intval($_GET['getServerLogs']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
-    die("{\"data\":" . json_encode(Logger::getServerLogs($sql)) . "}");
+    die("{\"data\":" . json_encode(Logger::getServerLogs($sql, $_SESSION['user_id'])) . "}");
 }
 
 if (isset($_GET['getFailedLogins']) && intval($_GET['getFailedLogins']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
