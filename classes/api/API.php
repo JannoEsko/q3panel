@@ -30,7 +30,7 @@ class API {
         require_once __DIR__ . "/../servers/Server.php";
         $user = new User($this->username, $this->password);
         $dat = $user->authenticate($sql);
-        if (!isset($dat['error'])) {
+        if (!isset($dat['error']) && intval($dat['group_id']) === Constants::$PANEL_ADMIN) {
             if ($server_id !== null || strlen($server_id) > 0) {
                 $dat = Server::getServersWithHostAndGame($sql, $dat['user_id'], $server_id);
                 for ($i = 0; $i < sizeof($dat); $i++) {
@@ -64,10 +64,7 @@ class API {
         require_once __DIR__ . "/../servers/Game.php";
         $user = new User($this->username, $this->password);
         $dat = $user->authenticate($sql);
-        if (intval($dat['group_id']) !== Constants::$PANEL_ADMIN) {
-            return "NOT_AUTHORIZED";
-        }
-        if (!isset($dat['error'])) {
+        if (!isset($dat['error']) && intval($dat['group_id']) === Constants::$PANEL_ADMIN) {
             $srvData = Server::getServersWithHostAndGame($sql, $dat['user_id'], $server_id);
             if (sizeof($srvData) === 1) {
                 $srvData = $srvData[0];
@@ -103,10 +100,7 @@ class API {
         require_once __DIR__ . "/../servers/Game.php";
         $user = new User($this->username, $this->password);
         $dat = $user->authenticate($sql);
-        if (intval($dat['group_id']) !== Constants::$PANEL_ADMIN) {
-            return "NOT_AUTHORIZED";
-        }
-        if (!isset($dat['error'])) {
+        if (!isset($dat['error']) && intval($dat['group_id']) === Constants::$PANEL_ADMIN) {
             $srvData = Server::getServersWithHostAndGame($sql, $dat['user_id'], $server_id);
             if (sizeof($srvData) === 1) {
                 $srvData = $srvData[0];
@@ -145,10 +139,7 @@ class API {
         require_once __DIR__ . "/../servers/Game.php";
         $user = new User($this->username, $this->password);
         $dat = $user->authenticate($sql);
-        if (intval($dat['group_id']) !== Constants::$PANEL_ADMIN) {
-            return "NOT_AUTHORIZED";
-        }
-        if (!isset($dat['error'])) {
+        if (!isset($dat['error']) && intval($dat['group_id']) === Constants::$PANEL_ADMIN) {
             $srvData = Server::getServersWithHostAndGame($sql, $dat['user_id'], $server_id);
             if (sizeof($srvData) === 1) {
                 $srvData = $srvData[0];
@@ -185,10 +176,7 @@ class API {
         require_once __DIR__ . "/../servers/Game.php";
         $user = new User($this->username, $this->password);
         $dat = $user->authenticate($sql);
-        if (intval($dat['group_id']) !== Constants::$PANEL_ADMIN) {
-            return "NOT_AUTHORIZED";
-        }
-        if (!isset($dat['error'])) {
+        if (!isset($dat['error']) && intval($dat['group_id']) === Constants::$PANEL_ADMIN) {
             $srvData = Server::getServersWithHostAndGame($sql, $dat['user_id'], $server_id);
             if (sizeof($srvData) === 1) {
                 $srvData = $srvData[0];
