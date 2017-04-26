@@ -190,11 +190,13 @@ class Server extends SSH {
     /**
      * Restarts a server
      * @param SQL $sql The SQL handle.
+     * @returns bool Returns true, if all went well.
      */
     function restartServer($sql) {
-        $this->stopServer($sql);
+        $stop = $this->stopServer($sql);
         sleep(Constants::$RESTART_SERVER_SLEEP);
-        $this->startServer($sql);
+        $start = $this->startServer($sql);
+        return $stop && $start;
     }
     
     /**
