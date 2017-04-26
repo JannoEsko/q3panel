@@ -38,6 +38,7 @@ class Constants {
     static $PANEL_NAME = "Q3Panel";
     static $RESTART_SERVER_SLEEP = 2;
     static $SLEEP_BETWEEN_SERVERQUERY = 3;
+    static $CHECK_SERVER_PID_WAIT_TIME = 3;
     
     
     static $TICKETS_STATUSES = array(

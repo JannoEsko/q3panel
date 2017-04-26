@@ -418,9 +418,10 @@ class Server extends SSH {
     /**
      * Checks if the server is working correctly.
      * @param SQL $sql The SQL handle.
+     * @param bool $secondCall If true, means that this is the second call of the function and if no PID is received, it will restart the server. <b>DON'T</b> call out the function with the value.
      * @return mixed Returns either the player count, a message of what was done, an error message or a STDERR message.
      */
-    function checkServer(SQL $sql) {
+    function checkServer(SQL $sql, $secondCall = false) {
         //first, check if screen is up.
         $getScreenPID = Constants::$SSH_COMMANDS['GET_SCREEN_PID'];
         $getScreenPID = str_replace("{server_account}", $this->server_account, $getScreenPID);
@@ -470,7 +471,7 @@ class Server extends SSH {
                         }
                     }
                 }
-            } else {
+            } else if ($secondCall) {
                 
                 $reboot = $this->restartServer($sql);
                 if ($reboot) {
@@ -478,6 +479,9 @@ class Server extends SSH {
                 } else {
                     return array("error" => Constants::$SERVER_ACTIONS['SERVER_PID_DOWN_REBOOT_ERROR']);
                 }
+            } else {
+                sleep(Constants::$CHECK_SERVER_PID_WAIT_TIME);
+                return $this->checkServer($sql, true);
             }
         } else {
             return $out;
