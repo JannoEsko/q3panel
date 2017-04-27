@@ -489,7 +489,7 @@ if (isset($_POST['renameFileOrFolder'], $_POST['oldfilename'], $_POST['server_id
                 Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_FTP_ERROR'] . "Server id: " . $_POST['server_id']);
                 die(json_encode(array("error" => Constants::$ERRORS['GENERIC_FTP_ERROR'])));
             } else {
-                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_OR_FOLDER_RENAME_SUCCESS'], "refreshwebftptable" => "1")));
+                die(json_encode(array("msg" => Constants::$MESSAGES['FTP_FILE_OR_FOLDER_RENAME_SUCCESS'], "refreshwebftptable" => $_SESSION['ftp_last_dir'])));
             }
         }
 
@@ -853,7 +853,7 @@ if (isset($_POST['login'], $_POST['username'], $_POST['password'])) {
     } else if (isset($_SESSION['installer'])) {
         echo json_encode(array("href" => "../step6/"));
     } else {
-        echo json_encode(array("href" => "."));
+        echo json_encode(array("href" => "href"));
     }
 }
 

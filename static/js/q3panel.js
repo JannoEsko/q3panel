@@ -103,12 +103,17 @@ function handleForm(id, useToaster) {
                 }
             } else {
                 if (typeof response.href !== "undefined") {
-                    location.href = response.href;
+                    if (response.href === "href") {
+                        window.location.reload();
+                    } else {
+                        location.href = response.href;
+                    }
+                    
                 } else {
                     if (useToaster) {
                         toastr.success(response.msg);
                         if (typeof response.refreshwebftptable !== "undefined") {
-                            initWebFTPTable("webftptable", ".", $("#server_id").val());
+                            initWebFTPTable("webftptable", response.refreshwebftptable, $("#server_id").val());
                             $("#fileRenameModal").modal('toggle');
                         }
                         if (typeof response.successnewfolder !== "undefined") {
