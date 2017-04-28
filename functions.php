@@ -815,6 +815,20 @@ if (isset($_POST['getGame'], $_POST['game_id']) && intval($_POST['game_id']) > 0
 
 if (isset($_GET['logout'])) {
     session_destroy();
+    /*
+     * Taken from http://stackoverflow.com/questions/7195342/function-to-remove-get-variable-with-php
+     * 
+     * Splitting the $_GET variables from the basename, building it back together without the logout variable.
+     * Fixes the issue, when the user logs out and tries to instantly log back on, he'll 1st) won't end up on the same page and 2nd) if the logout variable's still in $_GET, he'll stay in a "logout loop"
+     */
+    $bn = basename($_SERVER['REQUEST_URI']);
+    $parts = parse_url($bn);
+    $queryParams = array();
+    parse_str($parts['query'], $queryParams);
+    unset($queryParams['logout']);
+    $queryString = http_build_query($queryParams);
+    $url = $parts['path'] . "?" . $queryString;
+    die(header("Location: $url"));
 }
 
 if (isset($_POST['requestRecovery'], $_POST['email'])) {
