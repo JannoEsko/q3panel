@@ -148,4 +148,12 @@ class FTP {
         
     }
     
+    /**
+     * Gets the FTP handle.
+     * @return resource Returns the FTP handle.
+     */
+    function getFTPHandle() {
+        return $this->ftp;
+    }
+    
 }

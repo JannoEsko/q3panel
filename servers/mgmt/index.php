@@ -274,6 +274,13 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
         </div>
 
 <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("ftppswchangeform", true);handleForm("serverForm", true);</script>
+        <script>handleForm("ftppswchangeform", true);handleForm("serverForm", true);
+        
+        $('input').keyup(function(e) {
+            if (e.keyCode === 13) {
+                sendCommand(<?php echo $server['server_id']; ?>);
+            }
+        });
+        </script>
     </body>
 </html>
