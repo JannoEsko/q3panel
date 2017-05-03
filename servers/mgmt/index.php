@@ -57,13 +57,13 @@ echo Constants::getPreferencedCSS($HOST_URL . "/static", $_SESSION['style']);
                                 </div>
                                 <div class="panel-body">
                                     <h4>Server: <?php echo $server['server_name']; ?></h4>
-                                    This server has currently <?php echo $server['current_players']; ?> players online, out of a total of <?php echo $server['max_players']; ?>.
+                                    This server has currently <b><?php echo $server['current_players']; ?></b> players online, out of a total of <b><?php echo $server['max_players']; ?></b>.
                                     <br>
                                     It is currently <b><?php echo Constants::$MESSAGES['SERVER_STATUSES'][$server['server_status']]; ?></b>
                                     <br>
-                                    The server's located at <?php echo $server['hostname'] . ":" . $server['server_port']; ?>
+                                    The server's located at <b><?php echo $server['hostname'] . ":" . $server['server_port']; ?></b>
                                     <br>
-                                    Its RCON password is <?php echo $server['rconpassword']; ?>, FTP account is <?php echo $server['server_account']; ?> and password is <?php echo $server['server_password']; ?>.
+                                    Its RCON password is <b><?php echo $server['rconpassword']; ?></b>, FTP account is <b><?php echo $server['server_account']; ?></b> and password is <b><?php echo $server['server_password']; ?></b>.
                                     <br>
                                     The startscript of the server is the following:
                                     <br>
