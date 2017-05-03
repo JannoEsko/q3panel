@@ -255,7 +255,7 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                     </div>
                     <div class="modal-body">
                         <pre id="console"></pre>
-                        <input type="text" class="form-control" name="command" id="command" placeholder="Enter a command to the server">
+                        <input autofocus type="text" class="form-control" name="command" id="command" placeholder="Enter a command to the server">
                         <br>
                         <div class="clearfix">
                             <div class="pull-left">
