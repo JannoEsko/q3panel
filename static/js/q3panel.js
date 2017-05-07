@@ -438,6 +438,7 @@ function initWebFTPTable(table_id, dir, server_id) {
  * @returns {void} Returns nothing.
  */
 function initFileEditModal(modal_id, filename, server_id) {
+    $("#formMsgPanel").hide();
     $.post(".", {
         getFile: 1,
         fileName: filename,
@@ -448,7 +449,7 @@ function initFileEditModal(modal_id, filename, server_id) {
             if (typeof data.error !== "undefined") {
                 toastr.error(data.error);
             } else {
-                $("#fileContents").html(data.filecontents);
+                $("#fileContents").val(data.filecontents);
                 $("#" + modal_id + "Title").html(filename);
                 $("#filename").val(filename);
                 $("#" + modal_id).modal();
