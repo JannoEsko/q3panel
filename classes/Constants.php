@@ -285,6 +285,13 @@ class Constants {
         , "SERVER_REBOOT_SUCCESS_NO_INFOMSG" => "Restarted the server, because it didn't respond to the getinfo query."
         , "SERVER_REBOOT_ERROR_NO_INFOMSG" => "The server didn't respond to the getinfo query and it couldn't be restarted"
         , "Q3_RCON_COMMAND" => "\xFF\xFF\xFF\xFFrcon {rconpassword} "
+        , "START_SERVER" => "User started the server"
+        , "STOP_SERVER" => "User stopped the server"
+        , "DISABLE_SERVER" => "User disabled the server"
+        , "ENABLE_SERVER" => "User enabled the server"
+        , "EDIT_MAPPING" => "User edited the mapping on this server"
+        , "ADD_MAPPING" => "User mapped a new user to this server."
+        , "EDIT_SERVER" => "User edited this server."
     );
     
     static $ERRORS = array(

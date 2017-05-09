@@ -265,6 +265,7 @@ if (isset($_POST['updateServer'], $_POST['server_startscript'], $_POST['server_i
             if ($isServerStarted) {
                 $server->restartServer($sql);
             }
+            Logger::logServer($sql, $_POST['server_id'], $_SESSION['user_id'], getUserIP(), Constants::$SERVER_LOG_SEVERITIES['info']['level'], Constants::$SERVER_ACTIONS['EDIT_SERVER']);
             die(json_encode(array("msg" => Constants::$MESSAGES['SERVER_EDIT_SUCCESS'], "toggleModal" => "serverModal")));
         } else {
             die(json_encode($out));
@@ -285,6 +286,7 @@ if (isset($_POST['server_id'], $_POST['addMap'], $_POST['user_id']) && intval($_
         
     } else {
         Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{user_id}", $_POST['user_id'], str_replace("{server_id}", $_POST['server_id'], Constants::$LOGGER_MESSAGES['SUCCESSES']['ADD_MAPPING'])));
+        Logger::logServer($sql, $_POST['server_id'], $_SESSION['user_id'], getUserIP(), Constants::$SERVER_LOG_SEVERITIES['info']['level'], Constants::$SERVER_ACTIONS['ADD_MAPPING']);
         die(json_encode(array("href" => "?server_id=" . $_POST['server_id'])));
         
     }
@@ -301,6 +303,7 @@ if (isset($_POST['server_id'], $_POST['editMap'], $_POST['user_id']) && intval($
         die(json_encode(array("error" => Constants::$ERRORS['EDIT_MAPPING_ERROR'], "toggleModal" => "serverMap")));
     } else {
         Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{user_id}", $_POST['user_id'], str_replace("{server_id}", $_POST['server_id'], Constants::$LOGGER_MESSAGES['SUCCESSES']['EDIT_MAPPING'])));
+        Logger::logServer($sql, $_POST['server_id'], $_SESSION['user_id'], getUserIP(), Constants::$SERVER_LOG_SEVERITIES['info']['level'], Constants::$SERVER_ACTIONS['EDIT_MAPPING']);
         die(json_encode(array("msg" => Constants::$MESSAGES['EDIT_MAPPING_SUCCESS'], "toggleModal" => "serverMap", "action" => "serverMapUpdate", "updateRow" => $_POST['user_id'], "can_see_rcon" => $can_see_rcon, "can_see_ftp" => $can_see_ftp, "can_stop_server" => $can_stop_server)));
     }
 }
@@ -625,6 +628,7 @@ if (isset($_POST['disableServer'], $_POST['server_id']) && intval($_POST['disabl
         $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
         if ($server->disableServer($sql)) {
             Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['SERVER_DISABLED'] . $_POST['server_id']);
+            Logger::logServer($sql, $_POST['server_id'], $_SESSION['user_id'], getUserIP(), Constants::$SERVER_LOG_SEVERITIES['error']['level'], Constants::$SERVER_ACTIONS['DISABLE_SERVER']);
             die(json_encode(array("msg" => "Server successfully disabled")));
         } else {
             Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['DISABLE_SERVER_GENERIC_ERROR'] . $_POST['server_id']);
@@ -644,7 +648,8 @@ if (isset($_POST['enableServer'], $_POST['server_id']) && intval($_POST['enableS
         $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
         $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
         if ($server->enableServer($sql)) {
-            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['ENABLE_SERVER'] . $_POST['server_id']);
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['SERVER_ENABLED'] . $_POST['server_id']);
+            Logger::logServer($sql, $_POST['server_id'], $_SESSION['user_id'], getUserIP(), Constants::$SERVER_LOG_SEVERITIES['success']['level'], Constants::$SERVER_ACTIONS['ENABLE_SERVER']);
             die(json_encode(array("msg" => "Server successfully enabled")));
         } else {
             Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['ENABLE_SERVER_GENERIC_ERROR'] . $_POST['server_id']);
@@ -666,6 +671,7 @@ if (isset($_POST['startServer'], $_POST['server_id']) && intval($_POST['startSer
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             if ($server->startServer($sql)) {
                 Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['START_SERVER'] . $_POST['server_id']);
+                Logger::logServer($sql, $_POST['server_id'], $_SESSION['user_id'], getUserIP(), Constants::$SERVER_LOG_SEVERITIES['success']['level'], Constants::$SERVER_ACTIONS['START_SERVER']);
                 die(json_encode(array("msg" => "Server successfully started")));
             } else {
                 Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['START_SERVER_GENERIC_ERROR'] . $_POST['server_id']);
@@ -694,6 +700,7 @@ if (isset($_POST['stopServer'], $_POST['server_id']) && intval($_POST['stopServe
             $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
             if ($server->stopServer($sql)) {
                 Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['SERVER_STOPPED'] . $_POST['server_id']);
+                Logger::logServer($sql, $_POST['server_id'], $_SESSION['user_id'], getUserIP(), Constants::$SERVER_LOG_SEVERITIES['error']['level'], Constants::$SERVER_ACTIONS['STOP_SERVER']);
                 die(json_encode(array("msg" => "Server successfully stopped")));
             } else {
                 Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['STOP_SERVER_GENERIC'] . $_POST['server_id']);

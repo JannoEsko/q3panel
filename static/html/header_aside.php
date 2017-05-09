@@ -100,19 +100,20 @@
                                 </a>
                                 
                                 <ul id="logs" class="nav sidebar-subnav collapse">
+                                    <?php if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN)) { ?>
                                     <li>
                                         <a href="<?php echo "$HOST_URL/logs/panel/"; ?>" title="Panel logs">
                                             <em class="fa fa-columns"></em>
                                             <span>Panel logs</span>
                                         </a>
                                     </li>
+                                    <?php } ?>
                                     <li>
                                         <a href="<?php echo "$HOST_URL/logs/server/"; ?>" title="Server logs">
                                             <em class="fa fa-server"></em>
                                             <span>Server logs</span>
                                         </a>
                                     </li>
-                                    
                                     <li>
                                         <a href="<?php echo "$HOST_URL/logs/login/"; ?>" title="Failed logins">
                                             <em class="fa fa-times"></em>
