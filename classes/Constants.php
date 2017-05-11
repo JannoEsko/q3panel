@@ -80,7 +80,17 @@ class Constants {
         "CREATE TABLE q3panel_email_service (email_service_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, is_sendgrid TINYINT, from_name VARCHAR(255), from_email VARCHAR(255), api_key TEXT COMMENT 'empty if PHPMailer, key if SendGrid')",
         "CREATE TABLE q3panel_style_preference (style_preference_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_id INTEGER NOT NULL, user_id INTEGER NOT NULL)",
         "CREATE TABLE q3panel_styles (style_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, style_name VARCHAR(255), style_bg VARCHAR(255) COMMENT 'The background color from CSS of the object janno-panel')"
-        
+        , "ALTER TABLE q3panel_style_preference ADD CONSTRAINT fk_style_preference_user_id FOREIGN KEY (user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_style_preference ADD CONSTRAINT fk_style_preference_style_id FOREIGN KEY (style_id) REFERENCES q3panel_styles (style_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_support_ticket_messages ADD CONSTRAINT fk_support_ticket_messages_user_id FOREIGN KEY (user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE NO ACTION"
+        , "ALTER TABLE q3panel_support_ticket_map ADD CONSTRAINT fk_support_ticket_map_mapped_user_id FOREIGN KEY (mapped_user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_servers_map ADD CONSTRAINT fk_servers_map_server_id FOREIGN KEY (server_id) REFERENCES q3panel_servers (server_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_servers_map ADD CONSTRAINT fk_servers_map_user_id FOREIGN KEY (user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_servers_logs ADD CONSTRAINT fk_servers_logs_server_id FOREIGN KEY (server_id) REFERENCES q3panel_servers (server_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_servers ADD CONSTRAINT fk_servers_host_id FOREIGN KEY (host_id) REFERENCES q3panel_hosts (host_id) ON UPDATE NO ACTION ON DELETE NO ACTION"
+        , "ALTER TABLE q3panel_servers ADD CONSTRAINT fk_servers_game_id FOREIGN KEY (game_id) REFERENCES q3panel_games (game_id) ON UPDATE NO ACTION ON DELETE NO ACTION"
+        , "ALTER TABLE q3panel_logs ADD CONSTRAINT fk_logs_user_id FOREIGN KEY (user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_forgottenpsw ADD CONSTRAINT fk_forgottenpsw_user_id FOREIGN KEY (user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE CASCADE"
     );
     
     static $INSERT_QUERIES = array(
@@ -121,7 +131,8 @@ class Constants {
         , "GET_USER_BY_RECOVERY_DATA" => "SELECT * FROM q3panel_forgottenpsw INNER JOIN q3panel_users ON q3panel_users.user_id = q3panel_forgottenpsw.user_id WHERE request_key = ? AND request_time >= (CURRENT_TIMESTAMP - INTERVAL 24 HOUR)"
         , "GET_ALL_USERS" => "SELECT * FROM q3panel_users"
         , "GET_ALL_USERS_BY_GROUP_HIGHER_THAN" => "SELECT * FROM q3panel_users WHERE group_id >= ?"
-        , "GET_EXT_USER_BY_ID" => "SELECT {ext_usrtable_id}, {ext_usrname}, {ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = ?"
+        , "GET_EXT_USER_BY_ID" => "SELECT {ext_usrtable_id}, {ext_usrname}, "
+        . "{ext_email} FROM {ext_usrtable} WHERE {ext_usrtable_id} = ?"
         , "GET_USER_BY_ID" => "SELECT * FROM q3panel_users WHERE user_id = ?"
         , "GET_USER_BY_NAME" => "SELECT * FROM q3panel_users WHERE username = ?"
         , "GET_ALL_GAMES" => "SELECT * FROM q3panel_games"
@@ -372,8 +383,10 @@ class Constants {
         , "CHANGE_PASSWORD" => "echo \"{server_account}:{server_password}\" | chpasswd"
         , "COPY_GAME_FILES" => "cp -R {game_location}/* /home/{server_account}/"
         , "CHOWN_GAME_FILES" => "chown -R {server_account} /home/{server_account}"
-        , "START_SERVER" => "screen -d -S {server_account} -m sh -c \"{server_startscript}\""
-        , "GET_SCREEN_PID" => "screen -ls | grep -o '[0-9]\{1,5\}.{server_account}' | grep -o '[0-9]\{1,5\}' | head -1"
+        , "START_SERVER" => "screen -d -S {server_account} -m sh -c \"{server_startscript}\"" , 
+        "GET_SCREEN_PID" => "screen -ls "
+        . "| grep -o '[0-9]\{1,5\}.{server_account}' "
+        . "| grep -o '[0-9]\{1,5\}' | head -1"
         , "STOP_SERVER" => "kill {screen_pid}"
         , "DELETE_ACCOUNT" => "userdel -fr {server_account}"
     );
