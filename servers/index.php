@@ -130,7 +130,7 @@ $is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants:
                                 <select class="form-control" name="game_id" required>
                                     <?php echo Game::getGamesSelect($sql); ?>
                                 </select>
-                                <small>If it's empty, click <a href="<?php echo "$HOST_URL/hosts/"; ?>">here</a> to add it.</small>
+                                <small>If it's empty, click <a href="<?php echo "$HOST_URL/game/"; ?>">here</a> to add it.</small>
                             </div>
                             <div class="form-group">
                                 <label>Server name</label>
