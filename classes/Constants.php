@@ -91,6 +91,8 @@ class Constants {
         , "ALTER TABLE q3panel_servers ADD CONSTRAINT fk_servers_game_id FOREIGN KEY (game_id) REFERENCES q3panel_games (game_id) ON UPDATE NO ACTION ON DELETE NO ACTION"
         , "ALTER TABLE q3panel_logs ADD CONSTRAINT fk_logs_user_id FOREIGN KEY (user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE CASCADE"
         , "ALTER TABLE q3panel_forgottenpsw ADD CONSTRAINT fk_forgottenpsw_user_id FOREIGN KEY (user_id) REFERENCES q3panel_users (user_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_support_ticket_messages ADD CONSTRAINT fk_support_ticket_messages_ticket_id FOREIGN KEY (ticket_id) REFERENCES q3panel_support_ticket (support_ticket_id) ON UPDATE NO ACTION ON DELETE CASCADE"
+        , "ALTER TABLE q3panel_support_ticket_map ADD CONSTRAINT fk_support_ticket_map_ticket_id FOREIGN KEY (ticket_id) REFERENCES q3panel_support_ticket (support_ticket_id) ON UPDATE NO ACTION ON DELETE CASCADE"
     );
     
     static $INSERT_QUERIES = array(
