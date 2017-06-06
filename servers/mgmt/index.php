@@ -131,8 +131,8 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                                                 </div>
                                                 <div id="stopServer" <?php if (intval($server['server_status']) === Constants::$SERVER_STOPPED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
                                                     <button id="stopServer"  class="btn btn-default btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
-<?php if ((intval($server['can_see_rcon']) || $is_server_admin) && intval($server['server_status']) === Constants::$SERVER_STARTED) { ?>
-                                                    <button id="rcon" class="btn btn-default btn-block" onclick="initRCONModal('rconModal');">Web RCON</button><?php } ?>
+<?php if ((intval($server['can_see_rcon']) || $is_server_admin)) { ?>
+                                                    <button id="rcon" class="btn btn-default btn-block" onclick="initRCONModal('rconModal');" <?php if (intval($server['server_status']) !== Constants::$SERVER_STARTED) { ?> hidden <?php } ?>>Web RCON</button><?php } ?>
                                                 </div>
     <?php
 }
