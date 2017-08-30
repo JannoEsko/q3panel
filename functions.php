@@ -355,6 +355,28 @@ if (isset($_POST['server_id'], $_POST['generateNewFTP']) && intval($_POST['serve
 
 }
 
+if (isset($_POST['server_id'], $_POST['generateNewRCON']) && intval($_POST['server_id']) > 0 && intval($_POST['generateNewRCON']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        $output = $server->changeServerRCONPassword($sql, generateRandomKey(8));
+        if (isset($output['error'])) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERATE_NEW_RCON_ERROR'] . $output['error']);
+            die(json_encode($output));
+        } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['RCON_PSW_GENERATE'] . $_POST['server_id']);
+            die(json_encode(array("msg" => Constants::$MESSAGES['RCON_PASSWORD_CHANGE_SUCCESS'])));
+        }
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['RCON_PSW_GENERATE_PRIVILEGE'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
+
+}
+
 if (isset($_POST['server_id'], $_POST['resetFTPPassword'], $_POST['newFTPPassword']) && intval($_POST['server_id']) > 0 && intval($_POST['resetFTPPassword']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
     if (sizeof($data) === 1) {
@@ -372,6 +394,28 @@ if (isset($_POST['server_id'], $_POST['resetFTPPassword'], $_POST['newFTPPasswor
         }
     } else {
         Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['FTP_PSW_CHANGE_PRIVILEGE'] . $_POST['server_id']);
+        die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
+    }
+
+} 
+
+if (isset($_POST['server_id'], $_POST['changerconpsw'], $_POST['newrconpassword']) && intval($_POST['server_id']) > 0 && intval($_POST['changerconpsw']) === 1 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+    $data = Server::getServersWithHostAndGame($sql, $_SESSION['user_id'], $_POST['server_id']);
+    if (sizeof($data) === 1) {
+        $data = $data[0];
+        $host = new Host($data['host_id'], $data['servername'], $data['hostname'], $data['sshport'], $data['host_username'], $data['host_password']);
+        $game = new Game($data['game_id'], $data['game_name'], $data['game_location'], $data['startscript']);
+        $server = new Server($data['server_id'], $host, $data['server_name'], $game, $data['server_port'], $data['server_account'], $data['server_password'], $data['server_status'], $data['server_startscript'], $data['current_players'], $data['max_players'], $data['rconpassword']);
+        $output = $server->changeServerRCONPassword($sql, $_POST['newrconpassword']);
+        if (isset($output['error'])) {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['GENERIC_SERVER_HOST_ERROR'] . " Server id: " . $_POST['server_id'] . ", Host id: " . $data['host_id'] . ". Error: " . $output['error']);
+            die(json_encode($output));
+        } else {
+            Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['SUCCESSES']['RCON_PSW_EDIT'] . $_POST['server_id']);
+            die(json_encode(array("msg" => Constants::$MESSAGES['RCON_PASSWORD_CHANGE_SUCCESS'], "changerconpsw" => "1")));
+        }
+    } else {
+        Logger::log($sql, $_SESSION['user_id'], getUserIP(), Constants::$LOGGER_MESSAGES['ERRORS']['RCON_PSW_CHANGE_PRIVILEGE'] . $_POST['server_id']);
         die(json_encode(array("error" => Constants::$ERRORS['GENERIC_PRIVILEGE_ERROR'])));
     }
 

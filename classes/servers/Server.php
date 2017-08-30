@@ -237,6 +237,34 @@ class Server extends SSH {
     }
     
     /**
+     * Changes server RCON password.
+     * @param SQL $sql The SQL handle.
+     * @param string $newPass The new password.
+     * @return mixed Returns true, if the new password got successfully set. otherwise returns an array with the key error.
+     */
+    function changeServerRCONPassword(SQL $sql, $newPass) {
+        if (intval($this->server_status) === Constants::$SERVER_STARTED) {
+            $change_password = $this->sendQ3Command(Constants::$SERVER_ACTIONS['Q3_RCON_COMMAND'] . "rconpassword $newPass", true, true);
+            $oldPass = $this->rconpassword;
+            $this->rconpassword = $newPass;
+            $out = $this->sendQ3Command(Constants::$SERVER_ACTIONS['Q3_RCON_COMMAND'] . "rconpassword", true, true);
+            $arr = explode(":", $out);
+            if (trim($arr[1]) === "\"$newPass^7\" default") {
+                $sql->query(Constants::$UPDATE_QUERIES['SET_NEW_SERVER_RCON_PASSWORD'], array($newPass, $this->server_id));
+            
+                return true;
+            } else {
+                $this->rconpassword = $oldPass;
+                return array("error" => "Unknown error, please try again, tested pass: $newPass");
+            }
+
+        } else {
+            $sql->query(Constants::$UPDATE_QUERIES['SET_NEW_SERVER_RCON_PASSWORD'], array($newPass, $this->server_id));
+            return true;
+        }
+    }
+    
+    /**
      * Updates the server.
      * @param SQL $sql The SQL handle.
      * @return array Returns the SQL output, array with the key error otherwise.

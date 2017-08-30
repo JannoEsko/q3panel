@@ -131,6 +131,9 @@ function handleForm(id, useToaster) {
                         if (typeof response.newFTPPasswordSet !== "undefined") {
                             $("#ftppswreset").modal('toggle');
                         }
+                        if (typeof response.changerconpsw !== "undefined") {
+                            $("#changerconpsw").modal('toggle');
+                        }
                         if (typeof response.removeMapTableRow !== "undefined") {
                             $("table#mapTable tr#tr" + response.removeMapTableRow).remove();
                         }
@@ -554,6 +557,15 @@ function resetFtpPassword(modal_id) {
 }
 
 /**
+ * Initializes RCON Password reset modal.
+ * @param {String} modal_id The modal ID.
+ * @returns {void} Returns nothing.
+ */
+function changeRconPassword(modal_id) {
+    $("#" + modal_id).modal();
+}
+
+/**
  * Automatically generates a new FTP password.
  * @param {int} server_id The server ID.
  * @param {String} modal_id The modal ID.
@@ -562,6 +574,27 @@ function resetFtpPassword(modal_id) {
 function autoGenerateNewFTPPsw(server_id, modal_id) {
     $.post(".", {
         generateNewFTP: 1,
+        server_id: server_id
+    }, function(data) {
+        data = JSON.parse(data);
+        $("#" + modal_id).modal('toggle');
+        if (typeof data.error !== "undefined") {
+            toastr.error(data.error);
+        } else if (typeof data.msg !== "undefined") {
+            toastr.success(data.msg);
+        }
+    });
+}
+
+/**
+ * Automatically generates a new RCON password.
+ * @param {int} server_id The server ID.
+ * @param {String} modal_id The modal ID.
+ * @returns {void} Returns nothing.
+ */
+function autoGenerateNewRCONPsw(server_id, modal_id) {
+    $.post(".", {
+        generateNewRCON: 1,
         server_id: server_id
     }, function(data) {
         data = JSON.parse(data);

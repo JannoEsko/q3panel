@@ -65,7 +65,7 @@ class Constants {
      */
     static $CREATE_TABLES = array(
         "CREATE TABLE q3panel_users (user_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100) NOT NULL, password VARCHAR(255), origin TINYINT DEFAULT 0, email VARCHAR(255), group_id TINYINT, allow_emails TINYINT, CONSTRAINT username_must_be_unique UNIQUE(username), CONSTRAINT email_must_be_unique UNIQUE(email))",
-        "CREATE TABLE q3panel_hosts (host_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, servername VARCHAR(255), hostname VARCHAR(255), sshport SMALLINT UNSIGNED, host_username VARCHAR(255), host_password VARCHAR(255), status TINYINT COMMENT '1 - ok, 2 - SSH problem, 3 - FTP problem')",
+        "CREATE TABLE q3panel_hosts (host_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, servername VARCHAR(255), hostname VARCHAR(255), sshport TINYINT, host_username VARCHAR(255), host_password VARCHAR(255), status TINYINT COMMENT '1 - ok, 2 - SSH problem, 3 - FTP problem')",
         "CREATE TABLE q3panel_servers (server_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, host_id INTEGER NOT NULL, server_name VARCHAR(255), game_id INTEGER, server_port SMALLINT UNSIGNED NOT NULL, server_account VARCHAR(255), server_password VARCHAR(255), server_status TINYINT COMMENT '0 - disabled, 1 - offline, 2 - online', server_startscript TEXT, current_players TINYINT, max_players TINYINT, rconpassword VARCHAR(255), CONSTRAINT server_name_must_be_unique UNIQUE(server_name), CONSTRAINT server_user_must_be_unique_on_same_host UNIQUE(host_id, server_account), CONSTRAINT server_port_must_be_unique_on_same_host UNIQUE(host_id, server_port))",
         "CREATE TABLE q3panel_servers_map (servers_map_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, server_id INTEGER NOT NULL, user_id INTEGER NOT NULL, can_see_rcon TINYINT, can_see_ftp TINYINT, can_access_config TINYINT, can_access_maps TINYINT, can_stop_server TINYINT, CONSTRAINT cant_have_duplicates UNIQUE(server_id, user_id))",
         "CREATE TABLE q3panel_servers_logs (server_log_id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY, server_id INTEGER NOT NULL, user_id INTEGER NOT NULL, user_ip VARCHAR(255), severity TINYINT, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)",
@@ -192,6 +192,7 @@ class Constants {
     static $UPDATE_QUERIES = array(
         "SET_STYLE_FOR_USER" => "UPDATE q3panel_style_preference SET style_id = ? WHERE user_id = ?"
         , "UPDATE_HOST_BY_ID" => "UPDATE q3panel_hosts SET servername = ?, hostname = ?, sshport = ?, host_username = ?, host_password = ? WHERE host_id = ?"
+        , "SET_NOT_STARTED_SERVER_PLAYER_COUNTS" => "UPDATE q3panel_servers SET current_players = 0 WHERE server_status != ?"
         , "SET_SERVER_STATUS" => "UPDATE q3panel_servers SET server_status = ? WHERE server_id = ?"
         , "SET_NEW_SERVER_ACCOUNT_PASSWORD" => "UPDATE q3panel_servers SET server_password = ? WHERE server_id = ?"
         , "SET_SERVER_PLAYERS_BY_ID" => "UPDATE q3panel_servers SET current_players = ? WHERE server_id = ?"
@@ -200,6 +201,7 @@ class Constants {
         , "UPDATE_EXTERNAL_AUTH" => "UPDATE q3panel_external_authentication SET host = ?, db_username = ?, db_password = ?, db_name = ?, users_table_name = ?, user_id_field = ?, username_field = ?, password_field = ?, email_field = ? WHERE ext_auth_id = 1"
         , "UPDATE_EMAIL_SERVICE" => "UPDATE q3panel_email_service SET is_sendgrid = ?, from_name = ?, from_email = ?, api_key = ? WHERE email_service_id = 1"
         , "UPDATE_TICKET_STATUS" => "UPDATE q3panel_support_ticket SET ticket_status = ? WHERE support_ticket_id = ?"
+        , "SET_NEW_SERVER_RCON_PASSWORD" => "UPDATE q3panel_servers SET rconpassword = ? WHERE server_id = ?"
     );
     
     static $DELETE_QUERIES = array(
@@ -223,9 +225,12 @@ class Constants {
             , "DIDNT_FIND_HOST" => "User requested a host, which couldn't be found."
             , "EDIT_ACCOUNT_ERROR" => "User tried to edit an account, but he/she was underprivileged to do so."
             , "GENERATE_NEW_FTP_ERROR" => "User tried to generate a new FTP password for a server, but an error occurred. Message: "
+            , "GENERATE_NEW_RCON_ERROR" => "User tried to generate a new RCON password for a server, but an error occured. Message: "
             , "FTP_PSW_GENERATE_PRIVILEGE" => "User tried to generate a new FTP password for a server, but was underprivileged to do so. Server id: "
+            , "RCON_PSW_GENERATE_PRIVILEGE" => "User tried to generate a new RCON password for a server, but was underprivileged to do so. Server id: "
             , "GENERIC_SERVER_HOST_ERROR" => "User tried to perform an action which was executed on the host machine, but an error occurred. "
             , "FTP_PSW_CHANGE_PRIVILEGE" => "User tried to generate a new FTP password for a server, but was underprivileged to do so. Server id: "
+            , "RCON_PSW_CHANGE_PRIVILEGE" => "User tried to generate a new RCON password for a server, but was underprivileged to do so. Server id: "
             , "FILE_UPLOAD_NOT_PRIVILEGED" => "User tried to upload a file to FTP, but he/she wasn't privileged enough to do so. Server id: "
             , "GENERIC_FTP_ERROR" => "User tried to perform an action in the Web FTP interface, but an error occurred. "
             , "GENERIC_FTP_PERMISSION_ERROR" => "User tried to perform an action in the Web FTP interface, but he/she is underprivileged to do so. Server id: "
@@ -259,7 +264,9 @@ class Constants {
         ),
         "SUCCESSES" => array(
             "FTP_PSW_GENERATE" => "User generated a new FTP password for server id "
+            , "RCON_PSW_GENERATE" => "User generated a new RCON password for server id "
             , "FTP_PSW_EDIT" => "User edited the FTP password for server id "
+            , "RCON_PSW_EDIT" => "User edited the RCON password for server id "
             , "DELETE_SERVER" => "User deleted a server with the id "
             , "SERVER_DISABLED" => "User disabled a server with the id "
             , "SERVER_ENABLED" => "User enabled a server with the id "
@@ -361,6 +368,7 @@ class Constants {
         , "FTP_NEW_FILE_SUCCESS" => "New file has been successfully created."
         , "FTP_FILE_UPLOAD_SUCCESS" => "New file has been successfully uploaded."
         , "FTP_PASSWORD_CHANGE_SUCCESS" => "The server account password has been successfully changed."
+        , "RCON_PASSWORD_CHANGE_SUCCESS" => "The server RCON password has been successfully changed."
         , "EMAIL_SETUP" => "The new e-mail preferences have been saved successfully."
         , "USER_MAPPING_REMOVED" => "The user has been successfully removed from the server map"
         , "USER_MAPPING_REMOVED_ERROR" => "Something went wrong with deleting the map for the user (most likely the user is a panel admin). Please refresh the page and try again."

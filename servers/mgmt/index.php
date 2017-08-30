@@ -110,10 +110,12 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)
 ?>
                                         
                                         
-                                           
+                                           <button class="btn btn-default btn-block" onclick="changeRconPassword('changerconpsw');">Change RCON Password</button>
                                                 <button class="btn btn-default btn-block" onclick="location.href='mapping/?server_id=<?php echo $_GET['server_id']; ?>';">Map users to server</button>
                                             
                                                 <button class="btn btn-default btn-block" onclick="resetFtpPassword('ftppswreset');">Reset FTP password</button>
+                                                
+                                                
                                        
                                         
 
@@ -244,6 +246,40 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
                 </div>
             </div>
         </div>
+                <div id="changerconpsw" role="dialog" aria-labelledby="changerconpswModalTitle" aria-hidden="true" class="modal fade">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" data-dismiss="modal" aria-label="Close" class="close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 id="changerconpswModalTitle" class="modal-title">Change RCON Password</h4>
+                    </div>
+                    <div class="modal-body">
+                        If you choose generate, it'll generate a random 8-digit password and change it itself. If you choose to type your own, it'll change the password to that.
+                        <div class="clearfix">
+                            <div class="pull-left">
+                                <button type="button" class="btn btn-default btn-block" onclick="autoGenerateNewRCONPsw('<?php echo $_GET['server_id']; ?>', 'changerconpsw');">Generate</button>
+                            </div>
+                            <div class="pull-right">
+                                <button type="button" class="btn btn-default btn-block" onclick="$('#changerconpswform').show(500);">Type your own new password</button>
+                            </div>
+                        </div>
+                        <form id="changerconpswform" hidden method="post" action="../../functions.php" role="form">
+                            <input type="hidden" name="server_id" value="<?php echo $_GET['server_id']; ?>">
+                            <input type="hidden" name="changerconpsw" value="1">
+                            <div class="form-group">
+                                <label>New password</label>
+                                <input type="text" name="newrconpassword" required class="form-control" placeholder="Type in the new RCON password you wish to use">
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-default btn-block">Submit</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="rconModal" role="dialog" aria-labelledby="rconModalTitle" aria-hidden="true" class="modal fade">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
@@ -274,7 +310,7 @@ if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
         </div>
 
 <?php echo Constants::getJS($HOST_URL . "/static"); ?>
-        <script>handleForm("ftppswchangeform", true);handleForm("serverForm", true);
+        <script>handleForm("ftppswchangeform", true);handleForm("serverForm", true);handleForm("changerconpswform", true);
         
         $('#command').keyup(function(e) {
             if (e.keyCode === 13) {

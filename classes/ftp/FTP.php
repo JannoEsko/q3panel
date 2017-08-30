@@ -25,6 +25,8 @@ class FTP {
      * @return array Returns array of folders and files.
      */
     function getDirectoryFileList($location) {
+//return $location;
+//$location = str_replace("&", "%26", $location);
         $contents = ftp_nlist($this->ftp, $location);
         $dirs = array();
         $files = array();
@@ -46,7 +48,9 @@ class FTP {
      * @return boolean Returns true, if it's a folder, false if it's a file.
      */
     function ftp_is_dir($content) {
+  //      $content = str_replace("&", "\&", $content);
         $origin = ftp_pwd($this->ftp);
+        if (substr($content, -4) === ".ent") {return false;} 
         if (ftp_chdir($this->ftp, $content)) {
             ftp_chdir($this->ftp, $origin);
             return true;
@@ -60,6 +64,7 @@ class FTP {
      * @return array Returns array with the key filecontents.
      */
     function getFileContents($filename) {
+    //    $filename = str_replace("&", "\&", $filename);
         return array("filecontents" => file_get_contents("ftp://" . $this->server->getHost_username() . ":" . $this->server->getHost_password() . "@" . $this->server->getHostname() ."/". $filename));
     }
     
