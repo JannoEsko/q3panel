@@ -5,11 +5,7 @@ ini_set('display_errors', 'on');
 //Install script cannot require loader.php because there's no config file yet.
 require_once __DIR__ . "/../functions.php";
 require_once __DIR__ . "/../classes/Constants.php";
-if (isset($_GET['writeSQL'])) {
-    require_once __DIR__ . "/../classes/writer/Writer.php";
-    $wrt = new Writer(__DIR__ . "/../config.php");
-    $wrt->write("<?php\n\n\$sql = new SQL();\n\n$page_url = \"\";");
-}
+
 
 ?>
 <html>
