@@ -23,7 +23,7 @@ class Installation {
             if ($test[0]['sum'] == 2) { 
                 $wtr = new Writer(__DIR__ . "/../../config.php");
                 $url = rtrim($url, "/");
-                $return = $wtr->write("<?php\n\n\$sql = new SQL(\"$db_host\", \"$db_username\", \"$db_password\", \"$db\");\n\n\n\$HOST_URL = \"$url\";");
+                $return = $wtr->write("<?php\n\n\$sql = new SQL('$db_host', '$db_username', '$db_password', '$db');\n\n\n\$HOST_URL = '$url';");
                 if (isset($return["error"])) {
                     return $return;
                 }
