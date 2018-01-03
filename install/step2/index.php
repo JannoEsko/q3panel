@@ -3,6 +3,10 @@ session_start();
 //Install script cannot require loader.php because there's no config file yet.
 require_once __DIR__ . "/../../functions.php";
 require_once __DIR__ . "/../../classes/Constants.php";
+if (file_exists(__DIR__ . "/../../config.php")) {
+    die("config.php exists, remove the file if you want to proceed.");
+}
+
 
 
 ?>
