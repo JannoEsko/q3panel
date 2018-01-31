@@ -1,6 +1,9 @@
 # q3panel
 An application for hosting game servers based on Quake 3 engine on Linux.
 
+Walkthrough how to set up a Q3 server with the panel can be seen under issue 1: 
+https://github.com/JannoEsko/q3panel/issues/1
+
 Some of the functionality:
 
 External authentication - you can connect this to any kind of a MySQL database, which has passwords hashed with PHP's password_hash function. Requirements are that the external table has an unique ID field (PK), username field, password field and email field (can be changed).
