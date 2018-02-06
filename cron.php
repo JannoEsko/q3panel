@@ -34,29 +34,6 @@ foreach ($servers as $server) {
         $params = array($players, $server['server_id']);
         $sql->query($query, $params);
         echo "Set server " . $server['server_name'] . " (on hostname " . $server['hostname'] . ") players to " . $players . "\n";
-        if (intval($srv->getServer_id()) === 2) {
-            $str = $srv->sendQ3Command(Constants::$SERVER_ACTIONS['Q3_RCON_COMMAND'] . "g_enablehash", true, true);
-            $str = str_replace("\xFF\xFF\xFF\xFFprint", "", $str);
-            $str = str_replace("\n", "", $str);
-            $str = preg_replace("/(\^.)/", "", $str);
-            $str = str_replace("\"", "\n", $str);
-            $arr = explode("\n", $str);
-            for ($i = 0; $i < sizeof($arr); $i++) {
-                $val = $arr[$i];
-                if (trim($val) === "g_enablehash") {
-                    $i++;
-                    $val = $arr[$i];
-                    if (trim($val) === "is:") {
-                        $i++;
-                        $hashval = intval(trim($arr[$i]));
-                        if ($hashval !== 0) {
-                            Logger::logServer($sql, $srv->getServer_id(), 0, gethostbyname(gethostname()), Constants::$SERVER_LOG_SEVERITIES['error']['level'], "Shutted down the server, because the crontask detected that the value of g_enablehash is 1. Fuck you Robert!");
-                            $srv->stopServer($sql);
-                        } 
-                    }
-                }
-            }
-        }
     } else if (isset($out['msg'])) {
         Logger::logServer($sql, $server['server_id'], 0, gethostbyname(gethostname()), Constants::$SERVER_LOG_SEVERITIES['info']['level'], $out['msg']);
         Email::notifyServerUsers($sql, Constants::$PANEL_ADMIN, Constants::$EMAIL_TEMPLATE['SERVER_REBOOT_TITLE'], Constants::$EMAIL_TEMPLATE['SERVER_REBOOT_MSG'], array("{server_id}" => $srv->getServer_id(), "{server_name}" => $srv->getServer_name(), "{out_msg}" => $out['msg']));
