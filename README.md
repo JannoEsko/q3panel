@@ -7,8 +7,11 @@ https://github.com/JannoEsko/q3panel/issues/1
 Update 08/03/2018 - XenForo authentication.
 To enable XenForo authentication, you need the new User.php class and the folder extensions from this repo. Also, you have to manually add a line to the end of your config.php file.
 
+
 //If you wish to include XenForo extension (so authentication works over XenForo forum software, this has to be in your config file)
+
 define("IS_XENFORO", true);
+
 
 Some of the functionality:
 
