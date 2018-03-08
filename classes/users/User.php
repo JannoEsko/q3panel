@@ -118,30 +118,52 @@ class User {
                 $query = str_replace("{ext_usrname}", $username_field, $query);
                 $query = str_replace("{ext_usrtable}", $users_table, $query);
                 $query = str_replace("{ext_psw}", $password_field, $query);
-
-                $params = array($this->getUsername());
-                $ext_sql = new SQL($db_host, $db_username, $db_password, $db);
-                $extUsers = $ext_sql->query($query, $params);
-                if (sizeof($extUsers) === 1) {
-                    $extUsers = $extUsers[0];
-                    $ext_member_id = $extUsers[$user_id];
-                    $ext_member_psw = $extUsers[$password_field];
-                    $ext_username = $extUsers[$username_field];
-                    if (password_verify($this->getPassword(), $ext_member_psw)) {
-                        //atleast password is correct, check now that do we have that user in our database.
-                        $query = Constants::$SELECT_QUERIES['GET_EXT_USER_BY_NAME'];
-                        $params = array($ext_member_id);
-                        $data = $sql->query($query, $params);
-                        if (sizeof($data) === 1) {
-                            $data = $data[0];
-                            $data['realUsername'] = $ext_username;
-                            self::setSessionVariables($data);
-                            return $data;
-                        } else {
-                            return array("error" => Constants::$ERRORS['AUTH_NO_DATA_WRONG_PSW_OR_DISABLED']);
-                        }
+                //20022018 - if XenForo is defined:
+                if (defined("IS_XENFORO") && IS_XENFORO) {
+                    require_once __DIR__ . "/../../extensions/XenForo/XenForo.php";
+                    $ext_sql = new SQL($db_host, $db_username, $db_password, $db);
+                    $auth_data = XenForo::authenticate($ext_sql, $this->getUsername(), $this->getPassword());
+                    if (!$auth_data) {
+                        return array("error" => Constants::$ERRORS['AUTH_NO_DATA_WRONG_PSW_OR_DISABLED']);
+                    }
+                    $ext_member_id = $auth_data['member_id'];
+                    $ext_username = $auth_data['name'];
+                    $query = Constants::$SELECT_QUERIES['GET_EXT_USER_BY_NAME'];
+                    $params = array($ext_member_id);
+                    $data = $sql->query($query, $params);
+                    if (sizeof($data) === 1) {
+                        $data = $data[0];
+                        $data['realUsername'] = $ext_username;
+                        self::setSessionVariables($data);
+                        return $data;
                     } else {
-                        return array("error" => Constants::$ERRORS['AUTH_WRONG_PASSWORD_OR_DISABLED']);
+                        return array("error" => Constants::$ERRORS['AUTH_NO_DATA_WRONG_PSW_OR_DISABLED']);
+                    }
+                } else {
+                    $params = array($this->getUsername());
+                    $ext_sql = new SQL($db_host, $db_username, $db_password, $db);
+                    $extUsers = $ext_sql->query($query, $params);
+                    if (sizeof($extUsers) === 1) {
+                        $extUsers = $extUsers[0];
+                        $ext_member_id = $extUsers[$user_id];
+                        $ext_member_psw = $extUsers[$password_field];
+                        $ext_username = $extUsers[$username_field];
+                        if (password_verify($this->getPassword(), $ext_member_psw)) {
+                            //atleast password is correct, check now that do we have that user in our database.
+                            $query = Constants::$SELECT_QUERIES['GET_EXT_USER_BY_NAME'];
+                            $params = array($ext_member_id);
+                            $data = $sql->query($query, $params);
+                            if (sizeof($data) === 1) {
+                                $data = $data[0];
+                                $data['realUsername'] = $ext_username;
+                                self::setSessionVariables($data);
+                                return $data;
+                            } else {
+                                return array("error" => Constants::$ERRORS['AUTH_NO_DATA_WRONG_PSW_OR_DISABLED']);
+                            }
+                        } else {
+                            return array("error" => Constants::$ERRORS['AUTH_WRONG_PASSWORD_OR_DISABLED']);
+                        }
                     }
                 }
             }
@@ -497,7 +519,31 @@ class User {
      * @param bool $extTable_spec [optional] If true, it will return the data with the external table specification (so you can use it to get the data out from the array).
      * @return array Returns the external account.
      */
-    static function getExternalAccount(SQL $sql, $ext_user_id, $extTable_spec = false) {
+    static function getExternalAccount(SQL $sql, $ext_user_id, $extTable_spec = false, SQL $extSql = null, $extData = null) {
+        if ($extSql !== null && $extSql instanceof SQL && $extData !== null) {
+            $extExists = false;
+            $extQuery = "";
+            $user_id = null;
+            $username_field = null;
+            $email_field = null;
+            if (sizeof($extData) !== 0) {
+                $db_host = $extData['host'];
+                $db_username = $extData['db_username'];
+                $db_password = $extData['db_password'];
+                $db = $extData['db_name'];
+                $users_table = $extData['users_table_name'];
+                $user_id = $extData['user_id_field'];
+                $username_field = $extData['username_field'];
+                $email_field = $extData['email_field'];
+                $extExists = true;
+                $extQuery = self::getExternalQuery(Constants::$SELECT_QUERIES['GET_EXT_USER_BY_ID'], $users_table, $user_id, $username_field, null, $email_field);
+                if ($extTable_spec) {
+                    return array("extTable_spec" => array("user_id_field" => $user_id, "username_field" => $username_field, "email_field" => $email_field), "data" => $extSql->query($extQuery, array($ext_user_id)));
+                }
+                return $extSql->query($extQuery, array($ext_user_id));
+            } 
+            return array();
+        } else {
         $extData = self::getExtData($sql);
         $extExists = false;
         $extSql = null;
@@ -524,6 +570,7 @@ class User {
             
         }
         return array();
+        }
     }
     
     /**
