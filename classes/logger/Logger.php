@@ -54,6 +54,8 @@ class Logger {
     static function getServerLogs($sql, $user_id = null) {
         $query = "";
         $params = null;
+        $extSql = null;
+        $extData = null;
         if ($user_id !== null) {
             //check if is panel admin, if is, show all, otherwise show the servers he sees.
             $check = User::canPerformAction($sql, $user_id, Constants::$PANEL_ADMIN);
@@ -77,7 +79,20 @@ class Logger {
                     $data[$i]['realName'] = $data[$i]['username'];
                 }
             } else {
-                $externalData = User::getExternalAccount($sql, $data[$i]['username'], true);
+                if ($extSql === null || !($extSql instanceof SQL)) {
+                    $extData = User::getExtData($sql);
+                    if (sizeof($extData) !== 0) {
+                        $db_host = $extData['host'];
+                        $db_username = $extData['db_username'];
+                        $db_password = $extData['db_password'];
+                        $db = $extData['db_name'];
+                        $extSql = new SQL($db_host, $db_username, $db_password, $db);
+                    } else {
+                        $extData = null;
+                    }
+                    
+                }
+                $externalData = User::getExternalAccount($sql, $data[$i]['username'], true, $extSql, $extData);
                 $data[$i]['realName'] = $externalData['data'][0][$externalData['extTable_spec']['username_field']];
             }
             $data[$i]['server_account'] = "";
@@ -109,11 +124,26 @@ class Logger {
     static function getLogs($sql) {
         $query = Constants::$SELECT_QUERIES['GET_PANEL_LOGS'];
         $data = $sql->query($query);
+        $extSql = null;
+        $extData = null;
         for ($i = 0; $i < sizeof($data); $i++) {
             if (intval($data[$i]['origin']) === 0) {
                 $data[$i]['realName'] = $data[$i]['username'];
             } else {
-                $externalData = User::getExternalAccount($sql, $data[$i]['username'], true);
+                if ($extSql === null || !($extSql instanceof SQL)) {
+                    $extData = User::getExtData($sql);
+                    if (sizeof($extData) !== 0) {
+                        $db_host = $extData['host'];
+                        $db_username = $extData['db_username'];
+                        $db_password = $extData['db_password'];
+                        $db = $extData['db_name'];
+                        $extSql = new SQL($db_host, $db_username, $db_password, $db);
+                    } else {
+                        $extData = null;
+                    }
+                    
+                }
+                $externalData = User::getExternalAccount($sql, $data[$i]['username'], true, $extSql, $extData);
                 $data[$i]['realName'] = $externalData['data'][0][$externalData['extTable_spec']['username_field']];
             }
             $data[$i]['password'] = "";
