@@ -104,8 +104,17 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
                                                 <button class="btn btn-danger btn-block" onclick="deleteServer('<?php echo $server['server_id']; ?>');">Delete server</button>
                                                 <br>
 
-<?php } 
+<?php } if (intval($server['can_stop_server']) === 1 || $is_server_admin) { ?>
+                                    <div id="startServer"  <?php if (intval($server['server_status']) === Constants::$SERVER_STARTED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
+                                                    <button  class="btn btn-primary btn-block" onclick="startServer('<?php echo $server['server_id']; ?>');">Start server</button>
+                                                </div>
+                                                <div id="stopServer" <?php if (intval($server['server_status']) === Constants::$SERVER_STOPPED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
+                                                    <button id="stopServer"  class="btn btn-danger btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
+                                    </div>
+                                    <br>
+                                    
 
+<?php } 
 if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
 ?>
                                         
@@ -125,17 +134,12 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)
 
 
                                     
-<?php
-if (intval($server['can_stop_server']) === 1 || $is_server_admin) {
-    ?>
-                                                <div id="startServer"  <?php if (intval($server['server_status']) === Constants::$SERVER_STARTED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
-                                                    <button  class="btn btn-default btn-block" onclick="startServer('<?php echo $server['server_id']; ?>');">Start server</button>
-                                                </div>
-                                                <div id="stopServer" <?php if (intval($server['server_status']) === Constants::$SERVER_STOPPED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
-                                                    <button id="stopServer"  class="btn btn-default btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
+
 <?php if ((intval($server['can_see_rcon']) || $is_server_admin)) { ?>
-                                                    <button id="rcon" class="btn btn-default btn-block" onclick="initRCONModal('rconModal');" <?php if (intval($server['server_status']) !== Constants::$SERVER_STARTED) { ?> hidden <?php } ?>>Web RCON</button><?php } ?>
-                                                </div>
+
+
+                                                    <button id="rcon" class="btn btn-default btn-block" onclick="initRCONModal('rconModal');" <?php if (intval($server['server_status']) !== Constants::$SERVER_STARTED) { ?> hidden <?php } ?>>Web RCON</button>
+
     <?php
 }
 ?>
