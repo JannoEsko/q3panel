@@ -106,7 +106,7 @@ if (User::canPerformAction($sql, $_SESSION['user_id'], Constants::$PANEL_ADMIN))
 
 <?php } if (intval($server['can_stop_server']) === 1 || $is_server_admin) { ?>
                                     <div id="startServer"  <?php if (intval($server['server_status']) === Constants::$SERVER_STARTED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
-                                                    <button  class="btn btn-primary btn-block" onclick="startServer('<?php echo $server['server_id']; ?>');">Start server</button>
+                                                    <button  class="btn btn-success btn-block" onclick="startServer('<?php echo $server['server_id']; ?>');">Start server</button>
                                                 </div>
                                                 <div id="stopServer" <?php if (intval($server['server_status']) === Constants::$SERVER_STOPPED || intval($server['server_status']) === Constants::$SERVER_DISABLED) { ?>hidden <?php } ?>>
                                                     <button id="stopServer"  class="btn btn-danger btn-block" onclick="stopServer('<?php echo $server['server_id']; ?>');">Stop server</button>
