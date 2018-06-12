@@ -922,19 +922,7 @@ if (isset($_POST['login'], $_POST['username'], $_POST['password'])) {
     }
 }
 
-if (isset($_GET['testsendgrid'])) {
-    $emailPrefs = Email::getEmailPreferences($sql);
-    $email = new Email($emailPrefs['from_email'], "eskojanno@gmail.com", "Test email", "Test email<br>hello", $emailPrefs['from_name'] . " SendGrid", "Janno");
-    echo json_encode($email->sendEmail(int2bool($emailPrefs['is_sendgrid']), $emailPrefs['api_key']));
-    die();
-}
 
-if (isset($_GET['testphpmailer'])) {
-    $emailPrefs = Email::getEmailPreferences($sql);
-    $email = new Email($emailPrefs['from_email'], "eskojanno@gmail.com", "Test email", "Test email<br>hello", $emailPrefs['from_name'] . " PHPMailer", "Janno");
-    echo json_encode($email->sendEmail());
-    die();
-}
 
 /**
  * Turns an integer into a boolean.
