@@ -1,6 +1,9 @@
 # q3panel
 An application for hosting game servers based on Quake 3 engine on Linux.
 
+Disclaimer - the panel is incompatible with PHP8 thanks to the SQL wrapper class.
+This can also contain outdated modules. Project so far is discontinued.
+
 Walkthrough how to set up a Q3 server with the panel can be seen under issue 1: 
 https://github.com/JannoEsko/q3panel/issues/1
 
