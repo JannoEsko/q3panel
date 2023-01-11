@@ -15,11 +15,11 @@ if (sizeof($server) !== 1) {
 }
 $server = $server[0];
 $is_server_admin = User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN);
-if (!intval($server['can_see_rcon']) === 1 && !$is_server_admin) {
+if (intval($server['can_see_rcon']) === 0 && !$is_server_admin) {
     $server['rconpassword'] = "<i>hidden</i>";
 }
 
-if (!intval($server['can_see_ftp']) === 1 && !$is_server_admin) {
+if (intval($server['can_see_ftp']) === 0 && !$is_server_admin) {
     $server['server_account'] = "<i>hidden</i>";
     $server['server_password'] = "<i>hidden</i>";
 }
