@@ -606,6 +606,21 @@ class Server extends SSH {
         }
         
     }
+
+    /**
+     * Checks whether the user is mapped to the given server
+     * @param SQL $sql The SQL handle.
+     * @param int $server_id The server ID
+     * @param int $user_id The user ID which to check.
+     * @return boolean Returns true if the user is mapped, false otherwise.
+     */
+    static function isUserMappedToServer(SQL $sql, $server_id, $user_id) {
+        
+        $data = $sql->query(Constants::$SELECT_QUERIES['GET_MAP_BY_USER_AND_SERVER'], [$server_id, $user_id]);
+        
+        return $data !== null && is_array($data) && sizeof($data) === 1;
+
+    }
     
     /**
      * Gets the server with hosts.

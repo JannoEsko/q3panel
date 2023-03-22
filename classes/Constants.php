@@ -187,6 +187,7 @@ class Constants {
         , "GET_COUNT_OF_TOTAL_SERVERS" => "SELECT Count(server_id) AS count FROM q3panel_servers"
         , "GET_EMAIL_SERVICE_IS_SENDGRID" => "SELECT is_sendgrid FROM q3panel_email_service"
         , "GET_SERVER_LOGS_LEFT_JOIN_USERS_INNER_JOIN_SERVERS_INNER_JOIN_SERVERMAP" => "SELECT q3panel_servers_logs.*, q3panel_users.*, q3panel_servers.server_name FROM q3panel_servers_logs LEFT JOIN q3panel_users ON q3panel_servers_logs.user_id = q3panel_users.user_id INNER JOIN q3panel_servers ON q3panel_servers_logs.server_id = q3panel_servers.server_id INNER JOIN q3panel_servers_map ON q3panel_servers.server_id = q3panel_servers_map.server_id WHERE q3panel_servers_map.user_id = ? ORDER BY timestamp DESC"
+        , "GET_MAP_BY_USER_AND_SERVER" => "SELECT * FROM q3panel_servers_map WHERE server_id = ? AND user_id = ?"
     );
     
     static $UPDATE_QUERIES = array(

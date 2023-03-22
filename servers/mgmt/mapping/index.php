@@ -12,6 +12,12 @@ if (!isset($_GET['server_id']) || intval($_GET['server_id']) === 0) {
 if (!User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
     header("Location: ../");
 }
+
+if (!Server::isUserMappedToServer($sql, intval($_GET['server_id']), intval($_SESSION['user_id']))) {
+    header("Location: ../");
+    die();
+}
+
 ?>
 
 <!DOCTYPE html>

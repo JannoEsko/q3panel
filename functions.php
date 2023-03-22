@@ -275,7 +275,7 @@ if (isset($_POST['updateServer'], $_POST['server_startscript'], $_POST['server_i
 }
 
 
-if (isset($_POST['server_id'], $_POST['addMap'], $_POST['user_id']) && intval($_POST['server_id']) > 0 && intval($_POST['addMap']) === 1 && intval($_POST['user_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+if (isset($_POST['server_id'], $_POST['addMap'], $_POST['user_id']) && intval($_POST['server_id']) > 0 && intval($_POST['addMap']) === 1 && intval($_POST['user_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN) && Server::isUserMappedToServer($sql, intval($_POST['server_id']), intval($_SESSION['user_id']))) {
     $can_stop_server = bool2int(isset($_POST['can_stop_server']) && trim($_POST['can_stop_server']) === "on");
     $can_see_rcon = bool2int(isset($_POST['can_see_rcon']) && trim($_POST['can_see_rcon']) === "on");
     $can_see_ftp = bool2int(isset($_POST['can_see_ftp']) && trim($_POST['can_see_ftp']) === "on");
@@ -293,7 +293,7 @@ if (isset($_POST['server_id'], $_POST['addMap'], $_POST['user_id']) && intval($_
 }
 
 
-if (isset($_POST['server_id'], $_POST['editMap'], $_POST['user_id']) && intval($_POST['server_id']) > 0 && intval($_POST['editMap']) === 1 && intval($_POST['user_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+if (isset($_POST['server_id'], $_POST['editMap'], $_POST['user_id']) && intval($_POST['server_id']) > 0 && intval($_POST['editMap']) === 1 && intval($_POST['user_id']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN) && Server::isUserMappedToServer($sql, intval($_POST['server_id']), intval($_SESSION['user_id']))) {
     $can_stop_server = bool2int(isset($_POST['can_stop_server']) && trim($_POST['can_stop_server']) === "on");
     $can_see_rcon = bool2int(isset($_POST['can_see_rcon']) && trim($_POST['can_see_rcon']) === "on");
     $can_see_ftp = bool2int(isset($_POST['can_see_ftp']) && trim($_POST['can_see_ftp']) === "on");
@@ -321,7 +321,7 @@ function bool2int($input) {
 }
 
 
-if (isset($_POST['deleteMap'], $_POST['server_id'], $_POST['removeMapUser']) && intval($_POST['deleteMap']) > 0 && intval($_POST['server_id']) > 0 && intval($_POST['removeMapUser']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN)) {
+if (isset($_POST['deleteMap'], $_POST['server_id'], $_POST['removeMapUser']) && intval($_POST['deleteMap']) > 0 && intval($_POST['server_id']) > 0 && intval($_POST['removeMapUser']) > 0 && User::canPerformAction($sql, $_SESSION['user_id'], Constants::$SERVER_ADMIN) && Server::isUserMappedToServer($sql, intval($_POST['server_id']), intval($_SESSION['user_id']))) {
     $dat = Server::removeUserFromMapping($sql, $_POST['server_id'], $_POST['removeMapUser']);
     if ($dat !== false && intval($dat['rows_affected']) === 1) {
         Logger::log($sql, $_SESSION['user_id'], getUserIP(), str_replace("{server_id}", $_POST['server_id'], str_replace("{user_id}", $_POST['removeMapUser'], Constants::$LOGGER_MESSAGES['SUCCESSES']['REMOVE_USER_SERVER_MAP_SUCCESS'])));
