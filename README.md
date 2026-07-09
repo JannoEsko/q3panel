@@ -1,8 +1,12 @@
 # q3panel
+
+# The project is archived, as there are better alternatives to consider. Refer to more modern alternatives like [Pterodactyl](https://github.com/pterodactyl), [Pelican](https://github.com/pelican-dev) for Docker-alike solutions, or to e.g. [belalgalhom/SoF2Panel](https://github.com/belalgalhom/SoF2Panel) which mimics a more closer setup to q3panel.
+
 An application for hosting game servers based on Quake 3 engine on Linux.
 
 Disclaimer - the panel is incompatible with PHP8 thanks to the SQL wrapper class.
-This can also contain outdated modules. Project so far is discontinued.
+This can also contain outdated modules. 
+
 
 Walkthrough how to set up a Q3 server with the panel can be seen under issue 1: 
 https://github.com/JannoEsko/q3panel/issues/1
